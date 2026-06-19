@@ -1,0 +1,1055 @@
+# Harness Core Scaffolder — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Build the stack-agnostic core of `harness` — a `bootstrap.sh` that installs the SDD flow (templates, skills, 4 active hooks, generic gates, CLAUDE.md) into any target project.
+
+**Architecture:** A source repo at `~/workspace/harness/`. `core/` holds everything copied into a target project; `bootstrap.sh` does the copying idempotently, symlinks `AGENTS.md → CLAUDE.md`, and merges hook registrations into the target `.claude/settings.json`. Active discipline is enforced by 4 zero-dep Node `.mjs` hooks (phase-gate, precommit-gate, phase-sensor, load-constitution) sharing `_lib.mjs`. `bootstrap.sh` and `run-gates.sh` stay shell. The TS pack is a separate plan.
+
+**Tech Stack:** POSIX-ish Bash 5 (`bootstrap.sh`, `run-gates.sh` — orchestration only), Node `.mjs` zero-dep (4 hooks + `_lib` + the JSON helpers `lib/merge-settings.mjs` and `core/gates/has-npm-script.mjs`; only `node:` builtins, no `jq`, no python, no third-party packages), Markdown (skills/templates).
+
+## Global Constraints
+
+- ALL JSON parsing is done by `.mjs` using only `node:` builtins — zero third-party deps, no `jq`, no python, anywhere in the repo. The 4 hooks + `_lib` are `.mjs`. The two shell scripts (`bootstrap.sh`, `run-gates.sh`) are thin orchestration and delegate every JSON read to a zero-dep `.mjs` helper: `bootstrap.sh` → `lib/merge-settings.mjs` (settings.json merge); `run-gates.sh` → `core/gates/has-npm-script.mjs` (package.json scripts probe). REVISED 2026-06-17: reverses the earlier shell+python3 rule AND its hooks-only scope — owner audits JS not Python, so NO unauditable python survives; native JSON kills the heredoc/stdin bug; same supply-chain immunity (risk is the npm tree, not `node`).
+- `node` is assumed on PATH: always for `bootstrap.sh` (the settings merge needs it), and for `run-gates.sh` only on the npm path (reached only when `package.json` exists, i.e. a Node project where node is necessarily present). The Makefile path of `run-gates.sh` needs no node.
+- `bootstrap.sh` is idempotent: never overwrite an existing target file unless `--force`; `settings.json` merge is additive and dedup-safe.
+- Hook scripts read the Claude Code hook JSON event on stdin and follow the documented exit-code contract (0 = allow; non-zero with stderr = block for PreToolUse).
+- "Approved" = YAML frontmatter `status: approved` present in BOTH `spec.md` and `plan.md` of the active feature.
+- Active feature = contents of `.specify/state` (a single line like `001-name`); fallback = most-recently-modified directory under `specs/`.
+- Test harness: plain Bash scripts under `tests/`, sandboxed in `$(mktemp -d)`; no external test deps.
+- File/dir naming inside the repo: kebab-case.
+
+---
+
+### Task 1: Repo skeleton + test harness
+
+**Files:**
+- Create: `~/workspace/harness/.gitignore`
+- Create: `~/workspace/harness/README.md`
+- Create: `~/workspace/harness/tests/lib.sh`
+- Create: `~/workspace/harness/tests/run.sh`
+
+**Interfaces:**
+- Produces: `tests/lib.sh` exposing shell functions `assert_eq <expected> <actual> <msg>`, `assert_file <path> <msg>`, `assert_nofile <path> <msg>`, `assert_contains <file> <substring> <msg>`, `pass <msg>`, `fail <msg>`, and `new_sandbox` (echoes a fresh `mktemp -d` path). All increment global counters `TESTS_RUN`/`TESTS_FAILED`.
+- Produces: `tests/run.sh` that sources every `tests/test-*.sh` and exits non-zero if any failed.
+
+- [ ] **Step 1: Write `tests/lib.sh`**
+
+```bash
+#!/usr/bin/env bash
+# Tiny assertion helpers for harness shell tests. No external deps.
+TESTS_RUN=0
+TESTS_FAILED=0
+
+pass() { TESTS_RUN=$((TESTS_RUN+1)); echo "  ok: $1"; }
+fail() { TESTS_RUN=$((TESTS_RUN+1)); TESTS_FAILED=$((TESTS_FAILED+1)); echo "  FAIL: $1" >&2; }
+
+assert_eq() { # expected actual msg
+  if [ "$1" = "$2" ]; then pass "$3"; else fail "$3 (expected '$1', got '$2')"; fi
+}
+assert_file() { [ -e "$1" ] && pass "$2" || fail "$2 (missing $1)"; }
+assert_nofile() { [ ! -e "$1" ] && pass "$2" || fail "$2 (unexpected $1)"; }
+assert_contains() { # file substring msg
+  if grep -qF "$2" "$1" 2>/dev/null; then pass "$3"; else fail "$3 (no '$2' in $1)"; fi
+}
+new_sandbox() { mktemp -d "${TMPDIR:-/tmp}/harness-test.XXXXXX"; }
+```
+
+- [ ] **Step 2: Write `tests/run.sh`**
+
+```bash
+#!/usr/bin/env bash
+set -u
+HERE="$(cd "$(dirname "$0")" && pwd)"
+. "$HERE/lib.sh"
+for t in "$HERE"/test-*.sh; do
+  [ -e "$t" ] || continue
+  echo "== $(basename "$t") =="
+  . "$t"
+done
+echo "---- $TESTS_RUN run, $TESTS_FAILED failed ----"
+[ "$TESTS_FAILED" -eq 0 ]
+```
+
+- [ ] **Step 3: Write `.gitignore`**
+
+```
+*.log
+.DS_Store
+/tmp/
+node_modules/
+```
+
+- [ ] **Step 4: Write `README.md`** (one paragraph: what harness is, `bootstrap.sh` usage, link to `docs/specs/2026-06-17-harness-design.md`).
+
+- [ ] **Step 5: Run the harness to confirm it executes with zero tests**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: prints `---- 0 run, 0 failed ----`, exit 0.
+
+- [ ] **Step 6: Commit**
+
+```bash
+cd ~/workspace/harness
+git add .gitignore README.md tests/
+git commit -m "chore: repo skeleton and shell test harness"
+```
+
+---
+
+### Task 2: `bootstrap.sh` — core copy + idempotency + AGENTS.md symlink
+
+**Files:**
+- Create: `~/workspace/harness/bootstrap.sh`
+- Create: `~/workspace/harness/core/claude/CLAUDE.md.tmpl` (stub: single line `# PROJECT` for now; real content in Task 11)
+- Create: `~/workspace/harness/core/specify/memory/.keep`
+- Create: `~/workspace/harness/tests/test-bootstrap-core.sh`
+
+**Interfaces:**
+- Produces: `bootstrap.sh` accepting flags `--force` (overwrite existing) and `--dir <path>` (target, default `$PWD`). It resolves its own repo dir via `$(cd "$(dirname "$0")" && pwd)` (call it `SELF`). Copies `core/specify/` → `<target>/.specify/`, `core/claude/skills/` → `<target>/.claude/skills/`, `core/claude/hooks/` → `<target>/.claude/hooks/`, `core/gates/` → `<target>/.specify/gates/`, renders `core/claude/CLAUDE.md.tmpl` → `<target>/CLAUDE.md`, creates symlink `<target>/AGENTS.md → CLAUDE.md`. Never overwrites an existing destination file unless `--force`. Prints one line per action (`[harness] +<path>` created, `[harness] =<path>` skipped).
+- Consumes: nothing from other tasks.
+
+- [ ] **Step 1: Write failing test `tests/test-bootstrap-core.sh`**
+
+```bash
+SANDBOX="$(new_sandbox)"
+bash "$HERE/../bootstrap.sh" --dir "$SANDBOX" >/dev/null
+assert_file "$SANDBOX/.specify"                 "creates .specify/"
+assert_file "$SANDBOX/.claude/skills"           "creates .claude/skills/"
+assert_file "$SANDBOX/.claude/hooks"            "creates .claude/hooks/"
+assert_file "$SANDBOX/CLAUDE.md"                "creates CLAUDE.md"
+assert_file "$SANDBOX/AGENTS.md"                "creates AGENTS.md"
+assert_eq "CLAUDE.md" "$(readlink "$SANDBOX/AGENTS.md")" "AGENTS.md symlinks to CLAUDE.md"
+# idempotency: write a marker, re-run without --force, marker survives
+echo "MINE" > "$SANDBOX/CLAUDE.md"
+bash "$HERE/../bootstrap.sh" --dir "$SANDBOX" >/dev/null
+assert_contains "$SANDBOX/CLAUDE.md" "MINE"     "re-run preserves edited CLAUDE.md"
+# --force overwrites
+bash "$HERE/../bootstrap.sh" --dir "$SANDBOX" --force >/dev/null
+grep -qF "MINE" "$SANDBOX/CLAUDE.md" && fail "--force should overwrite CLAUDE.md" || pass "--force overwrites CLAUDE.md"
+rm -rf "$SANDBOX"
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: FAIL — `bootstrap.sh` missing / assertions fail.
+
+- [ ] **Step 3: Write `bootstrap.sh`**
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+SELF="$(cd "$(dirname "$0")" && pwd)"
+TARGET="$PWD"; FORCE=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --force) FORCE=1; shift ;;
+    --dir) TARGET="$2"; shift 2 ;;
+    *) echo "[harness] unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+mkdir -p "$TARGET"
+
+# copy_file <src> <dest>
+copy_file() {
+  local src="$1" dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  if [ -e "$dest" ] && [ "$FORCE" -ne 1 ]; then
+    echo "[harness] =$dest"; return 0
+  fi
+  cp "$src" "$dest"; echo "[harness] +$dest"
+}
+# copy_tree <srcdir> <destdir>
+copy_tree() {
+  local srcdir="$1" destdir="$2"
+  [ -d "$srcdir" ] || return 0
+  find "$srcdir" -type f | while read -r f; do
+    local rel="${f#"$srcdir"/}"
+    copy_file "$f" "$destdir/$rel"
+  done
+}
+
+copy_tree "$SELF/core/specify"       "$TARGET/.specify"
+copy_tree "$SELF/core/gates"         "$TARGET/.specify/gates"
+copy_tree "$SELF/core/claude/skills" "$TARGET/.claude/skills"
+copy_tree "$SELF/core/claude/hooks"  "$TARGET/.claude/hooks"
+chmod +x "$TARGET/.claude/hooks/"*.sh 2>/dev/null || true
+copy_file "$SELF/core/claude/CLAUDE.md.tmpl" "$TARGET/CLAUDE.md"
+
+# AGENTS.md -> CLAUDE.md (relative symlink), created only if absent or --force
+if [ ! -e "$TARGET/AGENTS.md" ] || [ "$FORCE" -eq 1 ]; then
+  ln -sf "CLAUDE.md" "$TARGET/AGENTS.md"; echo "[harness] +$TARGET/AGENTS.md"
+else
+  echo "[harness] =$TARGET/AGENTS.md"
+fi
+
+echo "[harness] core installed at $TARGET"
+```
+
+- [ ] **Step 4: Create the stub source files so copy has something to copy**
+
+`core/claude/CLAUDE.md.tmpl`:
+```
+# PROJECT
+```
+`core/specify/memory/.keep`: empty file.
+
+- [ ] **Step 5: Run to verify pass**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: all `test-bootstrap-core.sh` assertions `ok`, exit 0.
+
+- [ ] **Step 6: Commit**
+
+```bash
+cd ~/workspace/harness
+git add bootstrap.sh core/ tests/test-bootstrap-core.sh
+git commit -m "feat: bootstrap core copy with idempotency and AGENTS.md symlink"
+```
+
+---
+
+### Task 3: `bootstrap.sh` — additive `settings.json` hook merge (python3)
+
+**Files:**
+- Modify: `~/workspace/harness/bootstrap.sh` (append merge step before final echo)
+- Create: `~/workspace/harness/core/claude/settings.hooks.json` (the canonical hook block to merge)
+- Create: `~/workspace/harness/tests/test-settings-merge.sh`
+
+**Interfaces:**
+- Consumes: `bootstrap.sh` from Task 2 (`TARGET`, `SELF`, `FORCE`).
+- Produces: after bootstrap, `<target>/.claude/settings.json` contains the 4 hook registrations under `.hooks`, merged additively (existing user hooks preserved, no duplicate harness entries on re-run). Dedup is by exact command-string match.
+
+- [ ] **Step 1: Write `core/claude/settings.hooks.json`** — the hook registrations referencing the installed hook paths:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/load-constitution.sh" } ] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/phase-sensor.sh" } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Edit|Write", "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/phase-gate.sh" } ] },
+      { "matcher": "Bash", "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/precommit-gate.sh" } ] }
+    ]
+  }
+}
+```
+
+- [ ] **Step 2: Write failing test `tests/test-settings-merge.sh`**
+
+```bash
+SANDBOX="$(new_sandbox)"
+# pre-existing user settings with an unrelated hook
+mkdir -p "$SANDBOX/.claude"
+cat > "$SANDBOX/.claude/settings.json" <<'EOF'
+{ "hooks": { "SessionStart": [ { "hooks": [ { "type": "command", "command": "echo user-hook" } ] } ] } }
+EOF
+bash "$HERE/../bootstrap.sh" --dir "$SANDBOX" >/dev/null
+assert_contains "$SANDBOX/.claude/settings.json" "load-constitution.sh" "merges load-constitution hook"
+assert_contains "$SANDBOX/.claude/settings.json" "phase-gate.sh"        "merges phase-gate hook"
+assert_contains "$SANDBOX/.claude/settings.json" "echo user-hook"       "preserves pre-existing user hook"
+# idempotency: re-run, count phase-gate occurrences stays 1
+bash "$HERE/../bootstrap.sh" --dir "$SANDBOX" >/dev/null
+N=$(grep -cF "phase-gate.sh" "$SANDBOX/.claude/settings.json")
+assert_eq "1" "$N" "no duplicate phase-gate hook after re-run"
+rm -rf "$SANDBOX"
+```
+
+- [ ] **Step 3: Run to verify it fails**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: FAIL — no merge yet.
+
+- [ ] **Step 4: Add the merge to `bootstrap.sh`** (insert before the final `echo "[harness] core installed"`):
+
+```bash
+# Merge harness hook registrations into target settings.json (additive, dedup by command).
+SETTINGS="$TARGET/.claude/settings.json"
+[ -f "$SETTINGS" ] || echo '{}' > "$SETTINGS"
+/usr/bin/python3 - "$SETTINGS" "$SELF/core/claude/settings.hooks.json" <<'PY'
+import json, sys
+settings_path, hooks_path = sys.argv[1], sys.argv[2]
+with open(settings_path) as f: settings = json.load(f)
+with open(hooks_path) as f: add = json.load(f)
+hooks = settings.setdefault("hooks", {})
+def commands(group_list):
+    out = set()
+    for g in group_list:
+        for h in g.get("hooks", []):
+            out.add(h.get("command"))
+    return out
+for event, groups in add["hooks"].items():
+    existing = hooks.setdefault(event, [])
+    have = commands(existing)
+    for g in groups:
+        new_cmds = commands([g])
+        if new_cmds & have:   # already registered this command -> skip group
+            continue
+        existing.append(g)
+with open(settings_path, "w") as f:
+    json.dump(settings, f, indent=2)
+PY
+echo "[harness] =merged hooks into $SETTINGS"
+```
+
+- [ ] **Step 5: Run to verify pass**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: all assertions `ok`.
+
+- [ ] **Step 6: Commit**
+
+```bash
+cd ~/workspace/harness
+git add bootstrap.sh core/claude/settings.hooks.json tests/test-settings-merge.sh
+git commit -m "feat: additive settings.json hook merge via python3"
+```
+
+---
+
+### Task 4: `.specify/` document templates
+
+**Files:**
+- Create: `~/workspace/harness/core/specify/memory/constitution.md.tmpl`
+- Create: `~/workspace/harness/core/specify/templates/prd-template.md`
+- Create: `~/workspace/harness/core/specify/templates/spec-template.md`
+- Create: `~/workspace/harness/core/specify/templates/plan-template.md`
+- Create: `~/workspace/harness/core/specify/templates/tasks-template.md`
+- Create: `~/workspace/harness/core/specify/templates/checklist-template.md`
+- Create: `~/workspace/harness/tests/test-templates.sh`
+
+**Interfaces:**
+- Produces: six markdown templates. `spec-template.md` and `plan-template.md` MUST begin with YAML frontmatter containing `status: draft` (so the phase-gate has a field to flip to `approved`). Section sets:
+  - `prd-template.md`: Problema, Hipótese, Usuário/contexto, Métrica de sucesso, Fora de escopo.
+  - `spec-template.md`: frontmatter (`status`, `feature`, `date`) + User stories, Requisitos funcionais, Critérios de aceitação, Fora de escopo.
+  - `plan-template.md`: frontmatter (`status`) + Arquitetura, Estrutura de arquivos, Decisões técnicas, Ordem de implementação, Como validar.
+  - `tasks-template.md`: a numbered task list skeleton with checkbox steps.
+  - `checklist-template.md`: pre-merge quality checklist (tests green, gates green, spec atualizada, docs).
+  - `constitution.md.tmpl`: Princípios (placeholder bullets), Padrões de código, Processo SDD.
+
+- [ ] **Step 1: Write the six template files** with the exact sections above. `spec-template.md` starts with:
+
+```markdown
+---
+status: draft
+feature: NNN-nome
+date: YYYY-MM-DD
+---
+
+# [Feature] — Spec
+```
+and `plan-template.md` starts with:
+```markdown
+---
+status: draft
+---
+
+# [Feature] — Plano
+```
+
+- [ ] **Step 2: Write test `tests/test-templates.sh`**
+
+```bash
+T="$HERE/../core/specify/templates"
+assert_file "$T/prd-template.md"        "prd template exists"
+assert_file "$T/spec-template.md"       "spec template exists"
+assert_file "$T/plan-template.md"       "plan template exists"
+assert_file "$T/tasks-template.md"      "tasks template exists"
+assert_file "$T/checklist-template.md"  "checklist template exists"
+assert_contains "$T/spec-template.md" "status: draft" "spec template has status frontmatter"
+assert_contains "$T/plan-template.md" "status: draft" "plan template has status frontmatter"
+assert_file "$HERE/../core/specify/memory/constitution.md.tmpl" "constitution template exists"
+```
+
+- [ ] **Step 3: Run to verify pass**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: all `ok`.
+
+- [ ] **Step 4: Verify bootstrap installs them**
+
+Run: `D=$(mktemp -d); bash ~/workspace/harness/bootstrap.sh --dir "$D" >/dev/null; ls "$D/.specify/templates"; rm -rf "$D"`
+Expected: lists the five templates.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/specify/ tests/test-templates.sh
+git commit -m "feat: SDD document templates with status frontmatter"
+```
+
+---
+
+### Task 5: Generic gate runner `run-gates.sh`
+
+**Files:**
+- Create: `~/workspace/harness/core/gates/run-gates.sh`
+- Create: `~/workspace/harness/tests/test-run-gates.sh`
+
+**Interfaces:**
+- Produces: `run-gates.sh` that detects and runs available project checks and exits non-zero if any fails. Detection: if `package.json` has a script named `lint`/`test`/`build`, run `npm run <name>` for each present; else if `Makefile` has targets `lint`/`test`, run `make <target>`; else if no checks found, print `[harness:gates] no checks detected` and exit 0. Reads no stdin. Accepts optional first arg = target dir (default `$PWD`). Each check prints `[harness:gates] running <name>`. Exit 1 if any check exits non-zero.
+- Consumes: nothing.
+
+- [ ] **Step 1: Write failing test `tests/test-run-gates.sh`**
+
+```bash
+G="$HERE/../core/gates/run-gates.sh"
+# no checks -> exit 0
+S1="$(new_sandbox)"
+( cd "$S1" && bash "$G" >/dev/null 2>&1 ); assert_eq "0" "$?" "no checks detected exits 0"
+rm -rf "$S1"
+# failing make test -> exit non-zero
+S2="$(new_sandbox)"
+printf 'test:\n\t@exit 3\n' > "$S2/Makefile"
+( cd "$S2" && bash "$G" >/dev/null 2>&1 ); rc=$?
+[ "$rc" -ne 0 ] && pass "failing make test propagates non-zero" || fail "should fail on make test exit 3"
+rm -rf "$S2"
+# passing make test -> exit 0
+S3="$(new_sandbox)"
+printf 'test:\n\t@true\n' > "$S3/Makefile"
+( cd "$S3" && bash "$G" >/dev/null 2>&1 ); assert_eq "0" "$?" "passing make test exits 0"
+rm -rf "$S3"
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: FAIL — script missing.
+
+- [ ] **Step 3: Write `core/gates/run-gates.sh`**
+
+```bash
+#!/usr/bin/env bash
+set -uo pipefail
+DIR="${1:-$PWD}"; cd "$DIR"
+FAILED=0; RAN=0
+
+run_check() { # name command...
+  local name="$1"; shift
+  echo "[harness:gates] running $name"
+  RAN=$((RAN+1))
+  "$@" || { echo "[harness:gates] $name FAILED"; FAILED=$((FAILED+1)); }
+}
+
+has_npm_script() { # name
+  [ -f package.json ] || return 1
+  /usr/bin/python3 - "$1" <<'PY'
+import json,sys
+try:
+    s=json.load(open("package.json")).get("scripts",{})
+except Exception:
+    sys.exit(1)
+sys.exit(0 if sys.argv[1] in s else 1)
+PY
+}
+has_make_target() { # name
+  [ -f Makefile ] || return 1
+  grep -qE "^$1:" Makefile
+}
+
+if [ -f package.json ]; then
+  for s in lint test build; do has_npm_script "$s" && run_check "npm:$s" npm run "$s"; done
+elif [ -f Makefile ]; then
+  for t in lint test; do has_make_target "$t" && run_check "make:$t" make "$t"; done
+fi
+
+if [ "$RAN" -eq 0 ]; then echo "[harness:gates] no checks detected"; exit 0; fi
+if [ "$FAILED" -ne 0 ]; then echo "[harness:gates] $FAILED gate(s) failed"; exit 1; fi
+echo "[harness:gates] all gates passed"; exit 0
+```
+
+- [ ] **Step 4: Run to verify pass**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: all `ok`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/gates/run-gates.sh tests/test-run-gates.sh
+git commit -m "feat: generic gate runner with npm/make detection"
+```
+
+---
+
+### Task 6: `load-constitution.sh` (SessionStart hook)
+
+**Files:**
+- Create: `~/workspace/harness/core/claude/hooks/load-constitution.sh`
+- Create: `~/workspace/harness/tests/test-hook-load-constitution.sh`
+
+**Interfaces:**
+- Produces: hook reading the SessionStart event JSON on stdin (field `cwd`). If `<cwd>/.specify/memory/constitution.md` exists, print `{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"<file contents>"}}` to stdout and exit 0. If absent, exit 0 with no output. Uses `/usr/bin/python3`.
+- Consumes: nothing.
+
+- [ ] **Step 1: Write failing test `tests/test-hook-load-constitution.sh`**
+
+```bash
+H="$HERE/../core/claude/hooks/load-constitution.sh"
+S="$(new_sandbox)"
+mkdir -p "$S/.specify/memory"
+echo "PRINCIPLE: ship small" > "$S/.specify/memory/constitution.md"
+OUT=$(printf '{"cwd":"%s"}' "$S" | bash "$H")
+echo "$OUT" | grep -qF "PRINCIPLE: ship small" && pass "injects constitution text" || fail "should inject constitution"
+echo "$OUT" | grep -qF "SessionStart" && pass "emits SessionStart additionalContext" || fail "missing hook output shape"
+# absent constitution -> empty output, exit 0
+S2="$(new_sandbox)"
+OUT2=$(printf '{"cwd":"%s"}' "$S2" | bash "$H"); rc=$?
+assert_eq "0" "$rc" "exits 0 when no constitution"
+assert_eq "" "$OUT2" "no output when no constitution"
+rm -rf "$S" "$S2"
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `bash ~/workspace/harness/tests/run.sh`
+Expected: FAIL — hook missing.
+
+- [ ] **Step 3: Write `load-constitution.sh`**
+
+```bash
+#!/usr/bin/env bash
+set -uo pipefail
+/usr/bin/python3 <<'PY'
+import json, sys, os
+try:
+    ev = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+cwd = ev.get("cwd") or os.getcwd()
+path = os.path.join(cwd, ".specify", "memory", "constitution.md")
+if not os.path.isfile(path):
+    sys.exit(0)
+with open(path) as f:
+    text = f.read()
+out = {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": text}}
+print(json.dumps(out))
+PY
+```
+
+- [ ] **Step 4: Run to verify pass** — `bash ~/workspace/harness/tests/run.sh` → all `ok`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/claude/hooks/load-constitution.sh tests/test-hook-load-constitution.sh
+git commit -m "feat: load-constitution SessionStart hook"
+```
+
+---
+
+### Task 7: `phase-sensor.sh` (UserPromptSubmit hook) + shared `active-feature` helper
+
+**Files:**
+- Create: `~/workspace/harness/core/claude/hooks/_lib.sh` (shared resolver, sourced by hooks)
+- Create: `~/workspace/harness/core/claude/hooks/phase-sensor.sh`
+- Create: `~/workspace/harness/tests/test-hook-phase-sensor.sh`
+
+**Interfaces:**
+- Produces: `_lib.sh` exposing `harness_active_feature <project_dir>` — echoes the active feature dir name: contents of `<dir>/.specify/state` if present and non-empty, else the basename of the most-recently-modified subdir of `<dir>/specs`, else empty string. And `harness_phase <project_dir> <feature>` — echoes the next SDD step by checking artifacts in `specs/<feature>/`: no `prd.md`→`prd`; prd but no `spec.md`→`spec`; spec but no `plan.md`→`plan`; plan but no `tasks.md`→`tasks`; all present→`implement`; no feature→`constitution`.
+- Produces: `phase-sensor.sh` reading event JSON (`cwd`), computing active feature + phase, printing `{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"<msg>"}}`. Always exit 0.
+- Consumes: nothing from app tasks.
+
+- [ ] **Step 1: Write failing test `tests/test-hook-phase-sensor.sh`**
+
+```bash
+H="$HERE/../core/claude/hooks/phase-sensor.sh"
+S="$(new_sandbox)"
+mkdir -p "$S/specs/001-foo"
+echo "x" > "$S/specs/001-foo/prd.md"           # has prd, no spec -> phase 'spec'
+OUT=$(printf '{"cwd":"%s"}' "$S" | bash "$H")
+echo "$OUT" | grep -qF "phase: spec" && pass "detects spec phase" || fail "should be spec phase"
+echo "$OUT" | grep -qF "001-foo" && pass "names active feature" || fail "should name feature"
+# explicit state file wins
+mkdir -p "$S/.specify" "$S/specs/002-bar"; echo "002-bar" > "$S/.specify/state"
+OUT2=$(printf '{"cwd":"%s"}' "$S" | bash "$H")
+echo "$OUT2" | grep -qF "002-bar" && pass ".specify/state overrides active feature" || fail "state file should win"
+rm -rf "$S"
+```
+
+- [ ] **Step 2: Run to verify it fails** — `bash ~/workspace/harness/tests/run.sh` → FAIL.
+
+- [ ] **Step 3: Write `_lib.sh`**
+
+```bash
+#!/usr/bin/env bash
+# Shared resolvers for harness hooks. Source me; do not execute.
+harness_active_feature() { # project_dir
+  local dir="$1" state="$1/.specify/state"
+  if [ -s "$state" ]; then head -n1 "$state" | tr -d '[:space:]'; return; fi
+  [ -d "$dir/specs" ] || return 0
+  local latest
+  latest="$(ls -1dt "$dir"/specs/*/ 2>/dev/null | head -n1)"
+  [ -n "$latest" ] && basename "$latest"
+}
+harness_phase() { # project_dir feature
+  local dir="$1" feat="$2" fdir="$1/specs/$2"
+  [ -n "$feat" ] || { echo "constitution"; return; }
+  [ -f "$fdir/prd.md" ]   || { echo "prd";   return; }
+  [ -f "$fdir/spec.md" ]  || { echo "spec";  return; }
+  [ -f "$fdir/plan.md" ]  || { echo "plan";  return; }
+  [ -f "$fdir/tasks.md" ] || { echo "tasks"; return; }
+  echo "implement"
+}
+```
+
+- [ ] **Step 4: Write `phase-sensor.sh`**
+
+```bash
+#!/usr/bin/env bash
+set -uo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+. "$HERE/_lib.sh"
+EVENT="$(cat)"
+CWD="$(printf '%s' "$EVENT" | /usr/bin/python3 -c 'import json,sys,os
+try: print(json.load(sys.stdin).get("cwd") or os.getcwd())
+except Exception: print(os.getcwd())')"
+FEAT="$(harness_active_feature "$CWD")"
+PHASE="$(harness_phase "$CWD" "$FEAT")"
+MSG="[harness] SDD phase: $PHASE (feature: ${FEAT:-none}). Next: run the ${PHASE}-writer skill (or implement-feature)."
+/usr/bin/python3 - "$MSG" <<'PY'
+import json,sys
+print(json.dumps({"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":sys.argv[1]}}))
+PY
+```
+
+- [ ] **Step 5: Run to verify pass** — `bash ~/workspace/harness/tests/run.sh` → all `ok`.
+
+- [ ] **Step 6: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/claude/hooks/_lib.sh core/claude/hooks/phase-sensor.sh tests/test-hook-phase-sensor.sh
+git commit -m "feat: phase-sensor hook and shared active-feature resolver"
+```
+
+---
+
+### Task 8: `phase-gate.sh` (PreToolUse Edit|Write hook)
+
+**Files:**
+- Create: `~/workspace/harness/core/claude/hooks/phase-gate.sh`
+- Create: `~/workspace/harness/tests/test-hook-phase-gate.sh`
+
+**Interfaces:**
+- Consumes: `_lib.sh` (`harness_active_feature`).
+- Produces: hook reading PreToolUse event JSON (`cwd`, `tool_input.file_path`). Logic: allow (exit 0) when the edited path is itself an SDD artifact (matches `*/specs/*`, `*/.specify/*`, `*/docs/*`, ends with `CLAUDE.md`/`AGENTS.md`). Otherwise resolve active feature; require BOTH `specs/<feature>/spec.md` and `plan.md` to contain frontmatter `status: approved`. If approved, exit 0. Else exit 2 with stderr (blocks the tool call).
+- "Approved" detection: a line matching `^status:\s*approved` within the leading frontmatter block; implemented with `/usr/bin/python3`.
+
+- [ ] **Step 1: Write failing test `tests/test-hook-phase-gate.sh`**
+
+```bash
+H="$HERE/../core/claude/hooks/phase-gate.sh"
+S="$(new_sandbox)"; mkdir -p "$S/specs/001-foo" "$S/src" "$S/.specify"; echo "001-foo" > "$S/.specify/state"
+# editing a spec artifact is always allowed
+printf '{"cwd":"%s","tool_input":{"file_path":"%s/specs/001-foo/spec.md"}}' "$S" "$S" | bash "$H"; assert_eq "0" "$?" "editing spec artifact allowed"
+# editing code with no approved spec/plan -> blocked (exit 2)
+printf '{"cwd":"%s","tool_input":{"file_path":"%s/src/app.py"}}' "$S" "$S" | bash "$H" 2>/dev/null; assert_eq "2" "$?" "code edit blocked without approval"
+# approve spec + plan -> allowed
+printf -- '---\nstatus: approved\n---\n' > "$S/specs/001-foo/spec.md"
+printf -- '---\nstatus: approved\n---\n' > "$S/specs/001-foo/plan.md"
+printf '{"cwd":"%s","tool_input":{"file_path":"%s/src/app.py"}}' "$S" "$S" | bash "$H"; assert_eq "0" "$?" "code edit allowed after approval"
+# only spec approved, plan still draft -> blocked
+printf -- '---\nstatus: draft\n---\n' > "$S/specs/001-foo/plan.md"
+printf '{"cwd":"%s","tool_input":{"file_path":"%s/src/app.py"}}' "$S" "$S" | bash "$H" 2>/dev/null; assert_eq "2" "$?" "blocked when plan not approved"
+rm -rf "$S"
+```
+
+- [ ] **Step 2: Run to verify it fails** — `bash ~/workspace/harness/tests/run.sh` → FAIL.
+
+- [ ] **Step 3: Write `phase-gate.sh`**
+
+```bash
+#!/usr/bin/env bash
+set -uo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+. "$HERE/_lib.sh"
+EVENT="$(cat)"
+CWD="$(printf '%s' "$EVENT" | /usr/bin/python3 -c 'import json,sys,os
+try: print(json.load(sys.stdin).get("cwd") or os.getcwd())
+except Exception: print(os.getcwd())')"
+FILE="$(printf '%s' "$EVENT" | /usr/bin/python3 -c 'import json,sys
+try: print((json.load(sys.stdin).get("tool_input") or {}).get("file_path") or "")
+except Exception: print("")')"
+
+# Allow edits to SDD artifacts / docs themselves.
+case "$FILE" in
+  */specs/*|*/.specify/*|*/docs/*|*CLAUDE.md|*AGENTS.md) exit 0 ;;
+esac
+
+FEAT="$(harness_active_feature "$CWD")"
+is_approved() { # path
+  [ -f "$1" ] || return 1
+  /usr/bin/python3 - "$1" <<'PY'
+import sys,re
+txt=open(sys.argv[1]).read()
+m=re.match(r'^---\n(.*?)\n---', txt, re.S)
+fm=m.group(1) if m else ""
+sys.exit(0 if re.search(r'^status:\s*approved\s*$', fm, re.M) else 1)
+PY
+}
+SPEC="$CWD/specs/$FEAT/spec.md"; PLAN="$CWD/specs/$FEAT/plan.md"
+if [ -n "$FEAT" ] && is_approved "$SPEC" && is_approved "$PLAN"; then
+  exit 0
+fi
+echo "[harness:phase-gate] Blocked: feature '${FEAT:-none}' has no approved spec.md+plan.md (need 'status: approved' in both). Run the SDD flow (spec-writer -> plan-writer) before editing code." >&2
+exit 2
+```
+
+- [ ] **Step 4: Run to verify pass** — `bash ~/workspace/harness/tests/run.sh` → all `ok`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/claude/hooks/phase-gate.sh tests/test-hook-phase-gate.sh
+git commit -m "feat: phase-gate hook blocking code edits without approved spec+plan"
+```
+
+---
+
+### Task 9: `precommit-gate.sh` (PreToolUse Bash hook)
+
+**Files:**
+- Create: `~/workspace/harness/core/claude/hooks/precommit-gate.sh`
+- Create: `~/workspace/harness/tests/test-hook-precommit-gate.sh`
+
+**Interfaces:**
+- Produces: hook reading PreToolUse Bash event JSON (`cwd`, `tool_input.command`). If the command does not contain `git commit`, exit 0 (no-op). If it does, run `<cwd>/.specify/gates/run-gates.sh "<cwd>"`; if absent, exit 0 (do not block). If gates exit non-zero, exit 2 with stderr (blocks the commit).
+- Consumes: `run-gates.sh` (Task 5), installed at `<cwd>/.specify/gates/run-gates.sh` by bootstrap.
+
+- [ ] **Step 1: Write failing test `tests/test-hook-precommit-gate.sh`**
+
+```bash
+H="$HERE/../core/claude/hooks/precommit-gate.sh"
+S="$(new_sandbox)"; mkdir -p "$S/.specify/gates"
+cp "$HERE/../core/gates/run-gates.sh" "$S/.specify/gates/run-gates.sh"
+# non-commit command -> allowed
+printf '{"cwd":"%s","tool_input":{"command":"ls -la"}}' "$S" | bash "$H"; assert_eq "0" "$?" "non-commit command passes through"
+# git commit with failing gate -> blocked
+printf 'test:\n\t@exit 1\n' > "$S/Makefile"
+printf '{"cwd":"%s","tool_input":{"command":"git commit -m x"}}' "$S" | bash "$H" 2>/dev/null; assert_eq "2" "$?" "commit blocked when gates fail"
+# git commit with passing gate -> allowed
+printf 'test:\n\t@true\n' > "$S/Makefile"
+printf '{"cwd":"%s","tool_input":{"command":"git commit -m x"}}' "$S" | bash "$H"; assert_eq "0" "$?" "commit allowed when gates pass"
+rm -rf "$S"
+```
+
+- [ ] **Step 2: Run to verify it fails** — `bash ~/workspace/harness/tests/run.sh` → FAIL.
+
+- [ ] **Step 3: Write `precommit-gate.sh`**
+
+```bash
+#!/usr/bin/env bash
+set -uo pipefail
+EVENT="$(cat)"
+CWD="$(printf '%s' "$EVENT" | /usr/bin/python3 -c 'import json,sys,os
+try: print(json.load(sys.stdin).get("cwd") or os.getcwd())
+except Exception: print(os.getcwd())')"
+CMD="$(printf '%s' "$EVENT" | /usr/bin/python3 -c 'import json,sys
+try: print((json.load(sys.stdin).get("tool_input") or {}).get("command") or "")
+except Exception: print("")')"
+
+# Only act on git commit.
+case "$CMD" in
+  *"git commit"*) : ;;
+  *) exit 0 ;;
+esac
+
+GATES="$CWD/.specify/gates/run-gates.sh"
+[ -f "$GATES" ] || exit 0   # no gates installed -> do not block
+if bash "$GATES" "$CWD" >&2; then
+  exit 0
+fi
+echo "[harness:precommit-gate] Blocked commit: quality gates failed. Fix them before committing." >&2
+exit 2
+```
+
+- [ ] **Step 4: Run to verify pass** — `bash ~/workspace/harness/tests/run.sh` → all `ok`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/claude/hooks/precommit-gate.sh tests/test-hook-precommit-gate.sh
+git commit -m "feat: precommit-gate hook running quality gates before git commit"
+```
+
+---
+
+### Task 10: Core SDD skills (document phase)
+
+**Files:**
+- Create: `~/workspace/harness/core/claude/skills/constitution-writer/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/prd-writer/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/spec-writer/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/clarify/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/plan-writer/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/tasks-writer/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/analyze/SKILL.md`
+- Create: `~/workspace/harness/tests/test-skills-core.sh`
+
+**Interfaces:**
+- Produces: seven skill files. Each MUST have valid frontmatter (`name`, `description`) and a body stating: when to use it, which template under `.specify/templates/` it fills, the exact output path under `specs/<feature>/`, and the hand-off to the next skill. Concrete responsibilities:
+  - `constitution-writer`: fills `constitution.md.tmpl` → `.specify/memory/constitution.md`.
+  - `prd-writer`: fills `prd-template.md` → `specs/<feature>/prd.md`; creates `specs/NNN-name/` (NNN = next zero-padded ordinal) and writes the feature name to `.specify/state`.
+  - `spec-writer`: fills `spec-template.md` → `specs/<feature>/spec.md` (`status: draft`); states approval = flipping to `status: approved`.
+  - `clarify`: reads `spec.md`, lists ambiguities as questions, updates spec in place.
+  - `plan-writer`: fills `plan-template.md` → `specs/<feature>/plan.md` (`status: draft`).
+  - `tasks-writer`: fills `tasks-template.md` → `specs/<feature>/tasks.md`.
+  - `analyze`: cross-checks spec ↔ plan ↔ tasks for gaps/contradictions; writes findings; no code changes.
+- Consumes: templates from Task 4; `.specify/state` convention from Task 7.
+
+- [ ] **Step 1: Write the seven `SKILL.md` files** with the frontmatter + responsibilities above. Frontmatter example for `spec-writer`:
+
+```markdown
+---
+name: spec-writer
+description: Use after the PRD exists to write the functional spec for the active feature into specs/<feature>/spec.md from the spec template, with status:draft frontmatter.
+---
+
+# spec-writer
+
+When: PRD done, before planning.
+Template: `.specify/templates/spec-template.md`.
+Output: `specs/<active-feature>/spec.md`.
+Steps: resolve active feature from `.specify/state`; copy template; fill User stories / Requisitos funcionais / Critérios de aceitação / Fora de escopo; keep `status: draft`.
+Approval: spec is "approved" only when a human flips frontmatter to `status: approved` (the phase-gate enforces this).
+Next: clarify, then plan-writer.
+```
+
+- [ ] **Step 2: Write test `tests/test-skills-core.sh`**
+
+```bash
+SK="$HERE/../core/claude/skills"
+for s in constitution-writer prd-writer spec-writer clarify plan-writer tasks-writer analyze; do
+  assert_file "$SK/$s/SKILL.md" "$s skill exists"
+  assert_contains "$SK/$s/SKILL.md" "name: $s" "$s has name frontmatter"
+  assert_contains "$SK/$s/SKILL.md" "description:" "$s has description frontmatter"
+done
+```
+
+- [ ] **Step 3: Run to verify pass** — `bash ~/workspace/harness/tests/run.sh` → all `ok`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/claude/skills/ tests/test-skills-core.sh
+git commit -m "feat: core SDD document-phase skills"
+```
+
+---
+
+### Task 11: Implementation-phase skills + core CLAUDE.md template
+
+**Files:**
+- Create: `~/workspace/harness/core/claude/skills/implement-feature/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/evaluator/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/fix-runner/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/implement-and-evaluate/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/code-review/SKILL.md`
+- Modify: `~/workspace/harness/core/claude/CLAUDE.md.tmpl` (replace stub with full core content)
+- Create: `~/workspace/harness/tests/test-skills-impl.sh`
+
+**Interfaces:**
+- Produces: five skill files with valid frontmatter and these responsibilities:
+  - `implement-feature`: implements code per `tasks.md`; requires approved spec+plan (phase-gate enforces); TDD per task; one task at a time.
+  - `evaluator`: scores the implementation against `spec.md` acceptance criteria; emits pass/fail list. Read-only.
+  - `fix-runner`: runs `.specify/gates/run-gates.sh`, applies minimal fixes, loops until green.
+  - `implement-and-evaluate`: orchestrates implement-feature → evaluator → fix-runner loop until acceptance met and gates green.
+  - `code-review`: final pre-merge review against constitution + checklist template.
+- Produces: `CLAUDE.md.tmpl` with these core sections (imperative MUST/DO NOT style, mirroring the reference): **SDD Workflow** (the skill order incl. `brainstorming` as entry; DO NOT write code before an approved spec+plan — the phase-gate enforces it), **Commits** (folded non-SDD rule: accumulate changes and commit at the END of a feature/milestone, NOT per task/step/TDD-cycle; dispatched subagents implement/test/report only — they NEVER commit; propose commits and await approval when tests+gates are green), **Quality Gates** (run `.specify/gates/run-gates.sh`; DO NOT invent your own gates), **Code style** (functions 4-20 lines; files <400 lines; SRP; specific names, avoid `data`/`handler`/`Manager`; explicit types, no `any`), **Security** (folded non-SDD rule: authorization/permission checks on `source`/`role`/`type`/`origin`/`createdVia`/`userGroup` MUST allow-list the permitted value, never deny-list the known-bad — new values blocked by default; prefer enum over string literal), **Comments** (WHY not WHAT; docstrings with intent+example; reference issue/SHA), **Structure** (small focused modules; predictable paths), **Logging** (structured JSON for debug; plain text for user-facing output).
+- Consumes: skills from Task 10; gate from Task 5.
+
+- [ ] **Step 1: Write the five implementation `SKILL.md` files** per responsibilities above (valid `name`/`description` frontmatter each).
+
+- [ ] **Step 2: Write `CLAUDE.md.tmpl`** with the eight core sections listed in Interfaces (SDD Workflow, Commits, Quality Gates, Code style, Security, Comments, Structure, Logging), imperative voice. (No stack-specific sections — those come from the TS pack in Plan 2.)
+
+- [ ] **Step 3: Write test `tests/test-skills-impl.sh`**
+
+```bash
+SK="$HERE/../core/claude/skills"
+for s in implement-feature evaluator fix-runner implement-and-evaluate code-review; do
+  assert_file "$SK/$s/SKILL.md" "$s skill exists"
+  assert_contains "$SK/$s/SKILL.md" "name: $s" "$s has name frontmatter"
+done
+C="$HERE/../core/claude/CLAUDE.md.tmpl"
+assert_contains "$C" "SDD Workflow"  "CLAUDE.md has SDD Workflow section"
+assert_contains "$C" "Quality Gates" "CLAUDE.md has Quality Gates section"
+assert_contains "$C" "Code style"    "CLAUDE.md has Code style section"
+assert_contains "$C" "Commits"       "CLAUDE.md has Commits section (folded rule)"
+assert_contains "$C" "Security"      "CLAUDE.md has Security section (folded whitelist rule)"
+```
+
+- [ ] **Step 4: Run to verify pass** — `bash ~/workspace/harness/tests/run.sh` → all `ok`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/claude/skills/ core/claude/CLAUDE.md.tmpl tests/test-skills-impl.sh
+git commit -m "feat: implementation-phase skills and core CLAUDE.md template"
+```
+
+---
+
+### Task 12: Ported discipline skills + adapted `brainstorming` (path A)
+
+**Files:**
+- Create: `~/workspace/harness/core/claude/skills/brainstorming/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/systematic-debugging/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/using-git-worktrees/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/dispatching-parallel-agents/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/subagent-driven-development/SKILL.md`
+- Create: `~/workspace/harness/core/claude/skills/verification-before-completion/SKILL.md`
+- Create: `~/workspace/harness/tests/test-skills-discipline.sh`
+
+**Interfaces:**
+- Produces: six vendored, self-contained skill files (path A — no runtime dependency on the superpowers plugin). Each has valid `name`/`description` frontmatter. The five discipline skills (`systematic-debugging`, `using-git-worktrees`, `dispatching-parallel-agents`, `subagent-driven-development`, `verification-before-completion`) are faithful re-authorings of their superpowers counterparts with all `superpowers:` cross-references rewritten to the harness skill names and all platform-adaptation / tool-mapping boilerplate removed. `subagent-driven-development` is the orchestration spine used to build harness itself (fresh implementer per task + task reviewer + snapshot-tree diffs + final whole-branch review); its companion prompt templates (implementer / task-reviewer / final-review) are vendored alongside `SKILL.md`, with cross-refs rewritten to harness skill names and the "subagents never commit / commit at milestone with approval" rule baked in.
+- Produces (folded non-SDD rules into `dispatching-parallel-agents/SKILL.md`): a **Selective orchestration** section — delegate only bulk / context-polluting / parallelizable work; small or highly context-dependent tasks run inline (dispatch overhead would exceed the work). And a **Cost-aware model routing** section — pick the cheapest model tier that can do the task perfectly without a costly re-run (mechanical/bulk → cheaper tier; reasoning/synthesis → top tier).
+- Produces: `brainstorming/SKILL.md` — the carefully adapted favorite. MUST preserve, in spirit: (a) one question at a time, multiple-choice preferred; (b) explore intent/constraints/success before solutions; (c) propose 2-3 approaches with a leading recommendation; (d) present the design in sections with incremental approval; (e) the HARD GATE — no implementation or downstream skill chaining until the design is approved; (f) the "too simple to need a design" anti-pattern and the red-flags rationalization table. MUST change only: the terminal state — instead of "invoke writing-plans", it writes `specs/NNN-name/brainstorm.md`, sets `.specify/state` to the feature name, and hands off to `prd-writer`. MUST drop all superpowers/platform cross-references. Visual companion kept as an optional note only.
+- Consumes: `.specify/state` convention (Task 7); `prd-writer` (Task 10) as the hand-off target.
+
+- [ ] **Step 1: Write `brainstorming/SKILL.md`** preserving (a)-(f) above; terminal state writes `specs/<feature>/brainstorm.md` + `.specify/state`, hands to `prd-writer`. Frontmatter:
+
+```markdown
+---
+name: brainstorming
+description: Use before ANY feature, refactor, or behavior change — the entry point of the SDD flow. Runs a one-question-at-a-time discovery dialogue, proposes approaches, presents a design in sections, and only hands off to prd-writer after the design is approved.
+---
+```
+
+- [ ] **Step 2: Write the five discipline `SKILL.md` files** as faithful re-authorings with cross-refs rewritten to harness skill names and platform boilerplate removed. In `dispatching-parallel-agents/SKILL.md`, add the **Selective orchestration** and **Cost-aware model routing** sections (folded non-SDD rules). For `subagent-driven-development`, vendor its companion prompt templates (implementer / task-reviewer / final-review) next to `SKILL.md` and bake in "subagents never commit; controller commits at milestone with approval".
+
+- [ ] **Step 3: Write test `tests/test-skills-discipline.sh`**
+
+```bash
+SK="$HERE/../core/claude/skills"
+for s in brainstorming systematic-debugging using-git-worktrees dispatching-parallel-agents subagent-driven-development verification-before-completion; do
+  assert_file "$SK/$s/SKILL.md" "$s skill exists"
+  assert_contains "$SK/$s/SKILL.md" "name: $s" "$s has name frontmatter"
+done
+# brainstorming essence preserved + terminal state adapted
+B="$SK/brainstorming/SKILL.md"
+assert_contains "$B" "one question at a time" "brainstorming keeps one-question-at-a-time"
+assert_contains "$B" "prd-writer"             "brainstorming hands off to prd-writer"
+grep -qiF "writing-plans" "$B" && fail "brainstorming must drop superpowers writing-plans handoff" || pass "brainstorming drops writing-plans handoff"
+grep -qiF "superpowers:" "$B" && fail "brainstorming must drop superpowers cross-refs" || pass "brainstorming has no superpowers cross-refs"
+# folded non-SDD rules in dispatching-parallel-agents
+D="$SK/dispatching-parallel-agents/SKILL.md"
+assert_contains "$D" "Selective orchestration"   "dispatching has folded selective-orchestration rule"
+assert_contains "$D" "Cost-aware model routing"  "dispatching has folded cost-routing rule"
+```
+
+- [ ] **Step 4: Run to verify pass** — `bash ~/workspace/harness/tests/run.sh` → all `ok`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd ~/workspace/harness
+git add core/claude/skills/ tests/test-skills-discipline.sh
+git commit -m "feat: vendored discipline skills and adapted brainstorming (path A)"
+```
+
+---
+
+### Task 13: Stack detection hook point in bootstrap + end-to-end validation
+
+**Files:**
+- Modify: `~/workspace/harness/bootstrap.sh` (add stack detection + pack dispatch stub)
+- Create: `~/workspace/harness/tests/test-bootstrap-e2e.sh`
+
+**Interfaces:**
+- Produces: `bootstrap.sh` detects a TS project when BOTH `<target>/package.json` and `<target>/tsconfig.json` exist; prints `[harness] TS project detected — ts-clean-arch pack` and, if `$SELF/packs/ts-clean-arch/install.sh` exists, executes it with `--dir "$TARGET"` (plus `--force` when forced). If the pack is absent (until Plan 2), just print the detection line. Non-TS projects print nothing extra. Detection runs after core install.
+- Consumes: all prior core pieces.
+
+- [ ] **Step 1: Write failing test `tests/test-bootstrap-e2e.sh`**
+
+```bash
+# Full core install on an empty dir, asserting every core artifact lands.
+S="$(new_sandbox)"
+bash "$HERE/../bootstrap.sh" --dir "$S" >/dev/null
+for f in .specify/templates/spec-template.md \
+         .specify/gates/run-gates.sh \
+         .claude/hooks/phase-gate.sh .claude/hooks/precommit-gate.sh \
+         .claude/hooks/phase-sensor.sh .claude/hooks/load-constitution.sh \
+         .claude/hooks/_lib.sh \
+         .claude/skills/spec-writer/SKILL.md \
+         .claude/skills/implement-and-evaluate/SKILL.md \
+         .claude/settings.json CLAUDE.md AGENTS.md; do
+  assert_file "$S/$f" "e2e: $f installed"
+done
+assert_contains "$S/.claude/settings.json" "phase-gate.sh" "e2e: hook registered"
+# TS detection line
+S2="$(new_sandbox)"; echo '{}' > "$S2/package.json"; echo '{}' > "$S2/tsconfig.json"
+OUT=$(bash "$HERE/../bootstrap.sh" --dir "$S2")
+echo "$OUT" | grep -qF "TS project detected" && pass "e2e: TS detection fires" || fail "e2e: should detect TS"
+# non-TS: no detection line
+S3="$(new_sandbox)"
+OUT3=$(bash "$HERE/../bootstrap.sh" --dir "$S3")
+echo "$OUT3" | grep -qF "TS project detected" && fail "e2e: should NOT detect TS" || pass "e2e: no false TS detection"
+rm -rf "$S" "$S2" "$S3"
+```
+
+- [ ] **Step 2: Run to verify it fails** — `bash ~/workspace/harness/tests/run.sh` → FAIL (no detection yet).
+
+- [ ] **Step 3: Add detection to `bootstrap.sh`** (before final echo):
+
+```bash
+# Stack detection -> optional pack dispatch.
+if [ -f "$TARGET/package.json" ] && [ -f "$TARGET/tsconfig.json" ]; then
+  echo "[harness] TS project detected — ts-clean-arch pack"
+  PACK="$SELF/packs/ts-clean-arch/install.sh"
+  if [ -f "$PACK" ]; then
+    if [ "$FORCE" -eq 1 ]; then bash "$PACK" --dir "$TARGET" --force; else bash "$PACK" --dir "$TARGET"; fi
+  fi
+fi
+```
+
+- [ ] **Step 4: Run to verify pass** — `bash ~/workspace/harness/tests/run.sh` → all `ok`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd ~/workspace/harness
+git add bootstrap.sh tests/test-bootstrap-e2e.sh
+git commit -m "feat: TS stack detection and pack dispatch hook point"
+```
+
+---
+
+## Self-Review
+
+**1. Spec coverage:**
+- Bootstrap (copy, idempotency, AGENTS.md symlink, settings merge) → Tasks 2, 3. ✔
+- `.specify/` templates → Task 4. ✔
+- Generic gates → Task 5. ✔
+- 4 active hooks → Tasks 6 (load-constitution), 7 (phase-sensor), 8 (phase-gate), 9 (precommit-gate). ✔
+- Document skills → Task 10. ✔
+- Implementation skills + core CLAUDE.md (incl. folded Commits + Security rules) → Task 11. ✔
+- Ported discipline skills + adapted brainstorming (path A) + folded selective-orchestration & cost-routing → Task 12. ✔
+- Stack detection + pack dispatch → Task 13. ✔
+- TS pack itself → **deferred to Plan 2** (separate independently-testable subsystem). Noted, not a gap.
+- Caveman / RTK / no-em-dash / secrets / delegation-triage → **stay global (per-user)**; harness merges into project settings additively, so they keep working. Intentionally NOT vendored.
+- Open items resolved: approval = `status: approved` in spec+plan (Task 8); active feature = `.specify/state` + mtime fallback (Task 7); template sections (Task 4). ✔
+
+**2. Placeholder scan:** No TBD/TODO. Skill bodies specify required frontmatter + responsibilities + output paths + structural test assertions rather than inventing full prose (authoring the prose is the execution act, gated by the tests). CLAUDE.md sections enumerated with concrete rules. No code step left without code.
+
+**3. Type/contract consistency:** Hook stdin contract (`cwd`, `tool_input.file_path`, `tool_input.command`) consistent across Tasks 7-9. `_lib.sh` functions `harness_active_feature`/`harness_phase` defined Task 7, consumed Task 8. `run-gates.sh [dir]` signature defined Task 5, consumed Task 9. `.specify/state` (single-line feature name) consistent Tasks 7, 8, 10. Approval frontmatter `status: approved` consistent Tasks 4, 8, 10.
+
+---
+
+## Out of scope (this plan)
+
+- `ts-clean-arch` pack contents (clean-arch skill, check-architecture.ts, run-gates.mjs, scaffold.mjs, playwright-cli, env scripts, claude-md-fragment) → **Plan 2**.
+- Publishing to npm / `degit` distribution polish.
+- Non-TS packs.

@@ -1,0 +1,48 @@
+# PROJECT
+
+## SDD Workflow
+
+This project follows spec-driven development. The skill chain, in order, is:
+
+`brainstorming` → `prd-writer` → `spec-writer` → `clarify` → `plan-writer` → `tasks-writer` → `analyze` → `implement-feature` → `implement-and-evaluate` → `code-review`
+
+`brainstorming` is the entry point for any non-trivial feature, refactor, or bug fix. DO NOT write code before a spec and plan both carry `status: approved` in their frontmatter. The phase-gate hook (`core/claude/hooks/phase-gate.mjs`) enforces this mechanically — it blocks Edit/Write on code files until both `spec.md` and `plan.md` for the active feature are approved. Work around the gate by getting approval, never by disabling or bypassing it.
+
+## Commits
+
+Accumulate changes and commit at the END of a feature or milestone — NOT after every task, step, or TDD cycle. When dispatching subagents, instruct them to implement/test/report only; they NEVER commit. Once tests are green and quality gates pass, propose the commit message(s) and wait for explicit approval before running `git commit`.
+
+## Quality Gates
+
+Run `.specify/gates/run-gates.sh` to check the project. DO NOT invent your own ad-hoc gates (no hand-rolled lint/test invocations outside what the script already runs). The precommit-gate hook (`core/claude/hooks/precommit-gate.mjs`) runs `run-gates.sh` automatically before any `git commit` and blocks the commit if gates fail.
+
+## Code style
+
+- Functions: 4-20 lines. Files: under 400 lines.
+- Single responsibility per function/module.
+- Specific names — avoid generic placeholders like `data`, `handler`, `Manager`.
+- Explicit types everywhere; no `any`.
+
+## Security
+
+Authorization and permission checks on fields like `source`, `role`, `type`, `origin`, `createdVia`, or `userGroup` MUST allow-list the permitted value — never deny-list the known-bad value. New/unexpected values must be blocked by default. Prefer an enum over a string literal for the allowed set.
+
+```ts
+// wrong — blacklist (new values pass through silently)
+if (entity.sourceApp === 'admin') throw new ForbiddenException();
+
+// right — whitelist (new values are blocked by default)
+if (entity.sourceApp !== 'expected-source') throw new ForbiddenException();
+```
+
+## Comments
+
+Comment WHY, not WHAT — the code already says what it does. Docstrings should state intent plus a short example. Reference the relevant issue or commit SHA when a comment explains a workaround or a non-obvious historical decision.
+
+## Structure
+
+Keep modules small and focused on one concern. Use predictable, conventional paths so files can be found without searching.
+
+## Logging
+
+Use structured JSON for debug/diagnostic logging. Use plain text for user-facing output.
