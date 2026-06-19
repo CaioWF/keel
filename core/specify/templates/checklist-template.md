@@ -33,3 +33,13 @@
 - [ ] Variáveis de ambiente documentadas
 - [ ] Rollback plan documentado
 - [ ] Monitoramento e alertas configurados
+
+## Segurança
+
+- [ ] Sem secrets/credenciais hardcoded
+- [ ] Checks de autorização em allow-list (não deny-list)
+- [ ] Input validado / sem injeção (SQL/comando/path)
+- [ ] Sem SSRF em requests externos
+- [ ] Crypto forte / IDs imprevisíveis
+- [ ] Nenhuma dependência de terceiro nova sem revisão (supply-chain)
+- [ ] Secrets fora dos logs

@@ -4,9 +4,13 @@
 
 This project follows spec-driven development. The skill chain, in order, is:
 
-`brainstorming` → `prd-writer` → `spec-writer` → `clarify` → `plan-writer` → `tasks-writer` → `analyze` → `implement-feature` → `implement-and-evaluate` → `code-review`
+`brainstorming` → `prd-writer` → `spec-writer` → `clarify` → `plan-writer` → `tasks-writer` → `analyze` → `implement-feature` → `implement-and-evaluate` → `review-and-simplify`
 
 `brainstorming` is the entry point for any non-trivial feature, refactor, or bug fix. DO NOT write code before a spec and plan both carry `status: approved` in their frontmatter. The phase-gate hook (`core/claude/hooks/phase-gate.mjs`) enforces this mechanically — it blocks Edit/Write on code files until both `spec.md` and `plan.md` for the active feature are approved. Work around the gate by getting approval, never by disabling or bypassing it.
+
+`review-and-simplify` is a MANDATORY pre-commit step: it runs the review lenses (`code-review` + `security-review`) in parallel and a behavior-preserving `simplify` pass before any commit is proposed — a commit must never be proposed without it.
+
+**TDD is a REQUIRED step.** All implementation (`implement-feature` and any dispatched implementer subagent) MUST follow the `test-driven-development` skill: no production code without a failing test first (Iron Law), red → green → refactor per behavior. Test BEHAVIOR — observable inputs/outputs/effects — NOT implementation details, and NEVER assert on mocks. A test that breaks on a behavior-preserving refactor is testing implementation; rewrite it. This is not optional; "test-after" does not satisfy it.
 
 ## Commits
 

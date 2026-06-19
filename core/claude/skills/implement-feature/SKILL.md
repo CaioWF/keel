@@ -16,7 +16,7 @@ Steps:
 2. Read `specs/<active-feature>/tasks.md` and pick the next unchecked top-level task (in order — do not skip ahead).
 3. Read that task's subtasks plus the relevant slices of `spec.md` (`Requisitos Funcionais`, `Critérios de Aceitação`) and `plan.md` (`Arquitetura`, `Estrutura de Arquivos`, `Decisões Técnicas`) to ground the implementation.
 4. If Edit/Write is blocked with a phase-gate error, stop and report it — do not work around the gate; the spec/plan need approval first.
-5. Implement with TDD: write the failing test for the subtask, make it pass with the minimal code, refactor, repeat per subtask.
+5. Implement with TDD — REQUIRED, follow the `test-driven-development` skill for every subtask. Iron Law: NO production code without a failing test first. Test BEHAVIOR (observable outcomes), never implementation details or mocks. Per subtask: write the failing test, watch it fail for the right reason, write minimal code to pass, refactor while green. Skipping test-first or asserting on mocks is not allowed — delete and start over.
 6. Work ONE task at a time. Do not start the next top-level task in the same pass — stop after the current one is done and tested.
 7. Tick the task's checkbox in `tasks.md` once its subtasks are all complete and its tests pass.
 8. Do not run `.specify/gates/run-gates.sh` yourself here — that is fix-runner's job — but do not leave the codebase in a state you know fails to compile or run its own tests.

@@ -5,6 +5,8 @@ description: Use after implement-and-evaluate confirms acceptance criteria and g
 
 # code-review
 
+This is one lens orchestrated by `review-and-simplify` (dispatched in parallel alongside `security-review` as part of the mandatory pre-commit step) — it is also usable standalone for an ad-hoc review.
+
 When: implement-and-evaluate has finished — all `tasks.md` boxes checked, all `Critérios de Aceitação` passing, gates green — and the feature is otherwise ready to propose for commit.
 
 Template: `.specify/templates/checklist-template.md`.

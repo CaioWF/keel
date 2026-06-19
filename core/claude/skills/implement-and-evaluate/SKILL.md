@@ -22,4 +22,4 @@ Steps:
 4. Once all tasks are checked and a final fix-runner pass confirms `.specify/gates/run-gates.sh` is green, run evaluator once more over the full `Critérios de Aceitação` list as a final confirmation before handing off.
 5. Do not commit. Accumulate changes; commit happens later, once code-review and the human both sign off.
 
-Next: code-review.
+Next: review-and-simplify.

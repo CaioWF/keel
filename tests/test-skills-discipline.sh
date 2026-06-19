@@ -1,8 +1,18 @@
 SK="$HERE/../core/claude/skills"
-for s in brainstorming systematic-debugging using-git-worktrees dispatching-parallel-agents subagent-driven-development verification-before-completion; do
+for s in brainstorming systematic-debugging using-git-worktrees dispatching-parallel-agents subagent-driven-development verification-before-completion test-driven-development; do
   assert_file "$SK/$s/SKILL.md" "$s skill exists"
   assert_contains "$SK/$s/SKILL.md" "name: $s" "$s has name frontmatter"
 done
+# test-driven-development: behavior-not-implementation concept + required + companion
+T="$SK/test-driven-development/SKILL.md"
+assert_contains "$T" "Behavior, Not Implementation" "tdd has behavior-not-implementation section"
+assert_contains "$T" "NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST" "tdd states the Iron Law"
+assert_contains "$T" "REQUIRED" "tdd marked required"
+assert_file "$SK/test-driven-development/testing-anti-patterns.md" "tdd companion anti-patterns exists"
+# TDD wired as a required step in the flow
+assert_contains "$SK/implement-feature/SKILL.md" "test-driven-development" "implement-feature requires the tdd skill"
+assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "test-driven-development" "CLAUDE.md mandates tdd skill"
+assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "TDD is a REQUIRED step" "CLAUDE.md marks tdd required"
 B="$SK/brainstorming/SKILL.md"
 assert_contains "$B" "one question at a time" "brainstorming keeps one-question-at-a-time"
 assert_contains "$B" "prd-writer"             "brainstorming hands off to prd-writer"

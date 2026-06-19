@@ -447,6 +447,10 @@ Final reviewer: All requirements met, ready to merge
 **Required workflow skills:**
 - **using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing), if the human wants isolation for this milestone
 
-**Subagents should use:**
-- Standard TDD practice (red-green-refactor) for each task, per this
-  project's own implementation skills
+**Subagents MUST use:**
+- The `test-driven-development` skill (red-green-refactor) for every task —
+  REQUIRED, not optional. Iron Law: no production code without a failing test
+  first; test BEHAVIOR, never implementation details or mocks. Each implementer
+  dispatch must instruct the subagent to follow it; a report that shows code
+  written before its test (or tests that assert on mocks) is a failed task
+  review — send it back.
