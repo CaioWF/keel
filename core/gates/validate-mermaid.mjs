@@ -10,7 +10,8 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve, extname, relative } from "node:path";
 
 const ROOT = resolve(process.argv[2] || ".");
-const IGNORE_DIRS = new Set(["node_modules", ".git", ".specify"]);
+// Inclui dirs de views geradas (clientes não-Claude) — derivados da fonte, não a fonte.
+const IGNORE_DIRS = new Set(["node_modules", ".git", ".specify", ".agents", ".cursor", ".gemini", ".windsurf"]);
 
 const TYPES = new Set([
   "flowchart", "graph", "sequenceDiagram", "classDiagram", "classDiagram-v2",

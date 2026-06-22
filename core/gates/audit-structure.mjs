@@ -10,7 +10,15 @@ import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname, relative, resolve, extname, basename } from "node:path";
 
 const ROOT = resolve(process.argv[2] || ".");
-const IGNORE = new Set(["node_modules", ".git", ".specify"]);
+// Dirs de views geradas (clientes não-Claude) são artefatos derivados da fonte canônica
+// (.claude/ + CLAUDE.md) — auditar a fonte basta e evita falso-positivo.
+const IGNORE = new Set(["node_modules", ".git", ".specify", ".agents", ".cursor", ".gemini", ".windsurf"]);
+// Arquivos de instruções gerados (fora de um dir próprio) que também são views derivadas.
+const isGenerated = (f) => {
+  const r = relative(ROOT, f).replace(/\\/g, "/");
+  return r === "AGENTS.md" || r === "GEMINI.md" ||
+    r === ".github/copilot-instructions.md" || r.startsWith(".github/prompts/");
+};
 const errors = [];
 const err = (f, m) => errors.push(`${relative(ROOT, f) || f}: ${m}`);
 
@@ -42,7 +50,7 @@ function parseFrontmatter(text) {
 // Só o SKILL.md de cada skill exige frontmatter; arquivos companheiros (prompts,
 // anti-patterns, refs) ficam ao lado e não são skills.
 const isSkill = (f) => f.replace(/\\/g, "/").includes("/.claude/skills/") && basename(f) === "SKILL.md";
-const files = walk(ROOT);
+const files = walk(ROOT).filter((f) => !isGenerated(f));
 
 // 1) skills precisam de frontmatter name + description
 for (const f of files) {

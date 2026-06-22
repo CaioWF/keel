@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SELF="$(cd "$(dirname "$0")" && pwd)"
-TARGET="$PWD"; FORCE=0
+TARGET="$PWD"; FORCE=0; AGENTS=""
+ALL_EXTRA="codex,cursor,copilot,gemini,windsurf"
 while [ $# -gt 0 ]; do
   case "$1" in
     --force) FORCE=1; shift ;;
     --dir) TARGET="$2"; shift 2 ;;
+    --all) AGENTS="$ALL_EXTRA"; shift ;;
+    --agent=*) AGENTS="${1#--agent=}"; shift ;;
     *) echo "[harness] unknown arg: $1" >&2; exit 2 ;;
   esac
 done
@@ -51,6 +54,13 @@ SETTINGS="$TARGET/.claude/settings.json"
 [ -f "$SETTINGS" ] || echo '{}' > "$SETTINGS"
 node "$SELF/lib/merge-settings.mjs" "$SETTINGS" "$SELF/core/claude/settings.hooks.json"
 echo "[harness] =merged hooks into $SETTINGS"
+
+# Multi-client views: generate advisory views for selected extra clients from the
+# canonical Claude source just installed. Default (no --agent/--all) = Claude-only.
+# If codex is selected, emit-views replaces the AGENTS.md symlink with a real view.
+if [ -n "$AGENTS" ]; then
+  node "$SELF/lib/emit-views.mjs" --dir "$TARGET" --agents "$AGENTS"
+fi
 
 # Stack detection -> optional pack dispatch (runs after core install).
 if [ -f "$TARGET/package.json" ] && [ -f "$TARGET/tsconfig.json" ]; then

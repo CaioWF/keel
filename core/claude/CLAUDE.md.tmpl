@@ -60,6 +60,10 @@ Keep modules small and focused on one concern. Use predictable, conventional pat
 
 Durable architecture decisions go in `docs/architecture/adr/NNNN-*.md` (use `_template.md`), not in STATE. ADRs are append-only: to change a decision, write a new ADR that supersedes the old one. Rule of thumb: hard-to-reverse decision → ADR; current work state → STATE.
 
+## Multi-client views
+
+This Claude Code setup (`CLAUDE.md` + `.claude/`) is the **canonical source**. If the project was bootstrapped with `--agent=` / `--all`, view files for other agents (Codex `AGENTS.md` + `.agents/`, Cursor `.cursor/`, Copilot `.github/copilot-instructions.md` + `.github/prompts/`, Gemini `GEMINI.md` + `.gemini/`, Windsurf `.windsurf/`) are **generated, advisory, and read-only** — they carry the instructions and skills but NOT the mechanical enforcement (gates/hooks are Claude-Code-only). Never hand-edit a view; change the canonical source and regenerate with `bootstrap.sh --force --agent=...`. The doc gates ignore generated view dirs. `.specify/clients.json` records which clients are generated.
+
 ## Logging
 
 Use structured JSON for debug/diagnostic logging. Use plain text for user-facing output.
