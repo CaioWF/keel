@@ -18,8 +18,12 @@ date: YYYY-MM-DD
 
 ## Critérios de Aceitação
 
-- [Cenário 1: Dado... quando... então...]
-- [Cenário 2: Dado... quando... então...]
+> Numere cada critério com um identificador `AC-N`. O gate `eval-spec-fidelity` exige que
+> todo `AC-N` seja referenciado por uma task em `tasks.md` (rastreabilidade) e, depois, no
+> código/teste que o implementa.
+
+- AC-1: [Dado... quando... então...]
+- AC-2: [Dado... quando... então...]
 
 ## Fora de Escopo
 

@@ -9,10 +9,19 @@ for f in .specify/templates/spec-template.md \
          .claude/hooks/_lib.mjs \
          .claude/skills/spec-writer/SKILL.md \
          .claude/skills/implement-and-evaluate/SKILL.md \
+         .claude/skills/handoff/SKILL.md \
+         .specify/gates/audit-structure.mjs \
+         .specify/gates/eval-spec-fidelity.mjs \
+         .specify/gates/validate-mermaid.mjs \
+         docs/STATE.md \
+         docs/architecture/adr/_template.md \
+         docs/architecture/adr/0001-record-architecture-decisions.md \
          .claude/settings.json CLAUDE.md AGENTS.md; do
   assert_file "$S/$f" "e2e: $f installed"
 done
 assert_contains "$S/.claude/settings.json" "phase-gate.mjs" "e2e: hook registered"
+# the freshly-installed project passes its own doc-layer gates
+( cd "$S" && bash .specify/gates/run-gates.sh >/dev/null 2>&1 ); assert_eq "0" "$?" "e2e: scaffold passes its own gates"
 # TS detection line
 S2="$(new_sandbox)"; echo '{}' > "$S2/package.json"; echo '{}' > "$S2/tsconfig.json"
 OUT=$(bash "$HERE/../bootstrap.sh" --dir "$S2")

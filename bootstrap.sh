@@ -32,6 +32,7 @@ copy_tree() {
 
 copy_tree "$SELF/core/specify"       "$TARGET/.specify"
 copy_tree "$SELF/core/gates"         "$TARGET/.specify/gates"
+copy_tree "$SELF/core/docs"          "$TARGET/docs"
 copy_tree "$SELF/core/claude/skills" "$TARGET/.claude/skills"
 copy_tree "$SELF/core/claude/hooks"  "$TARGET/.claude/hooks"
 mkdir -p "$TARGET/.claude/skills" "$TARGET/.claude/hooks"

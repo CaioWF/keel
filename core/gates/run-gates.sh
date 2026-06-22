@@ -19,6 +19,13 @@ has_make_target() { # name
   grep -qE "^$1:" Makefile
 }
 
+# Doc-layer conformance gates (zero-dep node, run on every project — node is assumed
+# available since bootstrap requires it). Auto-skip when their inputs are absent.
+GATES_DIR="$(cd "$(dirname "$0")" && pwd)"
+for g in audit-structure eval-spec-fidelity validate-mermaid; do
+  [ -f "$GATES_DIR/$g.mjs" ] && run_check "doc:$g" node "$GATES_DIR/$g.mjs" "$DIR"
+done
+
 if [ -f package.json ]; then
   for s in lint test build; do has_npm_script "$s" && run_check "npm:$s" npm run "$s"; done
 elif [ -f Makefile ]; then
