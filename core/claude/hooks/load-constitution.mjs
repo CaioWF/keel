@@ -8,8 +8,13 @@ import { readEvent } from "./_lib.mjs";
 const ev = await readEvent();
 const cwd = ev.cwd || process.cwd();
 
+// Constituição: preferir o .md preenchido (constitution-writer); cair no .md.tmpl recém
+// instalado para que editar o template na mão também apareça no contexto desde o início.
+const constMd = join(cwd, ".specify", "memory", "constitution.md");
+const constPath = existsSync(constMd) ? constMd : join(cwd, ".specify", "memory", "constitution.md.tmpl");
+
 const sources = [
-  [join(cwd, ".specify", "memory", "constitution.md"), "Constituição do projeto"],
+  [constPath, "Constituição do projeto"],
   [join(cwd, "docs", "STATE.md"), "STATE — memória de trabalho (onde paramos / próximo passo)"],
 ];
 
