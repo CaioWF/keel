@@ -39,7 +39,7 @@ const deviations = (codeBlob.match(/SPEC_DEVIATION/g) || []).length;
 let hardFail = 0;
 const rows = [];
 for (const name of readdirSync(specsDir)) {
-  if (!/^\d{4}-/.test(name)) continue;
+  if (!/^\d+-/.test(name)) continue; // aceita NNN- (skills) e NNNN- (qualquer nº de dígitos)
   const dir = join(specsDir, name);
   if (!existsSync(join(dir, "spec.md"))) continue;
   const acs = [...acTokens(readFileSync(join(dir, "spec.md"), "utf8"))].sort();

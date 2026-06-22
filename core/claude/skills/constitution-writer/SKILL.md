@@ -13,7 +13,7 @@ Output: `.specify/memory/constitution.md`.
 
 Steps:
 1. Check whether `.specify/memory/constitution.md` already exists. If it does, treat this as an edit, not a fresh fill — read it first and preserve decisions still valid.
-2. Copy `.specify/memory/constitution.md.tmpl` to `.specify/memory/constitution.md` if not present.
+2. If `constitution.md` is absent, **rename** `.specify/memory/constitution.md.tmpl` to `.specify/memory/constitution.md` (the constitution is one-per-project; the template is consumed, not kept). After filling, remove any leftover `constitution.md.tmpl` so only `constitution.md` remains.
 3. Fill each section that exists in the template:
    - `Princípios` — the project's guiding principles (3+ short statements).
    - `Padrões de Código` — concrete coding conventions with examples.

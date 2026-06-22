@@ -65,7 +65,7 @@ for (const f of files) {
 const specsDir = join(ROOT, "specs");
 if (existsSync(specsDir)) {
   for (const n of readdirSync(specsDir)) {
-    if (/^\d{4}-/.test(n) && !existsSync(join(specsDir, n, "spec.md")))
+    if (/^\d+-/.test(n) && !existsSync(join(specsDir, n, "spec.md")))
       err(join(specsDir, n), "feature sem `spec.md`");
   }
 }

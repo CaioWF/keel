@@ -10,30 +10,30 @@ E1="$(new_sandbox)"
 rm -rf "$E1"
 
 # spec with AC fully covered by tasks -> exit 0
-E2="$(new_sandbox)"; mkdir -p "$E2/specs/0001-x"
-printf '# spec\nAC-1: a\nAC-2: b\n' > "$E2/specs/0001-x/spec.md"
-printf '# tasks\n- [ ] T1 (AC-1)\n- [ ] T2 (AC-2)\n' > "$E2/specs/0001-x/tasks.md"
+E2="$(new_sandbox)"; mkdir -p "$E2/specs/001-x"
+printf '# spec\nAC-1: a\nAC-2: b\n' > "$E2/specs/001-x/spec.md"
+printf '# tasks\n- [ ] T1 (AC-1)\n- [ ] T2 (AC-2)\n' > "$E2/specs/001-x/tasks.md"
 ( node "$EV" "$E2" >/dev/null 2>&1 ); assert_eq "0" "$?" "eval: all AC covered exits 0"
 rm -rf "$E2"
 
 # spec with AC-2 uncovered by tasks -> exit 1
-E3="$(new_sandbox)"; mkdir -p "$E3/specs/0001-x"
-printf '# spec\nAC-1: a\nAC-2: b\n' > "$E3/specs/0001-x/spec.md"
-printf '# tasks\n- [ ] T1 (AC-1)\n' > "$E3/specs/0001-x/tasks.md"
+E3="$(new_sandbox)"; mkdir -p "$E3/specs/001-x"
+printf '# spec\nAC-1: a\nAC-2: b\n' > "$E3/specs/001-x/spec.md"
+printf '# tasks\n- [ ] T1 (AC-1)\n' > "$E3/specs/001-x/tasks.md"
 ( node "$EV" "$E3" >/dev/null 2>&1 ); rc=$?
 [ "$rc" -ne 0 ] && pass "eval: uncovered AC fails" || fail "eval should fail on uncovered AC"
 rm -rf "$E3"
 
 # spec phase (AC present, no tasks.md yet) -> not enforced, exit 0
-E4="$(new_sandbox)"; mkdir -p "$E4/specs/0001-x"
-printf '# spec\nAC-1: a\nAC-2: b\n' > "$E4/specs/0001-x/spec.md"
+E4="$(new_sandbox)"; mkdir -p "$E4/specs/001-x"
+printf '# spec\nAC-1: a\nAC-2: b\n' > "$E4/specs/001-x/spec.md"
 ( node "$EV" "$E4" >/dev/null 2>&1 ); assert_eq "0" "$?" "eval: spec phase (no tasks.md) not enforced"
 rm -rf "$E4"
 
 # SPEC_DEVIATION counted in output
-E5="$(new_sandbox)"; mkdir -p "$E5/specs/0001-x" "$E5/src"
-printf '# spec\nAC-1: a\n' > "$E5/specs/0001-x/spec.md"
-printf '# tasks\n- [ ] T1 (AC-1)\n' > "$E5/specs/0001-x/tasks.md"
+E5="$(new_sandbox)"; mkdir -p "$E5/specs/001-x" "$E5/src"
+printf '# spec\nAC-1: a\n' > "$E5/specs/001-x/spec.md"
+printf '# tasks\n- [ ] T1 (AC-1)\n' > "$E5/specs/001-x/tasks.md"
 printf '// SPEC_DEVIATION: skipped AC-9 for now\nconst x=1; // AC-1\n' > "$E5/src/a.mjs"
 out="$(node "$EV" "$E5" 2>&1)"
 echo "$out" | grep -qF "SPEC_DEVIATION abertos no código: 1" && pass "eval: counts SPEC_DEVIATION" || fail "eval should count SPEC_DEVIATION (got: $out)"
@@ -64,7 +64,7 @@ printf -- '---\ndescription: does foo\n---\n# foo\n' > "$A2/.claude/skills/foo/S
 rm -rf "$A2"
 
 # specs/NNNN-* without spec.md -> exit 1
-A3="$(new_sandbox)"; mkdir -p "$A3/specs/0001-x"
+A3="$(new_sandbox)"; mkdir -p "$A3/specs/001-x"
 ( node "$AU" "$A3" >/dev/null 2>&1 ); rc=$?
 [ "$rc" -ne 0 ] && pass "audit: spec dir without spec.md fails" || fail "audit should fail on missing spec.md"
 rm -rf "$A3"
