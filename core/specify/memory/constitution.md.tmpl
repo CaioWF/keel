@@ -12,6 +12,20 @@
 - [Padrão 2: Convenção e exemplo]
 - [Padrão 3: Convenção e exemplo]
 
+## Princípios de arquitetura
+
+> Não-negociáveis destilados da camada de conceito (skill `architecture`). A profundidade e o
+> racional ficam nos guias; aqui só as regras que o agente deve seguir sempre.
+
+- **Dependency rule:** dependências apontam para dentro. O domínio (entidades, regras de negócio)
+  NÃO importa framework, I/O, banco, HTTP nem detalhes de infra. Infra depende do domínio, nunca o contrário.
+- **Domínio puro:** lógica de negócio fica testável sem subir framework/rede/banco. Efeitos colaterais
+  ficam nas bordas (adapters/infra).
+- **Fronteira de agregado (DDD):** mutações passam pela raiz do agregado; invariantes são garantidas
+  ali. Não altere entidades internas por fora da raiz.
+- **Teste comportamento, não implementação:** testes verificam entradas/saídas/efeitos observáveis,
+  nunca mocks ou detalhes internos (ver skill `test-driven-development`).
+
 ## Processo SDD
 
 - [Fase 1: Investigação e Spec]

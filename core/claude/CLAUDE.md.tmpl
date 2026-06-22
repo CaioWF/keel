@@ -54,6 +54,8 @@ Comment WHY, not WHAT — the code already says what it does. Docstrings should 
 
 Keep modules small and focused on one concern. Use predictable, conventional paths so files can be found without searching.
 
+When designing a feature's structure (during `plan-writer`), use the `architecture` skill — agnostic guides for Clean Architecture, SOLID, testing strategy, and DDD tactical — and fill `.specify/templates/architecture-template.md`. The constitution's `## Princípios de arquitetura` (dependency rule, pure domain, aggregate boundary, test behavior) are non-negotiable. Mechanical enforcement of the dependency rule is per-language and ships in a pack, not in core.
+
 ## Continuity & decisions
 
 `docs/STATE.md` is the **volatile** work memory — where we stopped, the next concrete step, blockers. It is injected into context at SessionStart. Use the `handoff` skill to write it when pausing and to recompose context when resuming. Keep it short and actionable.
