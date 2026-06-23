@@ -1,8 +1,19 @@
 SK="$HERE/../core/claude/skills"
-for s in brainstorming systematic-debugging using-git-worktrees dispatching-parallel-agents subagent-driven-development verification-before-completion test-driven-development; do
+for s in brainstorming systematic-debugging using-git-worktrees dispatching-parallel-agents subagent-driven-development verification-before-completion test-driven-development receiving-code-review finishing-a-development-branch; do
   assert_file "$SK/$s/SKILL.md" "$s skill exists"
   assert_contains "$SK/$s/SKILL.md" "name: $s" "$s has name frontmatter"
 done
+# vendored skills must drop all superpowers cross-refs (Path A)
+for s in receiving-code-review finishing-a-development-branch; do
+  grep -qiF "superpowers:" "$SK/$s/SKILL.md" && fail "$s must drop superpowers cross-refs" || pass "$s has no superpowers cross-refs"
+done
+# wired into the chain + review flow
+assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "finishing-a-development-branch" "CLAUDE.md ends chain with finishing-a-development-branch"
+assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "receiving-code-review" "CLAUDE.md cites receiving-code-review"
+# finishing uses harness gates, not a hardcoded test runner
+assert_contains "$SK/finishing-a-development-branch/SKILL.md" "run-gates.sh" "finishing verifies via run-gates"
+# authoring-skills repo doc (writing-skills distilled)
+assert_file "$HERE/../docs/authoring-skills.md" "authoring-skills repo doc exists"
 # test-driven-development: behavior-not-implementation concept + required + companion
 T="$SK/test-driven-development/SKILL.md"
 assert_contains "$T" "Behavior, Not Implementation" "tdd has behavior-not-implementation section"

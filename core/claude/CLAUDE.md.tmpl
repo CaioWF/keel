@@ -4,7 +4,9 @@
 
 This project follows spec-driven development. The skill chain, in order, is:
 
-`brainstorming` → `prd-writer` → `spec-writer` → `clarify` → `plan-writer` → `tasks-writer` → `analyze` → `implement-feature` → `implement-and-evaluate` → `review-and-simplify`
+`brainstorming` → `prd-writer` → `spec-writer` → `clarify` → `plan-writer` → `tasks-writer` → `analyze` → `implement-feature` → `implement-and-evaluate` → `review-and-simplify` → `finishing-a-development-branch`
+
+When processing review feedback (from the user, a human reviewer, or the `review-and-simplify` lenses), follow `receiving-code-review`: verify before implementing, push back with technical reasoning when a suggestion is wrong, never performative agreement. After the approved commit(s), `finishing-a-development-branch` presents the integrate options (merge / PR / keep / discard) and handles worktree cleanup.
 
 `brainstorming` is the entry point for any non-trivial feature, refactor, or bug fix. DO NOT write code before a spec and plan both carry `status: approved` in their frontmatter. The phase-gate hook (`core/claude/hooks/phase-gate.mjs`) enforces this mechanically — it blocks Edit/Write on code files until both `spec.md` and `plan.md` for the active feature are approved. Work around the gate by getting approval, never by disabling or bypassing it.
 
