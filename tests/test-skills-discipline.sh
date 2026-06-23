@@ -10,7 +10,7 @@ done
 # wired into the chain + review flow
 assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "finishing-a-development-branch" "CLAUDE.md ends chain with finishing-a-development-branch"
 assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "receiving-code-review" "CLAUDE.md cites receiving-code-review"
-# finishing uses harness gates, not a hardcoded test runner
+# finishing uses keel gates, not a hardcoded test runner
 assert_contains "$SK/finishing-a-development-branch/SKILL.md" "run-gates.sh" "finishing verifies via run-gates"
 # authoring-skills repo doc (writing-skills distilled)
 assert_file "$HERE/../docs/authoring-skills.md" "authoring-skills repo doc exists"

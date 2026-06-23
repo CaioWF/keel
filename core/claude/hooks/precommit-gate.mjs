@@ -20,6 +20,6 @@ const r = spawnSync("bash", [gates, cwd], { stdio: ["ignore", 2, 2] });
 if (r.status === 0) process.exit(0);
 
 process.stderr.write(
-  "[harness:precommit-gate] Blocked commit: quality gates failed. Fix them before committing.\n",
+  "[keel:precommit-gate] Blocked commit: quality gates failed. Fix them before committing.\n",
 );
 process.exit(2);

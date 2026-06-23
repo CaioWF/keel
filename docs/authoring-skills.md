@@ -1,7 +1,7 @@
-# Authoring harness skills
+# Authoring keel skills
 
 Reference for adding/editing skills in `core/claude/skills/`. Distilled and adapted from
-superpowers `writing-skills` (the harness vendored its discipline skills under Path A; this is
+superpowers `writing-skills` (the keel vendored its discipline skills under Path A; this is
 the meta-guide for writing more). Pairs with `docs/design-notes/gates-vs-skills.md` (skill vs
 gate) and `docs/design-notes/concepts-layer.md` (the concept-container recipe).
 
@@ -36,7 +36,7 @@ A skill is a reusable technique/pattern/reference — not a story.
 
 ## SKILL.md structure
 
-Frontmatter — exactly two fields the harness audits (`audit-structure` requires them):
+Frontmatter — exactly two fields the keel audits (`audit-structure` requires them):
 - `name`: letters/numbers/hyphens only, matches the directory name.
 - `description`: **third-person, describes ONLY when to use** — start with "Use when…", list
   symptoms/contexts. NEVER summarize the workflow (the agent reads the body for that; a
@@ -63,7 +63,7 @@ Skills are behavior-shaping code, not docs. Before adding one:
 Don't reword carefully-tuned behavior content (Red Flags tables, rationalization lists) without
 evidence it improves outcomes.
 
-## Wiring a new skill into the harness
+## Wiring a new skill into the keel
 
 - Place it under `core/claude/skills/<name>/SKILL.md` → bootstrap copies it + emit-views renders
   client views automatically.

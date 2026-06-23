@@ -8,7 +8,7 @@ date: 2026-06-22
 
 ## 1. Entendimento
 
-O harness hoje instala um único cliente: Claude Code (CLAUDE.md + `.claude/skills` +
+O keel hoje instala um único cliente: Claude Code (CLAUDE.md + `.claude/skills` +
 `.mjs` hooks + gates). Milestone 2 adiciona a capacidade de **gerar views derivadas** do
 mesmo conteúdo canônico para outros agentes de IA — Codex, Cursor, Copilot, Gemini CLI e
 Windsurf — sem que nenhum deles vire dependência de runtime (continua Path A: views são
@@ -17,7 +17,7 @@ Windsurf — sem que nenhum deles vire dependência de runtime (continua Path A:
 Inspiração e padrão: `github.com/igoruehara/spec-driven` (`bin/adapters.mjs` + `bin/cli.mjs`),
 todo zero-dep `.mjs` — alinhado à nossa regra de linguagem.
 
-Restrição central já conhecida: **a espinha de enforcement do harness é específica do Claude
+Restrição central já conhecida: **a espinha de enforcement do keel é específica do Claude
 Code**. Os hooks `.mjs` (phase-gate default-deny, precommit-gate, injeção de constituição/STATE
 no SessionStart) e o gate runner só rodam no Claude Code. Nenhum outro cliente tem PreToolUse
 equivalente. Logo, as views não-Claude são **advisory**: levam as instruções e as skills (como
@@ -25,7 +25,7 @@ commands/rules), mas não o enforcement mecânico.
 
 ## 2. Investigação
 
-Fonte canônica no harness:
+Fonte canônica no keel:
 - `core/claude/CLAUDE.md.tmpl` — instruções (sem frontmatter; começa em `# PROJECT`).
 - `core/claude/skills/<name>/SKILL.md` — cada skill, com frontmatter `name`/`description`.
 - Várias skills têm **arquivos companheiros** (`subagent-driven-development/implementer-prompt.md`,
@@ -99,7 +99,7 @@ backward-compat (sem flag = só Claude, nenhum dir de view criado).
 - **Views são derivadas → entram na IGNORE dos gates**: o gate audita a fonte, não o artefato.
 - **Manifesto `.specify/clients.json`**: registra os clientes gerados (audita-ignore + futura
   regeneração).
-- **Fonte = target instalado** (não o `core/` do harness): emit-views lê o `CLAUDE.md`/`.claude`
+- **Fonte = target instalado** (não o `core/` do keel): emit-views lê o `CLAUDE.md`/`.claude`
   já copiado, então edições do projeto fluem para as views e o comando funciona em re-run.
 
 ## 5. Pontos de decisão
@@ -135,5 +135,5 @@ backward-compat (sem flag = só Claude, nenhum dir de view criado).
 
 - Comando `update`/`sync` dedicado e menu interativo (TUI readline) — bootstrap é flag-driven.
 - Enforcement per-cliente (decisão: advisory only).
-- Camada de produto da referência (Lean Inception, personas, MVP canvas) — não faz parte do harness.
+- Camada de produto da referência (Lean Inception, personas, MVP canvas) — não faz parte do keel.
 - Tradução/i18n das views; portar os gates `.mjs` para CI de cada cliente.

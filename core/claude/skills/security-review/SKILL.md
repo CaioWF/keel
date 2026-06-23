@@ -23,11 +23,11 @@ Same bands as the task-reviewer rubric in `subagent-driven-development`:
 Walk every item against the diff:
 
 1. **Hardcoded secrets/credentials/tokens.** Grep the diff for API keys, passwords, connection strings, private keys. Also flag secrets leaked into log statements — a secret printed to a log is still a secret leak.
-2. **Authorization/permission checks MUST allow-list the permitted value, never deny-list the known-bad.** This is the harness's own security rule (see project `CLAUDE.md`, `## Security`): any check on a field like `source`, `role`, `type`, `origin`, `createdVia`, or `userGroup` that compares against a *forbidden* value (`if (x === 'admin') throw`) is a blacklist — new/unexpected values pass through silently. Flag every instance; the fix is `if (x !== 'expected-value') throw` or `!allowedSet.has(x)`, with an enum preferred over a string literal.
+2. **Authorization/permission checks MUST allow-list the permitted value, never deny-list the known-bad.** This is the keel's own security rule (see project `CLAUDE.md`, `## Security`): any check on a field like `source`, `role`, `type`, `origin`, `createdVia`, or `userGroup` that compares against a *forbidden* value (`if (x === 'admin') throw`) is a blacklist — new/unexpected values pass through silently. Flag every instance; the fix is `if (x !== 'expected-value') throw` or `!allowedSet.has(x)`, with an enum preferred over a string literal.
 3. **Input validation / injection.** SQL built by string concatenation, shell commands built from unsanitized input, path segments taken from user input without normalization/containment (path traversal).
 4. **SSRF / unvalidated outbound requests.** Any outbound HTTP call whose host/URL is influenced by user input without an allowlist of permitted destinations.
 5. **Unsafe crypto, weak randomness, predictable IDs.** `Math.random()` or similar for tokens/IDs/secrets, weak or homegrown hashing, predictable session/reset tokens.
-6. **Dependency & supply-chain surface.** New third-party dependencies, postinstall scripts, auto-updating plugins. For harness-style code specifically: flag any deviation from zero-dependency / no-python (Path A) — a new runtime dependency on an external plugin or interpreter is itself a finding.
+6. **Dependency & supply-chain surface.** New third-party dependencies, postinstall scripts, auto-updating plugins. For keel-style code specifically: flag any deviation from zero-dependency / no-python (Path A) — a new runtime dependency on an external plugin or interpreter is itself a finding.
 
 ## Process
 

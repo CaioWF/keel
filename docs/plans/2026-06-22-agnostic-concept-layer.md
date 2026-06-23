@@ -10,7 +10,7 @@ date: 2026-06-22
 
 Reframe do usuário sobre o `ts-clean-arch`: em vez de um pack preso a uma linguagem,
 investir em **conceitos de engenharia agnósticos** (Clean Architecture, SOLID, etc.). O
-harness padroniza o **formato/estrutura** do que se cria; cada linguagem materializa com
+keel padroniza o **formato/estrutura** do que se cria; cada linguagem materializa com
 suas especificidades.
 
 Isso é a `docs/design-notes/gates-vs-skills.md` um nível acima — **duas camadas, não

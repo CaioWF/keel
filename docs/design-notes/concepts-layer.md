@@ -6,7 +6,7 @@ e o **formato**; o **enforcement** mecânico fica no pack por linguagem (o lado 
 
 ## A receita: um "conceito" é um triple uniforme
 
-Para adicionar um conceito ao harness, preencha até quatro slots — só o primeiro é obrigatório:
+Para adicionar um conceito ao keel, preencha até quatro slots — só o primeiro é obrigatório:
 
 1. **Guia (obrigatório)** — um companheiro da skill `architecture`:
    `core/claude/skills/architecture/<conceito>.md`. Agnóstico de linguagem: o princípio, quando

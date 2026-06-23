@@ -5,9 +5,9 @@ FAILED=0; RAN=0
 
 run_check() { # name command...
   local name="$1"; shift
-  echo "[harness:gates] running $name"
+  echo "[keel:gates] running $name"
   RAN=$((RAN+1))
-  "$@" || { echo "[harness:gates] $name FAILED"; FAILED=$((FAILED+1)); }
+  "$@" || { echo "[keel:gates] $name FAILED"; FAILED=$((FAILED+1)); }
 }
 
 has_npm_script() { # name
@@ -32,6 +32,6 @@ elif [ -f Makefile ]; then
   for t in lint test; do has_make_target "$t" && run_check "make:$t" make "$t"; done
 fi
 
-if [ "$RAN" -eq 0 ]; then echo "[harness:gates] no checks detected"; exit 0; fi
-if [ "$FAILED" -ne 0 ]; then echo "[harness:gates] $FAILED gate(s) failed"; exit 1; fi
-echo "[harness:gates] all gates passed"; exit 0
+if [ "$RAN" -eq 0 ]; then echo "[keel:gates] no checks detected"; exit 0; fi
+if [ "$FAILED" -ne 0 ]; then echo "[keel:gates] $FAILED gate(s) failed"; exit 1; fi
+echo "[keel:gates] all gates passed"; exit 0

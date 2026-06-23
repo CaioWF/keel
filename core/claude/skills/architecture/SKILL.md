@@ -5,7 +5,7 @@ description: Use ao desenhar a estrutura de uma feature ou módulo (na fase de p
 
 # architecture — princípios de engenharia agnósticos
 
-Container dos conceitos de arquitetura do harness. Agnóstico de linguagem: descreve **como
+Container dos conceitos de arquitetura do keel. Agnóstico de linguagem: descreve **como
 pensar** a estrutura; cada linguagem realiza com seu idioma, e o enforcement mecânico (quando
 existe) vem de um pack por linguagem, não daqui.
 

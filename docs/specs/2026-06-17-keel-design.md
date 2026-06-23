@@ -1,4 +1,4 @@
-# Harness — SDD Scaffolder · Design
+# Keel — SDD Scaffolder · Design
 
 **Data:** 2026-06-17
 **Status:** Aprovado para planejamento
@@ -7,19 +7,19 @@
 
 ## 1. Entendimento
 
-`harness` é um scaffolder de spec-driven development (SDD). Não é um projeto de
+`keel` é um scaffolder de spec-driven development (SDD). Não é um projeto de
 código de aplicação: é um esqueleto reutilizável que, rodado na raiz de qualquer
 projeto novo, instala o fluxo SDD completo (documentos + skills + gates ativos)
 para qualquer agente de IA, com foco primário em Claude Code.
 
 Base conceitual: GitHub **spec-kit** (constitution → spec → plan → tasks →
 implement), porém reconstruído do zero, sem vínculo com o pipeline atual do
-usuário (`spec-driven-pipeline`, `spec-plan-format-8`). Quando `harness` estiver
+usuário (`spec-driven-pipeline`, `spec-plan-format-8`). Quando `keel` estiver
 pronto e validado, ele vira o padrão canônico e o pipeline antigo é
 descontinuado.
 
 Diferencial sobre spec-kit: spec-kit entrega apenas **gates passivos**
-(markdown que o agente pode ignorar). `harness` adiciona uma **camada ativa** —
+(markdown que o agente pode ignorar). `keel` adiciona uma **camada ativa** —
 hooks executáveis que forçam o fluxo (bloqueiam código sem spec, rodam quality
 gates antes de commit, injetam contexto de fase).
 
@@ -48,7 +48,7 @@ Gera `.specify/` (memory/constitution.md, templates de spec/plan/tasks, scripts)
 (`.claude/commands/*.md`). Não escreve código de app; só o passo `/implement`
 delega geração ao agente. Gates são markdown passivo.
 
-### Harness de referência do usuário (16 screenshots "MBA-VIDEOMAX")
+### Keel de referência do usuário (16 screenshots "MBA-VIDEOMAX")
 Fonte do estilo de CLAUDE.md e dos scripts de gate. Extraído:
 
 - **CLAUDE.md** com regras imperativas (MUST / DO NOT): environment scripts
@@ -84,13 +84,13 @@ Fonte do estilo de CLAUDE.md e dos scripts de gate. Extraído:
 
 ## 3. Mudanças propostas
 
-Repo novo `~/harness/` (git, destino GitHub). Estrutura:
+Repo novo `~/keel/` (git, destino GitHub). Estrutura:
 
 ```
-harness/
+keel/
 ├── bootstrap.sh                # scaffolder agnóstico (shell puro)
 ├── README.md
-├── docs/specs/                 # specs do próprio harness
+├── docs/specs/                 # specs do próprio keel
 ├── core/                       # agnóstico, sempre instalado
 │   ├── claude/
 │   │   ├── CLAUDE.md.tmpl
@@ -169,7 +169,7 @@ shell fino de orquestração que delega JSON aos helpers. Packs Node = `.mjs`/
   `--force`; merge aditivo em `settings.json`.
 - **Reconstrução limpa.** Sem importar nada do pipeline atual; ele será
   descontinuado ao fim.
-- **Autossuficiência (caminho A).** O harness porta as skills de disciplina
+- **Autossuficiência (caminho A).** O keel porta as skills de disciplina
   genérica do superpowers pra dentro do projeto, auditadas — `brainstorming`,
   `systematic-debugging`, `using-git-worktrees`, `dispatching-parallel-agents`,
   `verification-before-completion`. Meta: dropar a dependência do superpowers de
@@ -219,7 +219,7 @@ shell fino de orquestração que delega JSON aos helpers. Packs Node = `.mjs`/
 - Distribuição: bootstrap script (não CLI oficial, não template-clone puro). ✔
 - Stack: núcleo agnóstico + packs. ✔
 - Doc: CLAUDE.md fonte + AGENTS.md symlink. ✔
-- Repo: dedicado no GitHub, `harness`. ✔
+- Repo: dedicado no GitHub, `keel`. ✔
 - Linguagem: hooks `.mjs` zero-dep; bootstrap+gates shell; packs mjs/ts. ✔
 
 ### Em aberto (resolver no plano)

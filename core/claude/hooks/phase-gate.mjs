@@ -38,6 +38,6 @@ const plan = join(cwd, "specs", feat, "plan.md");
 if (feat && isApproved(spec) && isApproved(plan)) process.exit(0);
 
 process.stderr.write(
-  `[harness:phase-gate] Blocked: feature '${feat || "none"}' has no approved spec.md+plan.md (need 'status: approved' in both). Run the SDD flow (spec-writer -> plan-writer) before editing code.\n`,
+  `[keel:phase-gate] Blocked: feature '${feat || "none"}' has no approved spec.md+plan.md (need 'status: approved' in both). Run the SDD flow (spec-writer -> plan-writer) before editing code.\n`,
 );
 process.exit(2);

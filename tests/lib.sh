@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tiny assertion helpers for harness shell tests. No external deps.
+# Tiny assertion helpers for keel shell tests. No external deps.
 TESTS_RUN=0
 TESTS_FAILED=0
 
@@ -14,4 +14,4 @@ assert_nofile() { [ ! -e "$1" ] && pass "$2" || fail "$2 (unexpected $1)"; }
 assert_contains() { # file substring msg
   if grep -qF "$2" "$1" 2>/dev/null; then pass "$3"; else fail "$3 (no '$2' in $1)"; fi
 }
-new_sandbox() { mktemp -d "${TMPDIR:-/tmp}/harness-test.XXXXXX"; }
+new_sandbox() { mktemp -d "${TMPDIR:-/tmp}/keel-test.XXXXXX"; }

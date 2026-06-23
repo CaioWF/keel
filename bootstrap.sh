@@ -9,7 +9,7 @@ while [ $# -gt 0 ]; do
     --dir) TARGET="$2"; shift 2 ;;
     --all) AGENTS="$ALL_EXTRA"; shift ;;
     --agent=*) AGENTS="${1#--agent=}"; shift ;;
-    *) echo "[harness] unknown arg: $1" >&2; exit 2 ;;
+    *) echo "[keel] unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 mkdir -p "$TARGET"
@@ -19,9 +19,9 @@ copy_file() {
   local src="$1" dest="$2"
   mkdir -p "$(dirname "$dest")"
   if [ -e "$dest" ] && [ "$FORCE" -ne 1 ]; then
-    echo "[harness] =$dest"; return 0
+    echo "[keel] =$dest"; return 0
   fi
-  cp "$src" "$dest"; echo "[harness] +$dest"
+  cp "$src" "$dest"; echo "[keel] +$dest"
 }
 # copy_tree <srcdir> <destdir>
 copy_tree() {
@@ -44,16 +44,16 @@ copy_file "$SELF/core/claude/CLAUDE.md.tmpl" "$TARGET/CLAUDE.md"
 
 # AGENTS.md -> CLAUDE.md (relative symlink), created only if absent or --force
 if [ ! -e "$TARGET/AGENTS.md" ] || [ "$FORCE" -eq 1 ]; then
-  ln -sf "CLAUDE.md" "$TARGET/AGENTS.md"; echo "[harness] +$TARGET/AGENTS.md"
+  ln -sf "CLAUDE.md" "$TARGET/AGENTS.md"; echo "[keel] +$TARGET/AGENTS.md"
 else
-  echo "[harness] =$TARGET/AGENTS.md"
+  echo "[keel] =$TARGET/AGENTS.md"
 fi
 
-# Merge harness hook registrations into target settings.json (additive, dedup by command).
+# Merge keel hook registrations into target settings.json (additive, dedup by command).
 SETTINGS="$TARGET/.claude/settings.json"
 [ -f "$SETTINGS" ] || echo '{}' > "$SETTINGS"
 node "$SELF/lib/merge-settings.mjs" "$SETTINGS" "$SELF/core/claude/settings.hooks.json"
-echo "[harness] =merged hooks into $SETTINGS"
+echo "[keel] =merged hooks into $SETTINGS"
 
 # Multi-client views: generate advisory views for selected extra clients from the
 # canonical Claude source just installed. Default (no --agent/--all) = Claude-only.
@@ -64,7 +64,7 @@ fi
 
 # Stack detection -> optional pack dispatch (runs after core install).
 if [ -f "$TARGET/package.json" ] && [ -f "$TARGET/tsconfig.json" ]; then
-  echo "[harness] TS project detected — ts-clean-arch pack"
+  echo "[keel] TS project detected — ts-clean-arch pack"
   # The TS pack ships in a later plan (Plan 2); absent in core, so this is a
   # no-op until then. Detection still prints so the seam is observable.
   PACK="$SELF/packs/ts-clean-arch/install.sh"
@@ -73,4 +73,4 @@ if [ -f "$TARGET/package.json" ] && [ -f "$TARGET/tsconfig.json" ]; then
   fi
 fi
 
-echo "[harness] core installed at $TARGET"
+echo "[keel] core installed at $TARGET"

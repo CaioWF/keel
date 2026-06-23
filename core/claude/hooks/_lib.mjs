@@ -1,4 +1,4 @@
-// Shared resolvers for harness hooks. Zero-dep: node: builtins only. Import me.
+// Shared resolvers for keel hooks. Zero-dep: node: builtins only. Import me.
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 

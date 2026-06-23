@@ -13,7 +13,7 @@ Write the test first. Watch it fail. Write minimal code to pass.
 
 **Violating the letter of the rules is violating the spirit of the rules.**
 
-This is a REQUIRED step in the harness SDD flow — `implement-feature` and any
+This is a REQUIRED step in the keel SDD flow — `implement-feature` and any
 subagent writing production code MUST follow this cycle. It is not optional and
 not "test-after".
 
@@ -121,7 +121,7 @@ real code (no mocks unless unavoidable).
 
 ### Verify RED — Watch It Fail
 
-**MANDATORY. Never skip.** Run the project's tests (the harness gate
+**MANDATORY. Never skip.** Run the project's tests (the keel gate
 `.specify/gates/run-gates.sh` auto-detects `npm test` / `make test`; or run the
 single test directly). Confirm:
 - Test fails (not errors)

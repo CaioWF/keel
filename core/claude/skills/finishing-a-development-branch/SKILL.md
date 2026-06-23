@@ -81,7 +81,7 @@ WORKTREE_PATH=$(git rev-parse --show-toplevel)
   git worktree remove "$WORKTREE_PATH"
   git worktree prune
   ```
-- Otherwise the host/harness owns the workspace — do NOT remove it.
+- Otherwise the host/keel owns the workspace — do NOT remove it.
 
 ## Quick reference
 
