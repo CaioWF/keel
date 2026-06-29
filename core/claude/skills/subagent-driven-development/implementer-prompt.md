@@ -100,6 +100,10 @@ Subagent (general-purpose):
 
     **Discipline:**
     - Did I avoid overbuilding (YAGNI)?
+    - Did I climb the laziness ladder before adding code? (reuse existing →
+      stdlib → native → already-installed dep → one-liner → minimum viable —
+      never a new dep/abstraction where something already covers it, and never
+      at the cost of validation/data-loss/security/a11y)
     - Did I only build what was requested?
     - Did I follow existing patterns in the codebase?
 

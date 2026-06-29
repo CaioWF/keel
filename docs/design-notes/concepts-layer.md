@@ -38,5 +38,6 @@ Para adicionar um conceito ao keel, preencha até quatro slots — só o primeir
 | SOLID | `solid.md` | — | — | (lint por linguagem, depois) |
 | Estratégia de testes | `testing-strategy.md` (aponta p/ `test-driven-development`) | testar comportamento | — | gate de teste já existe |
 | DDD tático | `ddd-tactical.md` | fronteira de agregado | — | — |
+| Minimalismo | `minimalism.md` | mínimo viável + carve-out | — | (advisory; sem pack) |
 
 Crescer = mais uma linha na tabela + os slots da receita. Sem tocar em código.

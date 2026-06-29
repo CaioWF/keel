@@ -14,6 +14,12 @@ done
 for c in clean-architecture solid testing-strategy ddd-tactical; do
   assert_contains "$SK/SKILL.md" "$c.md" "architecture skill indexes $c"
 done
+# minimalism companion (laziness ladder) exists, indexed, and stays distinct from simplify
+assert_file "$SK/minimalism.md" "architecture companion minimalism exists"
+assert_contains "$SK/SKILL.md" "minimalism.md" "architecture skill indexes minimalism"
+assert_contains "$SK/minimalism.md" "laziness ladder" "minimalism states the laziness ladder"
+assert_contains "$SK/minimalism.md" "simplify" "minimalism demarcates against simplify (pre vs post-write)"
+
 # testing-strategy references TDD (does not duplicate)
 assert_contains "$SK/testing-strategy.md" "test-driven-development" "testing-strategy points to TDD skill"
 # clean-architecture states the dependency rule

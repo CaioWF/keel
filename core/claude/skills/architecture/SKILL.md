@@ -28,6 +28,8 @@ SessionStart) — esta skill é a profundidade e o racional por trás deles.
    dependa de abstração, não de detalhe.
 5. Planeje os testes pela **estratégia de testes** (ver `testing-strategy.md`), que reforça a
    skill `test-driven-development` (comportamento > implementação).
+6. Antes de adicionar dep/abstração/feature, suba a **laziness ladder** (ver `minimalism.md`) —
+   o desenho mais simples que satisfaz o requisito, sem cortar segurança/validação/data-loss/a11y.
 
 ## Conceitos (companheiros)
 
@@ -35,5 +37,6 @@ SessionStart) — esta skill é a profundidade e o racional por trás deles.
 - `solid.md` — os 5 princípios como heurísticas.
 - `testing-strategy.md` — pirâmide/estratégia; referencia `test-driven-development`.
 - `ddd-tactical.md` — entity, value object, aggregate, repository, domain service.
+- `minimalism.md` — a laziness ladder; minimalismo pré-escrita (vs `simplify` pós-escrita).
 
 Adicionar um conceito: ver `docs/design-notes/concepts-layer.md` (a receita do container).

@@ -25,6 +25,9 @@
   ali. Não altere entidades internas por fora da raiz.
 - **Teste comportamento, não implementação:** testes verificam entradas/saídas/efeitos observáveis,
   nunca mocks ou detalhes internos (ver skill `test-driven-development`).
+- **Mínimo viável:** suba a laziness ladder (precisa existir? → reuso → stdlib → nativo → dep
+  instalada → one-liner → mínimo) antes de adicionar dep, abstração ou feature. Nunca à custa de
+  validação de trust-boundary, perda de dados, segurança ou a11y (ver guia `minimalism.md`).
 
 ## Processo SDD
 
