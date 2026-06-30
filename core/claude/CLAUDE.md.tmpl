@@ -64,6 +64,10 @@ When designing a feature's structure (during `plan-writer`), use the `architectu
 
 Durable architecture decisions go in `docs/architecture/adr/NNNN-*.md` (use `_template.md`), not in STATE. ADRs are append-only: to change a decision, write a new ADR that supersedes the old one. Rule of thumb: hard-to-reverse decision → ADR; current work state → STATE.
 
+### Open Knowledge Format index
+
+Any `.md` under `docs/`, `specs/`, or `.specify/memory/` that carries a `type:` key in its frontmatter is indexed at SessionStart by the `okf-index` hook (`core/claude/hooks/okf-index.mjs`) and injected as a compact map (concept name, type, path, `[[links]]`) — so documented schemas, metrics, APIs, and decisions are in context from turn one with zero tool calls. To register a concept, give the doc `type:` (e.g. `table`, `metric`, `api`, `service`) and optionally `name:`/`title:` frontmatter, and cross-reference related concepts with `[[wiki-links]]` in the body. Docs without `type:` are ignored, so the index stays signal-only; the injected map is capped at 60 concepts to bound token cost.
+
 ## Multi-client views
 
 This Claude Code setup (`CLAUDE.md` + `.claude/`) is the **canonical source**. If the project was bootstrapped with `--agent=` / `--all`, view files for other agents (Codex `AGENTS.md` + `.agents/`, Cursor `.cursor/`, Copilot `.github/copilot-instructions.md` + `.github/prompts/`, Gemini `GEMINI.md` + `.gemini/`, Windsurf `.windsurf/`) are **generated, advisory, and read-only** — they carry the instructions and skills but NOT the mechanical enforcement (gates/hooks are Claude-Code-only). Never hand-edit a view; change the canonical source and regenerate with `bootstrap.sh --force --agent=...`. The doc gates ignore generated view dirs. `.specify/clients.json` records which clients are generated.
