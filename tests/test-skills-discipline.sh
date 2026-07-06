@@ -32,3 +32,14 @@ grep -qiF "superpowers:" "$B" && fail "brainstorming must drop superpowers cross
 D="$SK/dispatching-parallel-agents/SKILL.md"
 assert_contains "$D" "Selective orchestration"   "dispatching has folded selective-orchestration rule"
 assert_contains "$D" "Cost-aware model routing"  "dispatching has folded cost-routing rule"
+
+# subagent-driven-development progressive-disclosure split (pilot): heavy detail
+# lives in references/, the body links each so it loads on demand.
+SDD="$SK/subagent-driven-development"
+for r in dispatch-mechanics example-workflow troubleshooting; do
+  assert_file "$SDD/references/$r.md" "SDD reference $r exists"
+  assert_contains "$SDD/SKILL.md" "references/$r.md" "SDD body links reference $r"
+done
+# the moved sections must NOT remain duplicated in the body
+grep -qF "## Constructing Reviewer Prompts" "$SDD/SKILL.md" && fail "SDD body still holds moved Constructing Reviewer Prompts" || pass "SDD body defers reviewer-prompt detail to reference"
+grep -qF "## Example Workflow" "$SDD/SKILL.md" && fail "SDD body still holds moved Example Workflow" || pass "SDD body defers example workflow to reference"
