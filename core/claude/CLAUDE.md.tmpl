@@ -4,7 +4,9 @@
 
 This project follows spec-driven development. The skill chain, in order, is:
 
-`brainstorming` → `prd-writer` → `spec-writer` → `clarify` → `plan-writer` → `tasks-writer` → `analyze` → `implement-feature` → `implement-and-evaluate` → `review-and-simplify` → `finishing-a-development-branch`
+`brainstorming` → `prd-writer` → `spec-writer` → `clarify` → `plan-writer` → `tasks-writer` → `analyze` → `implement-and-evaluate` → `review-and-simplify` → `finishing-a-development-branch`
+
+`implement-and-evaluate` is the execution loop. It runs each task in one of two modes, chosen once from the shape of `tasks.md`/`plan.md` (see its `## Mode Selection` and `docs/design-notes/execution-mode-routing.md`): **inline** — invoking `implement-feature` as a child skill on the session model (short or tightly-coupled features) — or **dispatch** — delegating to `subagent-driven-development` for fresh per-task implementer subagents with cost-aware model routing (3+ independent tasks). `implement-feature` is therefore a child of `implement-and-evaluate`, not a sibling step run before it.
 
 When processing review feedback (from the user, a human reviewer, or the `review-and-simplify` lenses), follow `receiving-code-review`: verify before implementing, push back with technical reasoning when a suggestion is wrong, never performative agreement. After the approved commit(s), `finishing-a-development-branch` presents the integrate options (merge / PR / keep / discard) and handles worktree cleanup.
 

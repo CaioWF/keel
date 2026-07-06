@@ -19,4 +19,6 @@ Steps:
 5. Loop steps 3-4 until the script exits 0 ("all gates passed"), or until a fix attempt would require scope beyond the current task (e.g. a missing approved spec/plan) — in that case stop and report the blocker instead of working around it.
 6. Do not touch `spec.md`, `plan.md`, or `tasks.md` frontmatter/approval state from this skill.
 
+Model routing: when a gate fix is handed to a subagent (via `dispatching-parallel-agents`) instead of run inline, size the model to the fix's difficulty — do NOT inherit the session model by default. A single-file mechanical gate fix (lint, formatting, a missing import) is cheapest tier; a fix that needs cross-file reasoning is standard tier. See the `routing-minimum-capable-model` skill.
+
 Next: evaluator, to re-confirm acceptance criteria now that gates are green; loop continues via implement-and-evaluate.

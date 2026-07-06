@@ -11,10 +11,23 @@ Template: none — this skill orchestrates other skills, it does not fill or pro
 
 Output: a fully implemented, gate-green feature with every `tasks.md` checkbox ticked and every `spec.md` `Critérios de Aceitação` scenario passing.
 
+## Mode Selection
+
+Choose the execution mode ONCE, before the loop, by reading `tasks.md` (task count and independence) and `plan.md` (coupling between tasks). This picks how each task is executed in step 2a — see `docs/design-notes/execution-mode-routing.md` for the rationale.
+
+| Signal | Mode | How each task runs |
+|---|---|---|
+| ≤2 tasks, **or** tightly-coupled (tasks share state / touch the same files) | **inline** | invoke `implement-feature` as a Skill (session model); `fix-runner` inline |
+| ≥3 mostly-independent tasks | **dispatch** | delegate the whole task loop to `subagent-driven-development` — fresh implementer subagent per task, tree snapshots, per-role model routing |
+
+Dispatch carries real overhead (tree snapshot, brief file, round-trip, re-integration). It pays off only when parallelism or bulk context-pollution justify it; a short or coupled feature is cheaper inline. When in doubt on a borderline count, prefer inline — the review loop is the same either way.
+
 Steps:
 1. Resolve the active feature from `.specify/state` (fallback: newest dir under `specs/`).
 2. Loop while `specs/<active-feature>/tasks.md` has unchecked top-level tasks:
-   a. Invoke implement-feature for the next unchecked task (ONE task per iteration).
+   a. Execute the next unchecked task (ONE task per iteration) per the mode chosen above:
+      - **inline** → invoke `implement-feature` for that task.
+      - **dispatch** → hand the task to `subagent-driven-development`, which owns the snapshot + brief + implementer dispatch + model routing for it; then resume this loop at step 2b with the task's result.
    b. Invoke evaluator to score the relevant `Critérios de Aceitação` against the new state.
    c. If evaluator reports any FAIL, invoke fix-runner, then re-invoke evaluator to confirm.
    d. Repeat b-c until evaluator reports all relevant scenarios PASS and gates are green, then proceed to the next task.

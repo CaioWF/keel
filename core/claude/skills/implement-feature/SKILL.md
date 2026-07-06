@@ -21,4 +21,6 @@ Steps:
 7. Tick the task's checkbox in `tasks.md` once its subtasks are all complete and its tests pass.
 8. Do not run `.specify/gates/run-gates.sh` yourself here — that is fix-runner's job — but do not leave the codebase in a state you know fails to compile or run its own tests.
 
+Model routing: when this skill's work is handed to a subagent (via `dispatching-parallel-agents`) instead of run inline, size the model to the task's real difficulty — do NOT inherit the session model by default. A 1-2 file task with a complete spec is transcription-plus-testing: cheapest tier. Multi-file integration or design judgment: standard-or-top tier. See the `routing-minimum-capable-model` skill and `subagent-driven-development`'s Model Selection. (For 3+ independent tasks, `implement-and-evaluate` should be in dispatch mode, which handles this routing per task.)
+
 Next: evaluator, then fix-runner, looped via implement-and-evaluate until all tasks are done.
