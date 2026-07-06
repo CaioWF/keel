@@ -19,6 +19,21 @@ has_make_target() { # name
   grep -qE "^$1:" Makefile
 }
 
+# Stack-independent build gate. Runs the FIRST build command that matches the
+# detected stack, so "does it compile/build?" is verified before commit
+# regardless of language. A project with no build step (interpreted, no compile)
+# matches nothing and is correctly a no-op — there is nothing to build.
+build_step() {
+  if [ -f package.json ] && has_npm_script build; then run_check "build:npm" npm run build; return 0; fi
+  if has_make_target build; then run_check "build:make" make build; return 0; fi
+  if [ -f go.mod ]; then run_check "build:go" go build ./...; return 0; fi
+  if [ -f Cargo.toml ]; then run_check "build:cargo" cargo build --quiet; return 0; fi
+  if [ -f pom.xml ]; then run_check "build:maven" mvn -q -DskipTests package; return 0; fi
+  if [ -f build.gradle ] || [ -f build.gradle.kts ]; then run_check "build:gradle" ./gradlew build -x test; return 0; fi
+  if ls ./*.sln ./*.csproj >/dev/null 2>&1; then run_check "build:dotnet" dotnet build --nologo; return 0; fi
+  return 1
+}
+
 # Doc-layer conformance gates (zero-dep node, run on every project — node is assumed
 # available since bootstrap requires it). Auto-skip when their inputs are absent.
 GATES_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -27,10 +42,14 @@ for g in audit-structure eval-spec-fidelity validate-mermaid; do
 done
 
 if [ -f package.json ]; then
-  for s in lint test build; do has_npm_script "$s" && run_check "npm:$s" npm run "$s"; done
+  for s in lint test; do has_npm_script "$s" && run_check "npm:$s" npm run "$s"; done
 elif [ -f Makefile ]; then
   for t in lint test; do has_make_target "$t" && run_check "make:$t" make "$t"; done
 fi
+
+# Build runs after lint/test, stack-detected and independent of the block above
+# (a project may build via Go/Cargo/etc. while linting via make).
+build_step || true
 
 if [ "$RAN" -eq 0 ]; then echo "[keel:gates] no checks detected"; exit 0; fi
 if [ "$FAILED" -ne 0 ]; then echo "[keel:gates] $FAILED gate(s) failed"; exit 1; fi

@@ -31,3 +31,32 @@ S3="$(new_sandbox)"; _make_shim "$S3"
 printf 'test:\n\t@true\n' > "$S3/Makefile"
 ( cd "$S3" && PATH="$S3/bin:$PATH" bash "$G" >/dev/null 2>&1 ); assert_eq "0" "$?" "passing make test exits 0"
 rm -rf "$S3"
+
+# build gate: make `build` target now runs (was previously lint/test only)
+S4="$(new_sandbox)"; _make_shim "$S4"
+printf 'build:\n\t@exit 5\n' > "$S4/Makefile"
+( cd "$S4" && PATH="$S4/bin:$PATH" bash "$G" >/dev/null 2>&1 ); rc=$?
+[ "$rc" -ne 0 ] && pass "failing make build propagates non-zero" || fail "should fail on make build exit 5"
+rm -rf "$S4"
+
+S5="$(new_sandbox)"; _make_shim "$S5"
+printf 'build:\n\t@true\n' > "$S5/Makefile"
+( cd "$S5" && PATH="$S5/bin:$PATH" bash "$G" >/dev/null 2>&1 ); assert_eq "0" "$?" "passing make build exits 0"
+rm -rf "$S5"
+
+# build gate: Go stack detected via go.mod, `go build ./...` invoked
+_go_shim() { # sandbox_dir exit_code
+  mkdir -p "$1/bin"
+  printf '#!/usr/bin/env bash\n[ "$1" = "build" ] && exit %s\nexit 0\n' "$2" > "$1/bin/go"
+  chmod +x "$1/bin/go"
+}
+S6="$(new_sandbox)"; _go_shim "$S6" 7
+printf 'module x\n' > "$S6/go.mod"
+( cd "$S6" && PATH="$S6/bin:$PATH" bash "$G" >/dev/null 2>&1 ); rc=$?
+[ "$rc" -ne 0 ] && pass "failing go build propagates non-zero" || fail "should fail on go build exit 7"
+rm -rf "$S6"
+
+S7="$(new_sandbox)"; _go_shim "$S7" 0
+printf 'module x\n' > "$S7/go.mod"
+( cd "$S7" && PATH="$S7/bin:$PATH" bash "$G" >/dev/null 2>&1 ); assert_eq "0" "$?" "passing go build exits 0"
+rm -rf "$S7"

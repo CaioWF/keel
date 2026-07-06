@@ -24,6 +24,8 @@ Accumulate changes and commit at the END of a feature or milestone — NOT after
 
 Run `.specify/gates/run-gates.sh` to check the project. DO NOT invent your own ad-hoc gates (no hand-rolled lint/test invocations outside what the script already runs). The precommit-gate hook (`core/claude/hooks/precommit-gate.mjs`) runs `run-gates.sh` automatically before any `git commit` and blocks the commit if gates fail.
 
+The runner detects and runs the project **build** stack-independently — `npm run build`, `make build`, `go build ./...`, `cargo build`, Maven, Gradle, or .NET, whichever matches. So "does it still build?" is verified at the end of every feature: `implement-and-evaluate`'s final `fix-runner` pass runs the gates, and the precommit-gate hook re-runs them before commit — a feature with a broken build cannot be committed. A project with no compile step (interpreted, no build) matches nothing and the build gate is correctly a no-op.
+
 The runner includes **doc-layer conformance gates** (zero-dep node, always run):
 - `audit-structure` — skills carry `name`/`description` frontmatter, every `specs/NNNN-*/` has `spec.md`, no broken relative links.
 - `eval-spec-fidelity` — once a feature has `tasks.md`, every `AC-N` in its `spec.md` MUST be referenced by a task (traceability); AC not yet in code/test is a warning. Tag acceptance criteria `AC-1`, `AC-2`… in the spec and cite the `AC-N` in the task that delivers it.
