@@ -13,11 +13,13 @@ Output: an aggregated findings report (by severity) from all lenses, a simplifie
 
 1. **Resolve scope.** Resolve the active feature from `.specify/state` (fallback: newest dir under `specs/`). Determine the diff to review: the feature's tree-snapshot diff (`git diff BASE_TREE HEAD_TREE`, per the no-commit-rule snapshotting in `subagent-driven-development`) or, if no snapshots were taken, the working tree diff.
 
-2. **Dispatch the review lenses IN PARALLEL.** Follow `dispatching-parallel-agents` — issue both dispatches in the same response so they run concurrently, not sequentially:
+2. **Resolve the lens set from the registry.** Read `.specify/review-lenses.txt` — one skill name per line, ignoring blank lines and `#` comments. That file is the source of truth for which lenses run. Core seeds it with the stack-agnostic lenses:
    - `code-review` — quality against the constitution and `checklist-template.md`.
    - `security-review` — the security checklist (secrets, allow-list authz, injection, SSRF, crypto, supply-chain).
 
-   Each lens is read-only and returns findings by severity (Critical/Important/Minor) with `file:line`. The lens set is extensible — stack-specific lenses (perf, a11y, etc.) can be added from packs later without changing this orchestration.
+   Packs append stack-specific lenses to the same file without touching this orchestration — e.g. the `ui-review` pack appends `perf-review` + `a11y-review`, and the `api-review` pack appends `api-contract` + `migration-safety`. If the registry is missing (older install), fall back to the two agnostic lenses above.
+
+   **Dispatch every listed lens IN PARALLEL.** Follow `dispatching-parallel-agents` — issue all lens dispatches in the same response so they run concurrently, not sequentially. Each lens is read-only and returns findings by severity (Critical/Important/Minor) with `file:line`.
 
 3. **Aggregate findings.** Any Critical or Important finding from either lens MUST be fixed: hand it back to `fix-runner` (small, localized fix) or `implement-and-evaluate` (larger scope), then re-dispatch the lens that raised it to confirm the fix. Do not proceed to step 4 with open Critical/Important findings. Minor findings are logged for the human, not blocking.
 

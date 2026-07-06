@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SELF="$(cd "$(dirname "$0")" && pwd)"
-TARGET="$PWD"; FORCE=0; AGENTS=""
+TARGET="$PWD"; FORCE=0; AGENTS=""; PACKS=""
 ALL_EXTRA="codex,cursor,copilot,gemini,windsurf"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -9,6 +9,7 @@ while [ $# -gt 0 ]; do
     --dir) TARGET="$2"; shift 2 ;;
     --all) AGENTS="$ALL_EXTRA"; shift ;;
     --agent=*) AGENTS="${1#--agent=}"; shift ;;
+    --pack=*) PACKS="${1#--pack=}"; shift ;;
     *) echo "[keel] unknown arg: $1" >&2; exit 2 ;;
   esac
 done
@@ -60,6 +61,20 @@ echo "[keel] =merged hooks into $SETTINGS"
 # If codex is selected, emit-views replaces the AGENTS.md symlink with a real view.
 if [ -n "$AGENTS" ]; then
   node "$SELF/lib/emit-views.mjs" --dir "$TARGET" --agents "$AGENTS"
+fi
+
+# Explicit pack dispatch (--pack=a,b). Runs after core install so packs layer
+# on top of the seeded skills/registry. Each pack owns its own idempotent install.
+if [ -n "$PACKS" ]; then
+  IFS=',' read -ra PACK_LIST <<< "$PACKS"
+  for p in "${PACK_LIST[@]}"; do
+    PACK_SH="$SELF/packs/$p/install.sh"
+    if [ -f "$PACK_SH" ]; then
+      if [ "$FORCE" -eq 1 ]; then bash "$PACK_SH" --dir "$TARGET" --force; else bash "$PACK_SH" --dir "$TARGET"; fi
+    else
+      echo "[keel] unknown pack: $p (no $PACK_SH)" >&2; exit 2
+    fi
+  done
 fi
 
 # Stack detection -> optional pack dispatch (runs after core install).
