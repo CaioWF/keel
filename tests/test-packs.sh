@@ -61,3 +61,22 @@ assert_file "$SB3/.claude/skills/api-contract/SKILL.md" "composed install has ap
 CORECOUNT="$(grep -cx "code-review" "$REG3")"
 assert_eq "1" "$CORECOUNT" "composed registry keeps core lens unduplicated"
 rm -rf "$SB3"
+
+# --- saas-security pack: SaaS-domain security review lens, same contract ---
+SPACK="$HERE/../packs/saas-security"
+assert_file "$SPACK/install.sh" "saas-security pack has installer"
+assert_file "$SPACK/skills/saas-security/SKILL.md" "saas-security ships lens skill"
+assert_contains "$SPACK/skills/saas-security/SKILL.md" "name: saas-security" "saas-security has name frontmatter"
+assert_contains "$SPACK/skills/saas-security/SKILL.md" "NO edits" "saas-security is read-only"
+assert_contains "$SPACK/skills/saas-security/SKILL.md" "Server-side enforcement" "saas-security checks server-side enforcement"
+
+SB6="$(new_sandbox)"
+bash "$HERE/../bootstrap.sh" --dir "$SB6" --pack=saas-security >/dev/null 2>&1
+assert_contains "$SB6/.specify/review-lenses.txt" "saas-security" "bootstrap --pack registers saas-security lens"
+assert_contains "$SB6/.specify/review-lenses.txt" "security-review" "registry keeps core security-review lens"
+assert_file "$SB6/.claude/skills/saas-security/SKILL.md" "bootstrap --pack installs saas-security skill"
+# Idempotent under re-install: no duplicate lens line.
+bash "$SPACK/install.sh" --dir "$SB6" >/dev/null 2>&1
+SCOUNT="$(grep -cx "saas-security" "$SB6/.specify/review-lenses.txt")"
+assert_eq "1" "$SCOUNT" "saas-security install is idempotent (no duplicate lens line)"
+rm -rf "$SB6"
