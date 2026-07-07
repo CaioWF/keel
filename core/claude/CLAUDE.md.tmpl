@@ -62,6 +62,8 @@ Keep modules small and focused on one concern. Use predictable, conventional pat
 
 When designing a feature's structure (during `plan-writer`), use the `architecture` skill — agnostic guides for Clean Architecture, SOLID, testing strategy, and DDD tactical — and fill `.specify/templates/architecture-template.md`. The constitution's `## Princípios de arquitetura` (dependency rule, pure domain, aggregate boundary, test behavior) are non-negotiable. Mechanical enforcement of the dependency rule is per-language and ships in a pack, not in core.
 
+Before designing structure, ground the plan in the real tree with the `codebase-map` skill: it maps the repo ONCE into `docs/codebase-map.md` (a token-lean, depth-limited structural map) so `plan-writer`, `analyze`, and `implement-feature` reuse it instead of re-exploring each phase. Generate/refresh it at feature start when the repo is non-trivial or the map has drifted; skip on small repos.
+
 ## Continuity & decisions
 
 `docs/STATE.md` is the **volatile** work memory — where we stopped, the next concrete step, blockers. It is injected into context at SessionStart. Use the `handoff` skill to write it when pausing and to recompose context when resuming. Keep it short and actionable.
