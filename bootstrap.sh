@@ -33,10 +33,28 @@ copy_tree() {
     copy_file "$f" "$destdir/$rel"
   done
 }
+# copy_file_once <src> <dest>: seed once, NEVER overwrite — even under --force.
+# For living project artifacts (STATE.md, ADRs) that keel starts but the project
+# then owns and edits; forcing them would clobber real work.
+copy_file_once() {
+  local src="$1" dest="$2"
+  if [ -e "$dest" ]; then echo "[keel] =$dest (seeded, kept)"; return 0; fi
+  mkdir -p "$(dirname "$dest")"
+  cp "$src" "$dest"; echo "[keel] +$dest"
+}
+# copy_tree_once <srcdir> <destdir>: seed-once semantics for a whole tree.
+copy_tree_once() {
+  local srcdir="$1" destdir="$2"
+  [ -d "$srcdir" ] || return 0
+  find "$srcdir" -type f | while read -r f; do
+    local rel="${f#"$srcdir"/}"
+    copy_file_once "$f" "$destdir/$rel"
+  done
+}
 
 copy_tree "$SELF/core/specify"       "$TARGET/.specify"
 copy_tree "$SELF/core/gates"         "$TARGET/.specify/gates"
-copy_tree "$SELF/core/docs"          "$TARGET/docs"
+copy_tree_once "$SELF/core/docs"     "$TARGET/docs"  # living artifacts — seed once, never force
 copy_tree "$SELF/core/claude/skills" "$TARGET/.claude/skills"
 copy_tree "$SELF/core/claude/hooks"  "$TARGET/.claude/hooks"
 mkdir -p "$TARGET/.claude/skills" "$TARGET/.claude/hooks"

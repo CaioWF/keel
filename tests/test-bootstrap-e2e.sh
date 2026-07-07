@@ -48,4 +48,15 @@ done
 assert_contains "$S4/.specify/clients.json" "windsurf" "e2e(--all): manifest lists windsurf"
 [ -L "$S4/AGENTS.md" ] && fail "e2e(--all): AGENTS.md should be real view (codex selected)" || pass "e2e(--all): AGENTS.md is real codex view"
 ( cd "$S4" && bash .specify/gates/run-gates.sh >/dev/null 2>&1 ); assert_eq "0" "$?" "e2e(--all): scaffold+views pass gates (derived dirs ignored)"
-rm -rf "$S" "$S2" "$S3" "$S4"
+# living docs are seed-once: --force must NOT clobber a project's edited STATE/ADR,
+# while framework files (gates/skills) ARE updated by --force.
+S5="$(new_sandbox)"
+bash "$HERE/../bootstrap.sh" --dir "$S5" >/dev/null
+printf 'PROJECT-OWNED STATE — do not clobber\n' > "$S5/docs/STATE.md"
+printf 'PROJECT-OWNED ADR\n' > "$S5/docs/architecture/adr/0001-record-architecture-decisions.md"
+printf 'BROKEN\n' > "$S5/.specify/gates/run-gates.sh"   # framework file, should be restored
+bash "$HERE/../bootstrap.sh" --dir "$S5" --force >/dev/null
+assert_contains "$S5/docs/STATE.md" "PROJECT-OWNED STATE" "seed-once: --force keeps edited STATE.md"
+assert_contains "$S5/docs/architecture/adr/0001-record-architecture-decisions.md" "PROJECT-OWNED ADR" "seed-once: --force keeps edited ADR"
+grep -qF "BROKEN" "$S5/.specify/gates/run-gates.sh" && fail "framework file must be updated by --force" || pass "seed-once contrast: --force restores framework run-gates.sh"
+rm -rf "$S" "$S2" "$S3" "$S4" "$S5"
