@@ -24,12 +24,14 @@ copy_file() {
   fi
   cp "$src" "$dest"; echo "[keel] +$dest"
 }
-# copy_tree <srcdir> <destdir>
+# copy_tree <srcdir> <destdir> [skip_rel]
+# skip_rel: a relative path to exclude (handled separately, e.g. a living file).
 copy_tree() {
-  local srcdir="$1" destdir="$2"
+  local srcdir="$1" destdir="$2" skip="${3:-}"
   [ -d "$srcdir" ] || return 0
   find "$srcdir" -type f | while read -r f; do
     local rel="${f#"$srcdir"/}"
+    [ -n "$skip" ] && [ "$rel" = "$skip" ] && continue
     copy_file "$f" "$destdir/$rel"
   done
 }
@@ -52,7 +54,10 @@ copy_tree_once() {
   done
 }
 
-copy_tree "$SELF/core/specify"       "$TARGET/.specify"
+# review-lenses.txt is a LIVING registry — packs append to it, so seed it once and
+# never force it (forcing would wipe pack-registered lenses on every update).
+copy_tree "$SELF/core/specify"       "$TARGET/.specify"  review-lenses.txt
+copy_file_once "$SELF/core/specify/review-lenses.txt" "$TARGET/.specify/review-lenses.txt"
 copy_tree "$SELF/core/gates"         "$TARGET/.specify/gates"
 copy_tree_once "$SELF/core/docs"     "$TARGET/docs"  # living artifacts — seed once, never force
 copy_tree "$SELF/core/claude/skills" "$TARGET/.claude/skills"

@@ -59,4 +59,8 @@ bash "$HERE/../bootstrap.sh" --dir "$S5" --force >/dev/null
 assert_contains "$S5/docs/STATE.md" "PROJECT-OWNED STATE" "seed-once: --force keeps edited STATE.md"
 assert_contains "$S5/docs/architecture/adr/0001-record-architecture-decisions.md" "PROJECT-OWNED ADR" "seed-once: --force keeps edited ADR"
 grep -qF "BROKEN" "$S5/.specify/gates/run-gates.sh" && fail "framework file must be updated by --force" || pass "seed-once contrast: --force restores framework run-gates.sh"
+# review-lenses.txt is a living registry — pack-appended lenses must survive --force
+printf 'perf-review\n' >> "$S5/.specify/review-lenses.txt"
+bash "$HERE/../bootstrap.sh" --dir "$S5" --force >/dev/null
+assert_contains "$S5/.specify/review-lenses.txt" "perf-review" "seed-once: --force keeps pack-appended lens in registry"
 rm -rf "$S" "$S2" "$S3" "$S4" "$S5"
