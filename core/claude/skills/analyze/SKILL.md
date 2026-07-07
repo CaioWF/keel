@@ -20,6 +20,7 @@ Steps:
    - The plan's `Ordem de Implementação` and `tasks.md`'s checklist agree on sequence and scope.
    - No task references something out of scope per `Fora de Escopo` in either spec or PRD.
    - No requirement or task introduces a dependency, abstraction, or feature the spec doesn't actually require — laziness ladder degrau 1, "precisa existir?" (see `architecture` skill's `minimalism.md`). Flag suspected over-engineering for the human; don't fix it here.
+   - The plan replicates the codebase's existing pattern for this shape of problem rather than inventing a parallel one. Cross-check `Arquitetura` / `Estrutura de Arquivos` against `docs/codebase-map.md` and the closest existing feature: a new layering, error/validation strategy, or file placement that diverges from an established equivalent without a recorded reason in `Decisões Técnicas` is a finding (architecture divergence). Replicating is the default; divergence must be justified.
 4. Report findings as a list of gaps/contradictions (or confirm none found). Do not edit spec.md, plan.md, or tasks.md, and do not touch any code — this skill is read-only advisory.
 5. If findings require changes, hand back to spec-writer/clarify, plan-writer, or tasks-writer as appropriate rather than fixing them directly.
 
