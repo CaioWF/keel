@@ -46,3 +46,13 @@ pack above, gated behind `--pack=ship` (opt-in, never auto-detected).
 Recommendation: **build the lean pack, opt-in only.** Observability is a real gap the DoD
 already gestures at; the rest stays out. This preserves the agnostic-core line while closing the
 one gap that has downstream references pointing into the void.
+
+## Decision (2026-07-08)
+
+Grow the phase, minimally. Built `packs/ship` with **only** `observability-and-instrumentation`
+(+ `observability-checklist.md` companion), opt-in via `--pack=ship`, registered as an
+impl-convention so `implement-feature` applies it and the DoD verifies it. **contract-deprecation
+was deferred** — `migration-safety` already covers the highest-risk (DB) case, and building an
+API-deprecation skill with no concrete demand is degrau-1 over-engineering by keel's own
+minimalism rule. Revisit when a real deprecation need surfaces. ci-cd / shipping-launch /
+documentation-and-adrs remain out per the verdicts above.

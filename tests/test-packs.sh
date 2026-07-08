@@ -84,3 +84,37 @@ bash "$SPACK/install.sh" --dir "$SB6" >/dev/null 2>&1
 SCOUNT="$(grep -cx "saas-security" "$SB6/.specify/review-lenses.txt")"
 assert_eq "1" "$SCOUNT" "saas-security install is idempotent (no duplicate lens line)"
 rm -rf "$SB6"
+
+# --- ship pack: opt-in observability, registers as an IMPL-convention (not a review lens) ---
+# adapted from addyosmani/agent-skills (MIT); wired into the Definition-of-Done.
+SHPACK="$HERE/../packs/ship"
+assert_file "$SHPACK/install.sh" "ship pack has installer"
+OBS="$SHPACK/skills/observability-and-instrumentation"
+assert_file "$OBS/SKILL.md" "ship ships observability skill"
+assert_contains "$OBS/SKILL.md" "name: observability-and-instrumentation" "observability has name frontmatter"
+assert_contains "$OBS/SKILL.md" "symptoms" "observability alerts on symptoms not causes"
+assert_contains "$OBS/SKILL.md" "addyosmani/agent-skills" "observability attributes adapted source"
+assert_file "$OBS/observability-checklist.md" "ship ships observability checklist companion"
+assert_contains "$OBS/SKILL.md" "observability-checklist.md" "observability references its checklist companion"
+
+SB7="$(new_sandbox)"
+bash "$HERE/../bootstrap.sh" --dir "$SB7" --pack=ship >/dev/null 2>&1
+assert_contains "$SB7/.specify/impl-conventions.txt" "observability-and-instrumentation" "bootstrap --pack=ship registers impl-convention lens"
+assert_file "$SB7/.claude/skills/observability-and-instrumentation/SKILL.md" "bootstrap --pack=ship installs observability skill"
+assert_file "$SB7/.claude/skills/observability-and-instrumentation/observability-checklist.md" "bootstrap --pack=ship installs checklist companion"
+# It does NOT register as a review lens (implement-time discipline, not a review lens).
+grep -qx "observability-and-instrumentation" "$SB7/.specify/review-lenses.txt" && fail "observability must not be a review lens" || pass "observability stays out of review-lenses registry"
+# Idempotent under re-install: no duplicate line.
+bash "$SHPACK/install.sh" --dir "$SB7" >/dev/null 2>&1
+OCOUNT="$(grep -cx "observability-and-instrumentation" "$SB7/.specify/impl-conventions.txt")"
+assert_eq "1" "$OCOUNT" "ship install is idempotent (no duplicate impl-convention line)"
+rm -rf "$SB7"
+
+# Ship is OPT-IN: a plain bootstrap (no --pack) must NOT install observability.
+SB8="$(new_sandbox)"
+bash "$HERE/../bootstrap.sh" --dir "$SB8" >/dev/null 2>&1
+[ -e "$SB8/.claude/skills/observability-and-instrumentation/SKILL.md" ] && fail "ship must be opt-in, not auto-installed" || pass "ship is opt-in (absent without --pack=ship)"
+rm -rf "$SB8"
+
+# The Definition-of-Done points its observability line at the ship skill.
+assert_contains "$HERE/../core/claude/skills/finishing-a-development-branch/definition-of-done.md" "observability-and-instrumentation" "DoD references the observability skill"

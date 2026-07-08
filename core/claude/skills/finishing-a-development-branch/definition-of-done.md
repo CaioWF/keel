@@ -33,6 +33,6 @@ Adapted from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skill
 
 ## Ship-readiness
 - Security reviewed for any untrusted input, auth, or data handling (allow-list, not deny-list).
-- Observability in place for new critical paths (logs, metrics, traces) where the change warrants it.
+- Observability in place for new critical paths (logs, metrics, traces) where the change warrants it — if the `ship` pack is installed, per its `observability-and-instrumentation` skill.
 - A rollback path exists for anything risky (reversible migration, flag, revert plan).
 - The human has reviewed and approved before merge/deploy.
