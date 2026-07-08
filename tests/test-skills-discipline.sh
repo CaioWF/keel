@@ -12,6 +12,10 @@ assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "finishing-a-development-b
 assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "receiving-code-review" "CLAUDE.md cites receiving-code-review"
 # finishing uses keel gates, not a hardcoded test runner
 assert_contains "$SK/finishing-a-development-branch/SKILL.md" "run-gates.sh" "finishing verifies via run-gates"
+# finishing runs a Definition-of-Done checklist companion (adapted from agent-skills, MIT)
+assert_file "$SK/finishing-a-development-branch/definition-of-done.md" "finishing ships DoD companion"
+assert_contains "$SK/finishing-a-development-branch/SKILL.md" "definition-of-done.md" "finishing references the DoD checklist"
+assert_contains "$SK/finishing-a-development-branch/definition-of-done.md" "addyosmani/agent-skills" "DoD attributes adapted source"
 # authoring-skills repo doc (writing-skills distilled)
 assert_file "$HERE/../docs/authoring-skills.md" "authoring-skills repo doc exists"
 # test-driven-development: behavior-not-implementation concept + required + companion

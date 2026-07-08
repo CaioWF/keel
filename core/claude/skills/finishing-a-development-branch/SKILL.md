@@ -21,7 +21,7 @@ Run the project's quality gates before offering options:
 .specify/gates/run-gates.sh
 ```
 
-If they fail: report the failures and stop — cannot proceed with merge/PR until green. If they pass: continue.
+If they fail: report the failures and stop — cannot proceed with merge/PR until green. If they pass: run the `definition-of-done.md` checklist (sibling companion) — it covers what gates cannot mechanically check (runtime-verified behavior, docs, backward compat, rollback path, observability on new critical paths). Fix or explicitly flag any unmet item to the human, then continue.
 
 ## Step 2 — Detect environment
 

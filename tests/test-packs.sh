@@ -13,6 +13,10 @@ SB="$(new_sandbox)"
 bash "$PACK/install.sh" --dir "$SB" >/dev/null 2>&1
 assert_file "$SB/.claude/skills/perf-review/SKILL.md" "pack install copies perf-review"
 assert_file "$SB/.claude/skills/a11y-review/SKILL.md" "pack install copies a11y-review"
+# perf-review ships the numeric budgets companion (adapted from agent-skills, MIT) + references it
+assert_file "$SB/.claude/skills/perf-review/performance-budgets.md" "pack install copies perf budgets companion"
+assert_contains "$PACK/skills/perf-review/performance-budgets.md" "addyosmani/agent-skills" "perf budgets attributes adapted source"
+assert_contains "$PACK/skills/perf-review/SKILL.md" "performance-budgets.md" "perf-review references its budgets companion"
 assert_file "$SB/.specify/review-lenses.txt" "pack install seeds/writes registry"
 assert_contains "$SB/.specify/review-lenses.txt" "perf-review" "registry gains perf-review"
 assert_contains "$SB/.specify/review-lenses.txt" "a11y-review" "registry gains a11y-review"
