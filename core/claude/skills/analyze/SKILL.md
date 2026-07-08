@@ -23,5 +23,6 @@ Steps:
    - The plan replicates the codebase's existing pattern for this shape of problem rather than inventing a parallel one. Cross-check `Arquitetura` / `Estrutura de Arquivos` against `docs/codebase-map.md` and the closest existing feature: a new layering, error/validation strategy, or file placement that diverges from an established equivalent without a recorded reason in `Decisões Técnicas` is a finding (architecture divergence). Replicating is the default; divergence must be justified.
 4. Report findings as a list of gaps/contradictions (or confirm none found). Do not edit spec.md, plan.md, or tasks.md, and do not touch any code — this skill is read-only advisory.
 5. If findings require changes, hand back to spec-writer/clarify, plan-writer, or tasks-writer as appropriate rather than fixing them directly.
+6. For a non-obvious design call that survives this cross-check but still feels uncertain — a cross-module contract, an irreversible choice, an unverifiable assumption — run it through `doubt-driven-development` (a fresh-context reviewer that tries to disprove it) before it is treated as settled.
 
 Next: implement-feature, once analyze reports clean and spec.md + plan.md both carry `status: approved`.
