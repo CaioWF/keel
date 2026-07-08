@@ -22,4 +22,6 @@ Flag real, likely-hot regressions the changed code introduces — not micro-opti
 
 Weigh cost against likelihood and hotness: an N+1 on a per-request endpoint is Critical; a redundant `.map` over a 3-element constant is not a finding. Do not duplicate what a bundler/profiler gate already measures — this lens is for the judgment those tools don't make (is this path *actually* hot? does this abstraction *earn* its cost?).
 
+When a finding needs a concrete threshold (Core Web Vitals target, bundle size, p95, font/image tactic), cite `performance-budgets.md` (sibling companion) rather than inventing a number — it carries the numeric budgets and remediation tactics this lens references.
+
 Next: findings return to `review-and-simplify`, which aggregates them with the other lenses; Critical/Important must be fixed before the pre-commit gate.

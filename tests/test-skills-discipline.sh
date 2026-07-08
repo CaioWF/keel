@@ -1,5 +1,5 @@
 SK="$HERE/../core/claude/skills"
-for s in brainstorming systematic-debugging using-git-worktrees dispatching-parallel-agents subagent-driven-development verification-before-completion test-driven-development receiving-code-review finishing-a-development-branch; do
+for s in brainstorming systematic-debugging doubt-driven-development source-driven-development using-git-worktrees dispatching-parallel-agents subagent-driven-development verification-before-completion test-driven-development receiving-code-review finishing-a-development-branch; do
   assert_file "$SK/$s/SKILL.md" "$s skill exists"
   assert_contains "$SK/$s/SKILL.md" "name: $s" "$s has name frontmatter"
 done
@@ -12,6 +12,10 @@ assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "finishing-a-development-b
 assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "receiving-code-review" "CLAUDE.md cites receiving-code-review"
 # finishing uses keel gates, not a hardcoded test runner
 assert_contains "$SK/finishing-a-development-branch/SKILL.md" "run-gates.sh" "finishing verifies via run-gates"
+# finishing runs a Definition-of-Done checklist companion (adapted from agent-skills, MIT)
+assert_file "$SK/finishing-a-development-branch/definition-of-done.md" "finishing ships DoD companion"
+assert_contains "$SK/finishing-a-development-branch/SKILL.md" "definition-of-done.md" "finishing references the DoD checklist"
+assert_contains "$SK/finishing-a-development-branch/definition-of-done.md" "addyosmani/agent-skills" "DoD attributes adapted source"
 # authoring-skills repo doc (writing-skills distilled)
 assert_file "$HERE/../docs/authoring-skills.md" "authoring-skills repo doc exists"
 # test-driven-development: behavior-not-implementation concept + required + companion
@@ -29,6 +33,20 @@ assert_contains "$B" "one question at a time" "brainstorming keeps one-question-
 assert_contains "$B" "prd-writer"             "brainstorming hands off to prd-writer"
 grep -qiF "writing-plans" "$B" && fail "brainstorming must drop superpowers writing-plans handoff" || pass "brainstorming drops writing-plans handoff"
 grep -qiF "superpowers:" "$B" && fail "brainstorming must drop superpowers cross-refs" || pass "brainstorming has no superpowers cross-refs"
+# doubt-driven-development: adversarial fresh-context reviewer, bounded, attributed (adapted, MIT)
+DDD="$SK/doubt-driven-development/SKILL.md"
+assert_contains "$DDD" "CLAIM"       "doubt has the CLAIM->EXTRACT->DOUBT->RECONCILE->STOP loop"
+assert_contains "$DDD" "fresh-context" "doubt dispatches a fresh-context reviewer"
+assert_contains "$DDD" "Do NOT pass the CLAIM" "doubt withholds the claim to avoid agreement bias"
+assert_contains "$DDD" "addyosmani/agent-skills" "doubt attributes the adapted source"
+
+# source-driven-development: verify framework facts against official docs, cite, attributed (adapted, MIT)
+SDDV="$SK/source-driven-development/SKILL.md"
+assert_contains "$SDDV" "Detect"    "source-driven has the Detect->Fetch->Implement->Cite loop"
+assert_contains "$SDDV" "context7"  "source-driven wires to context7 MCP for docs"
+assert_contains "$SDDV" "stack-conventions" "source-driven distinguishes itself from stack-conventions house style"
+assert_contains "$SDDV" "addyosmani/agent-skills" "source-driven attributes the adapted source"
+
 D="$SK/dispatching-parallel-agents/SKILL.md"
 assert_contains "$D" "Selective orchestration"   "dispatching has folded selective-orchestration rule"
 assert_contains "$D" "Cost-aware model routing"  "dispatching has folded cost-routing rule"
