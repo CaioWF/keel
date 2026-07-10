@@ -40,6 +40,7 @@ GATES_DIR="$(cd "$(dirname "$0")" && pwd)"
 for g in audit-structure eval-spec-fidelity validate-mermaid; do
   [ -f "$GATES_DIR/$g.mjs" ] && run_check "doc:$g" node "$GATES_DIR/$g.mjs" "$DIR"
 done
+[ -f "$GATES_DIR/okf-build-index.mjs" ] && run_check "doc:okf-index" node "$GATES_DIR/okf-build-index.mjs" check "$DIR/docs"
 
 if [ -f package.json ]; then
   for s in lint test; do has_npm_script "$s" && run_check "npm:$s" npm run "$s"; done
