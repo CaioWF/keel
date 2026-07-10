@@ -280,3 +280,9 @@ shell fino de orquestração que delega JSON aos helpers. Packs Node = `.mjs`/
 - Integração com outros agentes além de Claude Code (AGENTS.md cobre leitura
   básica, sem comandos por agente como spec-kit faz).
 - GUI / dashboard de fase.
+
+## Relacionado
+
+- [[Keel Core Scaffolder]] — o plano que implementa este design
+- [[Multi-client views]] — a extensão que gera views derivadas para outros clientes de IA
+- [[Authoring keel skills]] — guia para escrever novas skills dentro do keel

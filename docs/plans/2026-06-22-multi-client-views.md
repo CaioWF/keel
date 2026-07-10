@@ -140,3 +140,7 @@ backward-compat (sem flag = só Claude, nenhum dir de view criado).
 - Enforcement per-cliente (decisão: advisory only).
 - Camada de produto da referência (Lean Inception, personas, MVP canvas) — não faz parte do keel.
 - Tradução/i18n das views; portar os gates `.mjs` para CI de cada cliente.
+
+## Relacionado
+
+- [[Keel design]] — o design que esta milestone estende com suporte a múltiplos clientes

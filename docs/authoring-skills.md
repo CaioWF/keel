@@ -78,3 +78,7 @@ evidence it improves outcomes.
   vendored skills, assert no `superpowers:` cross-refs remain (Path A).
 - If it's an architecture *concept*, don't make a top-level skill — follow the concept-container
   recipe (`docs/design-notes/concepts-layer.md`): add a companion under the `architecture` skill.
+
+## Related
+
+- [[Keel design]] — the design spec for keel that defines the skill architecture and framework

@@ -101,3 +101,7 @@ O routing fica no julgamento do controller (`implement-and-evaluate`), não trav
 `.claude/agents/*.md` estáticos. O bootstrap só propaga `skills/` e `hooks/` — não há tree
 `agents/`. Manter a decisão nas skills preserva a fonte única (uso standalone continua) e evita
 duplicar lógica num wrapper de agent. Trade-off aceito: enforcement por prompt, não por tool.
+
+## Relacionado
+
+- [[Keel Core Scaffolder]] — o plano que implementa este roteamento de modos de execução

@@ -58,3 +58,7 @@ traceability (`eval-spec-fidelity`), and mermaid syntax (`validate-mermaid`).
 Core ships these as ready-to-run `.mjs` gates in `core/gates/`, wired into
 `run-gates.sh` to always run. Stack-specific *source* gates (lint/format/types)
 stay deferred to the project/pack; agnostic *artifact* gates ship complete.
+
+## Related
+
+- [[Concept layer]] — applies the gate-vs-skill rule at the level of engineering concepts

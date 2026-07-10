@@ -61,3 +61,7 @@ Skills observados na imagem: `directory-map`, `typescript-expert`, `frontend-des
 
 ## Ordem
 1 → 2 → 3 → 4 → 5. Começar por #1 (gap estrutural, maior cobertura).
+
+## Relacionado
+
+- [[Ship-pack scoping]] — nota que escopeia possíveis packs de pós-integração, complementando este roadmap de packs de conhecimento

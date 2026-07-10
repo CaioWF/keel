@@ -1,6 +1,6 @@
 ---
 type: design-note
-title: Agnostic concept layer
+title: Concept layer
 description: How the concept layer standardizes engineering principles (Clean Architecture, SOLID, etc.) agnostically across languages using skills, constitution rules, and structure templates
 ---
 
@@ -47,3 +47,8 @@ Para adicionar um conceito ao keel, preencha até quatro slots — só o primeir
 | Minimalismo | `minimalism.md` | mínimo viável + carve-out | — | (advisory; sem pack) |
 
 Crescer = mais uma linha na tabela + os slots da receita. Sem tocar em código.
+
+## Relacionado
+
+- [[Gate vs skill]] — a regra gate-vs-skill que esta camada aplica no lado skill
+- [[Agnostic concept layer]] — o plano que implementa esta nota de design

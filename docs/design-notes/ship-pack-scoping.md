@@ -62,3 +62,7 @@ was deferred** — `migration-safety` already covers the highest-risk (DB) case,
 API-deprecation skill with no concrete demand is degrau-1 over-engineering by keel's own
 minimalism rule. Revisit when a real deprecation need surfaces. ci-cd / shipping-launch /
 documentation-and-adrs remain out per the verdicts above.
+
+## Related
+
+- [[Knowledge-packs roadmap]] — the parallel roadmap of knowledge packs injected during plan and implement phases that this ship-pack scope complements

@@ -3,7 +3,7 @@ okf_version: "0.1"
 ---
 
 # design-note
-* [Agnostic concept layer](design-notes/concepts-layer.md) - How the concept layer standardizes engineering principles (Clean Architecture, SOLID, etc.) agnostically across languages using skills, constitution rules, and structure templates
+* [Concept layer](design-notes/concepts-layer.md) - How the concept layer standardizes engineering principles (Clean Architecture, SOLID, etc.) agnostically across languages using skills, constitution rules, and structure templates
 * [Execution mode routing](design-notes/execution-mode-routing.md) - Why implement-and-evaluate picks inline vs dispatch vs dispatch-parallel execution modes based on task count and coupling, with parallelization via scope declaration and worktree isolation
 * [Gate vs skill](design-notes/gates-vs-skills.md) - Decision rule for splitting review concerns: mechanical/deterministic rules belong in gates, judgment-based concerns in skills
 * [Knowledge-packs roadmap](design-notes/knowledge-packs-roadmap.md) - Roadmap for adding knowledge packs that inject stack/domain expertise during plan and implement phases, including stack-conventions, codebase-map, saas-security, pattern replication, and data-layer contracts

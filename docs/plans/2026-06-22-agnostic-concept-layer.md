@@ -139,3 +139,7 @@ no audit; constituição tem a seção; template existe; um conceito-exemplo seg
 - Scaffolding de código real das camadas (é pack/linguagem).
 - Cobertura exaustiva de livros além do conjunto curado (a receita permite crescer depois).
 - Reescrever `test-driven-development` (a estratégia de testes referencia a skill existente).
+
+## Relacionado
+
+- [[Concept layer]] — a nota de design que descreve a receita desta camada agnóstica
