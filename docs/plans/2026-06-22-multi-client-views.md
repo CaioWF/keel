@@ -1,7 +1,10 @@
 ---
+type: plan
 status: draft
 feature: multi-client-views
 date: 2026-06-22
+title: Multi-client views
+description: Plan for generating derived views from canonical keel content for other AI agents (Codex, Cursor, Copilot, Gemini, Windsurf) while maintaining advisory-only enforcement without mechanical hooks
 ---
 
 # Plano — Milestone 2: geração de views multi-cliente

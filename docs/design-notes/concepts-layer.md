@@ -1,3 +1,9 @@
+---
+type: design-note
+title: Agnostic concept layer
+description: How the concept layer standardizes engineering principles (Clean Architecture, SOLID, etc.) agnostically across languages using skills, constitution rules, and structure templates
+---
+
 # Design note: a camada de conceito agnóstica (o container)
 
 A camada de conceito é o lado **skill/agnóstico** da `gates-vs-skills.md` aplicado a

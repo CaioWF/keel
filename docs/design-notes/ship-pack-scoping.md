@@ -1,3 +1,9 @@
+---
+type: design-note
+title: Ship-pack scoping
+description: Scope analysis for a ship pack covering post-integration lifecycle, including observability-and-instrumentation (included) and contract-deprecation (deferred)
+---
+
 # Ship-pack scoping
 
 Scoping note for a possible `ship` pack — the lifecycle phase keel's chain deliberately

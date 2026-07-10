@@ -1,3 +1,9 @@
+---
+type: design-note
+title: Knowledge-packs roadmap
+description: Roadmap for adding knowledge packs that inject stack/domain expertise during plan and implement phases, including stack-conventions, codebase-map, saas-security, pattern replication, and data-layer contracts
+---
+
 # Knowledge-packs roadmap
 
 Origem: screenshot de um agente (projeto `finance-lite`) usando skills de **conhecimento

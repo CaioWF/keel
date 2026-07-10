@@ -1,3 +1,9 @@
+---
+type: spec
+title: Keel design
+description: Design spec for keel: a spec-driven development scaffolder that installs SDD flow (agnostic core + stack packs) with active enforcement via hooks, templates, skills, and gates
+---
+
 # Keel — SDD Scaffolder · Design
 
 **Data:** 2026-06-17

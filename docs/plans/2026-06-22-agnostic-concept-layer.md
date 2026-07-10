@@ -1,7 +1,10 @@
 ---
+type: plan
 status: draft
 feature: agnostic-concept-layer
 date: 2026-06-22
+title: Agnostic concept layer
+description: Design and implementation plan for a language-agnostic concept layer that standardizes engineering principles with skill guides, constitution rules, structure templates, and language-specific packs
 ---
 
 # Plano — Milestone 3: camada de conceito agnóstica + enforcement por linguagem

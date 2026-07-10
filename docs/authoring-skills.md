@@ -1,3 +1,9 @@
+---
+type: reference
+title: Authoring keel skills
+description: Guide for writing skills in keel following TDD methodology, including when to create a skill, SKILL.md structure, and how to wire new skills into the keel framework
+---
+
 # Authoring keel skills
 
 Reference for adding/editing skills in `core/claude/skills/`. Distilled and adapted from

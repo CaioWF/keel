@@ -1,3 +1,9 @@
+---
+type: design-note
+title: Execution mode routing
+description: Why implement-and-evaluate picks inline vs dispatch vs dispatch-parallel execution modes based on task count and coupling, with parallelization via scope declaration and worktree isolation
+---
+
 # Design note: roteamento de modo de execução (inline vs. dispatch)
 
 O keel tem **três modos** de executar o loop de implementação de uma feature (`inline`,

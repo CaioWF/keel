@@ -1,3 +1,9 @@
+---
+type: design-note
+title: Gate vs skill
+description: Decision rule for splitting review concerns: mechanical/deterministic rules belong in gates, judgment-based concerns in skills
+---
+
 # Design note: gate vs skill — where a review concern belongs
 
 **Decision rule:** split by determinism.
