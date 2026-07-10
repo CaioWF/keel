@@ -64,4 +64,4 @@ Skills observados na imagem: `directory-map`, `typescript-expert`, `frontend-des
 
 ## Relacionado
 
-- [[Ship-pack scoping]] — nota que escopeia possíveis packs de pós-integração, complementando este roadmap de packs de conhecimento
+- [Ship-pack scoping](ship-pack-scoping.md) — nota que escopeia possíveis packs de pós-integração, complementando este roadmap de packs de conhecimento

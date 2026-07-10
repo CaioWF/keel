@@ -81,4 +81,4 @@ evidence it improves outcomes.
 
 ## Related
 
-- [[Keel design]] — the design spec for keel that defines the skill architecture and framework
+- [Keel design](specs/2026-06-17-keel-design.md) — the design spec for keel that defines the skill architecture and framework

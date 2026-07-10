@@ -36,7 +36,7 @@ For each concept, write or update a page at `<bundle>/<subdir>/<slug>.md`:
 - Prose summary in your own words
 - Use OKF body conventions where they fit: `# Schema` for structured fields, `# Examples` for worked examples
 - **ALWAYS end with `# Citations`** — list the source (URL, file path, or reference) so all claims are traceable to their origin
-- Link related concepts with `[[Title]]` wiki-links or markdown links to grow the knowledge graph
+- Cross-link related concepts using **relative markdown links** (e.g., `[Title](../design-notes/XXXX.md)` — OKF-conformant and portable) to grow the knowledge graph
 
 **Update rule:** If a page for this concept already exists, MERGE the new facts into it. Preserve existing frontmatter keys and content; never clobber.
 

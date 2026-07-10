@@ -65,4 +65,4 @@ documentation-and-adrs remain out per the verdicts above.
 
 ## Related
 
-- [[Knowledge-packs roadmap]] — the parallel roadmap of knowledge packs injected during plan and implement phases that this ship-pack scope complements
+- [Knowledge-packs roadmap](knowledge-packs-roadmap.md) — the parallel roadmap of knowledge packs injected during plan and implement phases that this ship-pack scope complements

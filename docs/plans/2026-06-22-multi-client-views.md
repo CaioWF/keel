@@ -143,4 +143,4 @@ backward-compat (sem flag = só Claude, nenhum dir de view criado).
 
 ## Relacionado
 
-- [[Keel design]] — o design que esta milestone estende com suporte a múltiplos clientes
+- [Keel design](../specs/2026-06-17-keel-design.md) — o design que esta milestone estende com suporte a múltiplos clientes

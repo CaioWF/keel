@@ -283,6 +283,6 @@ shell fino de orquestração que delega JSON aos helpers. Packs Node = `.mjs`/
 
 ## Relacionado
 
-- [[Keel Core Scaffolder]] — o plano que implementa este design
-- [[Multi-client views]] — a extensão que gera views derivadas para outros clientes de IA
-- [[Authoring keel skills]] — guia para escrever novas skills dentro do keel
+- [Keel Core Scaffolder](../plans/2026-06-17-keel-core.md) — o plano que implementa este design
+- [Multi-client views](../plans/2026-06-22-multi-client-views.md) — a extensão que gera views derivadas para outros clientes de IA
+- [Authoring keel skills](../authoring-skills.md) — guia para escrever novas skills dentro do keel

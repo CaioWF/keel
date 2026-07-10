@@ -61,4 +61,4 @@ stay deferred to the project/pack; agnostic *artifact* gates ship complete.
 
 ## Related
 
-- [[Concept layer]] — applies the gate-vs-skill rule at the level of engineering concepts
+- [Concept layer](concepts-layer.md) — applies the gate-vs-skill rule at the level of engineering concepts

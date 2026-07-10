@@ -104,4 +104,4 @@ duplicar lógica num wrapper de agent. Trade-off aceito: enforcement por prompt,
 
 ## Relacionado
 
-- [[Keel Core Scaffolder]] — o plano que implementa este roteamento de modos de execução
+- [Keel Core Scaffolder](../plans/2026-06-17-keel-core.md) — o plano que implementa este roteamento de modos de execução

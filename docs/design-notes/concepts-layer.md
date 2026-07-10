@@ -50,5 +50,5 @@ Crescer = mais uma linha na tabela + os slots da receita. Sem tocar em código.
 
 ## Relacionado
 
-- [[Gate vs skill]] — a regra gate-vs-skill que esta camada aplica no lado skill
-- [[Agnostic concept layer]] — o plano que implementa esta nota de design
+- [Gate vs skill](gates-vs-skills.md) — a regra gate-vs-skill que esta camada aplica no lado skill
+- [Agnostic concept layer](../plans/2026-06-22-agnostic-concept-layer.md) — o plano que implementa esta nota de design

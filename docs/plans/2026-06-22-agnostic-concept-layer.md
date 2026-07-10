@@ -142,4 +142,4 @@ no audit; constituição tem a seção; template existe; um conceito-exemplo seg
 
 ## Relacionado
 
-- [[Concept layer]] — a nota de design que descreve a receita desta camada agnóstica
+- [Concept layer](../design-notes/concepts-layer.md) — a nota de design que descreve a receita desta camada agnóstica

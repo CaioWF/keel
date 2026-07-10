@@ -56,4 +56,10 @@ echo "$OUT_DEFAULT" | grep -qF "doc-a" && pass "shows all concepts with default 
 echo "$OUT_DEFAULT" | grep -qF "doc-c" && pass "shows third concept with default budget" || fail "should show all concepts"
 ! echo "$OUT_DEFAULT" | grep -qF "Read on demand" && pass "no overflow pointer with default budget and only 3 concepts" || fail "should not show overflow pointer when all concepts fit in budget"
 
+# test markdown links: captures link TEXT from [text](relative.md) links
+printf -- '---\ntype: guide\nname: data-layer\n---\nSee [Orders table](orders.md) for details. Also check [User schema](../schema.md).\n' > "$S3/docs/data-guide.md"
+OUT_MD=$(printf '{"cwd":"%s"}' "$S3" | node "$H")
+echo "$OUT_MD" | grep -qF "Orders table" && pass "captures markdown link text" || fail "should capture markdown link text from [text](file.md)"
+echo "$OUT_MD" | grep -qF "User schema" && pass "captures multiple markdown link texts" || fail "should capture all markdown link texts"
+
 rm -rf "$S3"

@@ -58,7 +58,11 @@ outer: for (const root of ROOTS) {
     }
     const fm = frontmatter(text);
     if (!fm || !fm.type) continue;
-    const links = [...text.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
+    const wiki = [...text.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]);
+    const md = [...text.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)]
+      .filter((m) => /\.md(?:[)#]|$)/.test(m[2]) && !/^(?:https?:|mailto:|#|\/)/.test(m[2]))
+      .map((m) => m[1]);
+    const links = [...new Set([...wiki, ...md])].slice(0, 5);
     concepts.push({
       name: fm.name || fm.title || relative(cwd, path).replace(/\.md$/, ""),
       type: fm.type,
