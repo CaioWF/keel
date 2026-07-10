@@ -21,5 +21,6 @@ Steps:
    - `Bloqueadores` — known blockers or external dependencies.
    - `Notas` — execution notes worth keeping (constraints, gotchas).
 5. Tasks should be scoped so each can be implemented and verified independently (matches the "ONE task" convention used elsewhere in this repo).
+6. Declare each task's **file scope** with a `[scope: glob, glob]` suffix on its checklist line, derived from the plan's `Estrutura de Arquivos` — the globs that task will create or edit (e.g. `[scope: src/auth/**, tests/auth/**]`). This is what lets `implement-and-evaluate` run tasks with disjoint scopes in parallel (`dispatch-parallel`). Be honest and tight: an over-broad scope needlessly serializes; a scope that omits a file a task actually touches risks a clobber against a parallel sibling. When a task genuinely spans shared/broad files (a cross-cutting migration, a file many tasks touch), either omit `[scope: …]` or use a broad glob — both force that task to run alone. Absent or broad scope is the safe default: it never parallelizes.
 
 Next: analyze, then implement-feature.

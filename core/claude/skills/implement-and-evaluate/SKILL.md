@@ -18,16 +18,20 @@ Choose the execution mode ONCE, before the loop, by reading `tasks.md` (task cou
 | Signal | Mode | How each task runs |
 |---|---|---|
 | ≤2 tasks, **or** tightly-coupled (tasks share state / touch the same files) | **inline** | invoke `implement-feature` as a Skill (session model); `fix-runner` inline |
-| ≥3 mostly-independent tasks | **dispatch** | delegate the whole task loop to `subagent-driven-development` — fresh implementer subagent per task, tree snapshots, per-role model routing |
+| ≥3 mostly-independent tasks, scopes overlap or undeclared | **dispatch** | delegate the whole task loop to `subagent-driven-development` — fresh implementer subagent per task, one at a time, tree snapshots, per-role model routing |
+| ≥3 independent tasks with declared, **pairwise-disjoint** `[scope: …]` | **dispatch-parallel** | delegate to `subagent-driven-development` in parallel-batch mode — disjoint tasks run concurrently, each in its own worktree (`isolation: "worktree"`), merged back per batch |
 
-Dispatch carries real overhead (tree snapshot, brief file, round-trip, re-integration). It pays off only when parallelism or bulk context-pollution justify it; a short or coupled feature is cheaper inline. When in doubt on a borderline count, prefer inline — the review loop is the same either way.
+`dispatch` and `dispatch-parallel` are the same skill (`subagent-driven-development`) — the difference is whether it fans out a batch of disjoint tasks or runs one implementer at a time. To pick `dispatch-parallel`, confirm the partition is real: run `node .specify/gates/validate-parallel-scope.mjs partition specs/<active-feature>/tasks.md` and read the batches it computes. If it reports no batch larger than one task, there is nothing to parallelize — use plain `dispatch`.
+
+Dispatch carries real overhead (tree snapshot, brief file, round-trip, re-integration); the parallel variant adds worktree setup + merge-back per batch. It pays off only when parallelism or bulk context-pollution justify it; a short or coupled feature is cheaper inline. When in doubt on a borderline count, prefer inline — the review loop is the same either way.
 
 Steps:
 1. Resolve the active feature from `.specify/state` (fallback: newest dir under `specs/`).
 2. Loop while `specs/<active-feature>/tasks.md` has unchecked top-level tasks:
-   a. Execute the next unchecked task (ONE task per iteration) per the mode chosen above:
-      - **inline** → invoke `implement-feature` for that task.
-      - **dispatch** → hand the task to `subagent-driven-development`, which owns the snapshot + brief + implementer dispatch + model routing for it; then resume this loop at step 2b with the task's result.
+   a. Execute the next unit of work per the mode chosen above:
+      - **inline** → invoke `implement-feature` for the next unchecked task (ONE task per iteration).
+      - **dispatch** → hand the next unchecked task to `subagent-driven-development`, which owns the snapshot + brief + implementer dispatch + model routing for it; then resume this loop at step 2b with the task's result.
+      - **dispatch-parallel** → hand the next unchecked **batch** (the disjoint-scope group from `validate-parallel-scope partition`) to `subagent-driven-development`, which owns the batch snapshot + per-task briefs + concurrent worktree-isolated implementer dispatch + merge-back for it; then resume this loop at step 2b, evaluating the ACs of every task in the batch.
    b. Invoke evaluator to score the relevant `Critérios de Aceitação` against the new state.
    c. If evaluator reports any FAIL, invoke fix-runner, then re-invoke evaluator to confirm.
    d. Repeat b-c until evaluator reports all relevant scenarios PASS and gates are green, then proceed to the next task.

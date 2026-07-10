@@ -1,7 +1,9 @@
 # Design note: roteamento de modo de execução (inline vs. dispatch)
 
-O keel tem **dois modos** de executar o loop de implementação de uma feature — mas até
-esta nota nada decidia qual usar, e o default caiu silenciosamente no modo mais caro.
+O keel tem **três modos** de executar o loop de implementação de uma feature (`inline`,
+`dispatch`, `dispatch-parallel`) — mas até esta nota nada decidia qual usar, e o default caiu
+silenciosamente no modo mais caro. O terceiro modo (`dispatch-parallel`) foi somado depois;
+sua seção própria está mais abaixo.
 
 ## O problema
 
@@ -26,11 +28,44 @@ e independência de tasks) + `plan.md` (acoplamento):
 | Sinal | Modo | Como roda cada task |
 |---|---|---|
 | ≤2 tasks, **ou** tightly-coupled (mesmo estado/arquivos) | **inline** | `implement-feature` como Skill, modelo da sessão; `fix-runner` inline |
-| ≥3 tasks independentes | **dispatch** | delega a `subagent-driven-development` — snapshot + brief + implementer subagent + Model Selection |
+| ≥3 tasks independentes, scopes sobrepostos ou não declarados | **dispatch** | delega a `subagent-driven-development` — snapshot + brief + implementer subagent, um por vez + Model Selection |
+| ≥3 tasks independentes com `[scope: …]` declarado e **disjunto par-a-par** | **dispatch-parallel** | mesmo skill em modo batch — tasks disjuntas rodam concorrentes, cada uma em worktree próprio (`isolation: "worktree"`), merge-back por batch |
 
-Racional: dispatch tem overhead real (snapshot de árvore, brief-file, round-trip, re-integração).
-Compensa quando há paralelismo/volume que polui contexto; não compensa em feature curta ou
-acoplada, onde o inline é mais barato em wall-clock e contexto.
+Racional: dispatch tem overhead real (snapshot de árvore, brief-file, round-trip, re-integração);
+o variante paralelo soma setup de worktree + merge-back por batch. Compensa quando há
+paralelismo/volume que polui contexto; não compensa em feature curta ou acoplada, onde o inline
+é mais barato em wall-clock e contexto.
+
+## O terceiro modo: dispatch-parallel (partição + worktree)
+
+`dispatch` sempre rodou implementers **um por vez** — a hard rule *"never dispatch multiple
+implementation subagents in parallel (they conflict)"* existia porque todos dividiam **um único
+worktree**: dois implementers editando concorrente = clobber. O bloqueio era o worktree
+compartilhado, não o paralelismo em si.
+
+`dispatch-parallel` remove o bloqueio combinando duas coisas — nenhuma sozinha basta:
+
+1. **Partição por file-scope.** Cada task declara `[scope: glob]` no `tasks.md` (o `tasks-writer`
+   deriva do `Estrutura de Arquivos` do plan). `validate-parallel-scope.mjs partition` agrupa em
+   batches onde os scopes são **disjuntos par-a-par** — nenhum par de tasks no mesmo batch pode
+   tocar o mesmo arquivo. Scope ausente ou amplo (`**`) cai em batch de um → roda sozinho. É
+   whitelist, não blacklist: só paraleliza o que é **provadamente** disjunto; a dúvida serializa.
+2. **Isolamento por worktree.** Cada implementer concorrente roda com `isolation: "worktree"` —
+   checkout próprio, build/test próprios. Mesmo que a declaração de scope estivesse errada, os
+   writes ficam contidos no worktree até o merge-back; o `check` do `validate-parallel-scope`
+   verifica post-hoc que o implementer não escreveu fora do scope antes de integrar.
+
+Merge-back é conflict-free **por construção**: scopes disjuntos ⟹ os diffs de cada worktree tocam
+arquivos distintos ⟹ aplicar em qualquer ordem não colide. O modelo de review por tree-snapshot
+sobrevive: um `BATCH_BASE` antes do batch, um `BATCH_HEAD` depois do merge-back, e cada task é
+revisada na sua fatia (`git diff BATCH_BASE BATCH_HEAD -- <scope>`).
+
+Por que os dois juntos e não um só: partição sozinha (mesmo worktree) protege os *arquivos-fonte*
+se a declaração estiver certa, mas build/test concorrentes no mesmo diretório ainda colidem
+(portas, DB, coverage) — e uma declaração errada clobra de verdade. Worktree sozinho (sem
+partição) isola tudo, mas o merge-back vira reconciliação de conflitos e quebra o review por
+snapshot único. A combinação fecha os dois furos: partição decide **o que** é seguro paralelizar,
+worktree garante o isolamento de **runtime**, e a interseção vazia torna a integração trivial.
 
 ## Os pontos de inserção (onde a decisão foi plugada)
 

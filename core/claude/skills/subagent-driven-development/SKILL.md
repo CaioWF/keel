@@ -49,6 +49,46 @@ review works compared to a commit-per-task workflow:
   milestone's starting tree snapshot against the last task's tree snapshot
   — still no commits involved.
 
+## Parallel batch execution (dispatch-parallel)
+
+By default this skill runs one implementer at a time. When `implement-and-evaluate`
+selects **dispatch-parallel** — 3+ tasks whose declared `[scope: …]` globs are
+pairwise-disjoint — a batch of those tasks runs concurrently instead. Disjoint
+scopes are what make this safe: no two implementers can write the same file, so
+there is no clobber and the merge-back is conflict-free by construction.
+
+The per-task loop (snapshot → dispatch → review) is unchanged; only the dispatch
+step fans out. Per batch:
+
+1. **Partition.** Run `node .specify/gates/validate-parallel-scope.mjs partition
+   specs/<feature>/tasks.md`. It groups the unchecked tasks into batches where every
+   task's scope is disjoint from the others in its batch; tasks with absent or broad
+   scope land in a batch of one (they run alone, exactly as sequential dispatch). Take
+   the next batch it reports.
+2. **Snapshot BASE.** `git add -A && git write-tree` → `BATCH_BASE`, exactly as the
+   No-Commit Rule describes. One base for the whole batch.
+3. **Dispatch concurrently.** Extract each task's brief file, then issue all the
+   batch's implementer dispatches **in one response** so they run in parallel. Each
+   dispatch carries `isolation: "worktree"` (its own worktree — see
+   `using-git-worktrees`), the task's model per `## Model Selection`, and its declared
+   scope as a hard constraint: *"write ONLY files matching `<scope globs>`; touch
+   nothing outside it."* Implementers still NEVER run git and NEVER commit.
+4. **Merge back.** As each implementer returns, verify it stayed in scope: run
+   `node .specify/gates/validate-parallel-scope.mjs check "<its scope globs>" <changed
+   files>` — any file outside scope is a failed task (send it back; an out-of-scope
+   write could collide with a sibling). Then bring each isolated worktree's changes
+   into the main tree. Because scopes are disjoint, applying the worktrees in any
+   order is conflict-free.
+5. **Snapshot HEAD, review each task.** After merge-back, `git add -A && git
+   write-tree` → `BATCH_HEAD`. Review each task on its own slice —
+   `git diff BATCH_BASE BATCH_HEAD -- <that task's scope>` — using the normal
+   task-reviewer prompt; the diffs are disjoint, so each review sees only its task.
+   Run the fix loop per task as usual. `BATCH_HEAD` becomes the next batch's `BASE`.
+
+The final whole-branch review is unchanged: it diffs the milestone's first `BASE`
+against the last batch's `HEAD`. If a batch has only one member, this is identical to
+sequential dispatch — no worktree, no fan-out.
+
 ## When to Use
 
 ```dot
@@ -229,7 +269,7 @@ end-to-end trace is in **[references/example-workflow.md](references/example-wor
 - Never let an implementer or fix subagent run `git commit` (or any git mutation)
   — they implement, test, report only. The controller commits only at a milestone,
   with human approval.
-- Never dispatch multiple implementation subagents in parallel (they conflict).
+- Never dispatch multiple implementation subagents that share one worktree in parallel (they clobber each other's files). Parallel implementers are allowed ONLY in parallel-batch mode, where each runs with `isolation: "worktree"` AND the batch's declared `[scope: …]` globs are pairwise-disjoint (verified by `validate-parallel-scope`). Anything short of both conditions runs sequentially, one implementer at a time. See `## Parallel batch execution`.
 - Never skip task review or accept a report missing either verdict (spec
   compliance AND code quality are both required); never move to the next task
   with open Critical/Important findings.
@@ -238,7 +278,7 @@ end-to-end trace is in **[references/example-workflow.md](references/example-wor
 ## Integration
 
 **Required workflow skills:**
-- **using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing), if the human wants isolation for this milestone
+- **using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing), if the human wants isolation for this milestone. Also the isolation mechanism for **dispatch-parallel** batches: each concurrent implementer runs in its own worktree so disjoint-scope tasks cannot clobber one another (see `## Parallel batch execution`). `finishing-a-development-branch` owns the cleanup of those worktrees.
 
 **Subagents MUST use:**
 - The `test-driven-development` skill (red-green-refactor) for every task —

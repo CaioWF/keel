@@ -41,7 +41,7 @@ The `SKILL.md` body carries the compressed hard rules; this is the full catalog.
   milestone, with explicit human approval
 - Skip task review, or accept a report missing either verdict (spec compliance AND task quality are both required)
 - Proceed with unfixed issues
-- Dispatch multiple implementation subagents in parallel (conflicts)
+- Dispatch multiple implementation subagents that share one worktree in parallel (clobbers) — parallel implementers are allowed only in dispatch-parallel batches, each with `isolation: "worktree"` and pairwise-disjoint declared scopes (see SKILL.md `## Parallel batch execution`)
 - Make a subagent read the whole plan file (hand it its task brief instead)
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
