@@ -1,3 +1,9 @@
+---
+type: state
+title: Project state
+description: Between-session work-state tracking the current active feature, recent decisions, blockers, and deferred ideas.
+---
+
 # STATE — Memória viva do projeto
 
 > Memória de trabalho **entre sessões** (humanos e agentes). É **volátil**: atualizada o tempo

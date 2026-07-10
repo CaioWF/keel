@@ -1,3 +1,9 @@
+---
+type: adr
+title: <título da decisão>
+description: <uma frase resumindo a decisão>
+---
+
 # ADR-NNNN: <título da decisão>
 
 - **Status:** proposto | aceito | substituído por ADR-XXXX | descontinuado

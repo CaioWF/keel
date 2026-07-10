@@ -26,7 +26,7 @@ function* walk(dir) {
     if (e.isDirectory()) {
       if (SKIP.has(e.name)) continue;
       yield* walk(join(dir, e.name));
-    } else if (e.name.endsWith(".md")) {
+    } else if (e.name.endsWith(".md") && !e.name.startsWith("_")) {
       yield join(dir, e.name);
     }
   }

@@ -1,3 +1,9 @@
+---
+type: adr
+title: Registrar decisões de arquitetura
+description: Formalize architecture decision records as immutable documents to preserve structural reasoning and improve onboarding.
+---
+
 # ADR-0001: Registrar decisões de arquitetura
 
 - **Status:** aceito

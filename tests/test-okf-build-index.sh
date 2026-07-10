@@ -174,3 +174,32 @@ EOF
 ( cd "$S9" && node "$SCRIPT" build "$S9" >/dev/null 2>&1 )
 output="$( cd "$S9" && node "$SCRIPT" check "$S9" 2>&1 )"
 echo "$output" | grep -qF "✓ " && pass "check success has checkmark" || fail "check success should have checkmark"
+
+# Test 13: underscore-prefixed files (_template.md, _partial.md) are skipped
+S10="$(new_sandbox)"
+mkdir -p "$S10"
+cat > "$S10/_template.md" <<'INNEREOF'
+---
+type: adr
+title: ADR Template
+description: A template for ADRs
+---
+
+# ADR Template
+INNEREOF
+
+cat > "$S10/real-concept.md" <<'INNEREOF'
+---
+type: spec
+title: Real Concept
+description: A real concept
+---
+
+# Real Concept
+INNEREOF
+
+( cd "$S10" && node "$SCRIPT" build "$S10" >/dev/null 2>&1 )
+index_content="$(cat "$S10/index.md")"
+echo "$index_content" | grep -q "_template" && fail "_template.md should be skipped" || pass "_template.md skipped in index"
+echo "$index_content" | grep -q "ADR Template" && fail "_template.md should not appear in index" || pass "underscore files do not appear in index"
+echo "$index_content" | grep -q "Real Concept" && pass "real-concept.md included in index" || fail "non-underscore files should be included"

@@ -63,3 +63,14 @@ echo "$OUT_MD" | grep -qF "Orders table" && pass "captures markdown link text" |
 echo "$OUT_MD" | grep -qF "User schema" && pass "captures multiple markdown link texts" || fail "should capture all markdown link texts"
 
 rm -rf "$S3"
+
+# test underscore-prefixed files (_template.md, _partial.md) are skipped
+S4="$(new_sandbox)"; mkdir -p "$S4/docs"
+printf -- '---\ntype: adr\ntitle: ADR Template\ndescription: A template for ADRs\n---\n# ADR Template\n' > "$S4/docs/_template.md"
+printf -- '---\ntype: guide\nname: my-guide\n---\n# My Guide\n' > "$S4/docs/my-guide.md"
+OUT_SKIP=$(printf '{"cwd":"%s"}' "$S4" | node "$H")
+echo "$OUT_SKIP" | grep -qF "_template" && fail "should skip underscore-prefixed files" || pass "skips _template.md"
+echo "$OUT_SKIP" | grep -qF "ADR Template" && fail "should skip underscore-prefixed files even with type:" || pass "skips _template.md frontmatter title"
+echo "$OUT_SKIP" | grep -qF "my-guide" && pass "includes non-underscore files" || fail "should include my-guide.md"
+
+rm -rf "$S4"
