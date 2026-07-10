@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// okf-build-index — Generate and validate OKF bundle index.md files
+// okf-build-index — Generate and validate OKF bundle index.md files (recursive per-directory)
 // Zero-dependency: node: builtins only. Never throws uncaught.
-import { existsSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
-import { join, relative, posix } from "node:path";
+import { existsSync, readFileSync, writeFileSync, readdirSync, mkdirSync } from "node:fs";
+import { join, relative, dirname, posix } from "node:path";
 
 // Minimal frontmatter parse: key:value lines inside the leading --- ... --- block.
 function frontmatter(text) {
@@ -35,8 +35,10 @@ function* walk(dir) {
   }
 }
 
-// Generate the exact index.md contents for a bundle
-function generate(bundleDir) {
+// Pure function: generate all index.md files for a bundle
+// Returns Map of { dirRelPath -> indexMarkdownString }
+// dirRelPath uses posix "/" separators; root is ""
+function generateAll(bundleDir) {
   const concepts = [];
 
   // Walk bundleDir for typed .md files (skip index.md and log.md)
@@ -59,50 +61,134 @@ function generate(bundleDir) {
     const title = fm.title || fm.name || relPath.replace(/\.md$/, "");
     const description = fm.description || "";
 
+    // Immediate parent directory (posix)
+    const parts = relPath.split("/");
+    const dirPath = parts.length > 1 ? parts.slice(0, -1).join("/") : "";
+
     concepts.push({
       type: fm.type,
       title,
       description,
       path: relPath,
+      fileName: parts[parts.length - 1],
+      dirPath, // immediate parent dir, empty string for root
     });
   }
 
-  // Sort by type, then by path
-  concepts.sort((a, b) => {
-    if (a.type !== b.type) return a.type.localeCompare(b.type);
-    return a.path.localeCompare(b.path);
-  });
-
-  // Build index.md string
-  const lines = [];
-  lines.push("---");
-  lines.push('okf_version: "0.1"');
-  lines.push("---");
-  lines.push("");
-
-  // Group by type
-  const byType = {};
+  // Determine which directories need an index.md
+  const dirsWithConcepts = new Set();
   for (const c of concepts) {
-    if (!byType[c.type]) byType[c.type] = [];
-    byType[c.type].push(c);
+    dirsWithConcepts.add(c.dirPath);
   }
 
-  // Emit sections in sorted type order
-  const sortedTypes = Object.keys(byType).sort();
-  for (const type of sortedTypes) {
-    lines.push(`# ${type}`);
-    for (const c of byType[type]) {
-      if (c.description) {
-        lines.push(`* [${c.title}](${c.path}) - ${c.description}`);
+  // Also include all ancestors
+  const allDirsNeedingIndex = new Set();
+  allDirsNeedingIndex.add(""); // Always include root
+  for (const dir of dirsWithConcepts) {
+    allDirsNeedingIndex.add(dir);
+    // Walk up the tree
+    let current = dir;
+    while (current) {
+      allDirsNeedingIndex.add(current);
+      const parts = current.split("/");
+      if (parts.length > 1) {
+        current = parts.slice(0, -1).join("/");
       } else {
-        lines.push(`* [${c.title}](${c.path})`);
+        break;
       }
     }
-    lines.push("");
   }
 
-  // Join with newlines; ensure exactly one trailing newline
-  return lines.join("\n");
+  // Generate index.md for each directory
+  const result = new Map();
+
+  for (const dirPath of allDirsNeedingIndex) {
+    const lines = [];
+
+    // Add frontmatter only for root
+    if (dirPath === "") {
+      lines.push("---");
+      lines.push('okf_version: "0.1"');
+      lines.push("---");
+      lines.push("");
+    }
+
+    // Get concepts in THIS directory only (not subdirs)
+    const myConceptsUnsorted = concepts.filter((c) => c.dirPath === dirPath);
+    const myConcepts = myConceptsUnsorted.sort((a, b) => {
+      if (a.type !== b.type) return a.type.localeCompare(b.type);
+      return a.fileName.localeCompare(b.fileName);
+    });
+
+    // Group by type and emit
+    const byType = {};
+    for (const c of myConcepts) {
+      if (!byType[c.type]) byType[c.type] = [];
+      byType[c.type].push(c);
+    }
+
+    const sortedTypes = Object.keys(byType).sort();
+    for (const type of sortedTypes) {
+      lines.push(`# ${type}`);
+      for (const c of byType[type]) {
+        if (c.description) {
+          lines.push(`* [${c.title}](${c.fileName}) - ${c.description}`);
+        } else {
+          lines.push(`* [${c.title}](${c.fileName})`);
+        }
+      }
+      lines.push("");
+    }
+
+    // Find child directories that have concepts (direct children only)
+    const childDirs = new Set();
+    for (const c of concepts) {
+      if (c.dirPath.startsWith(dirPath)) {
+        let rest = c.dirPath;
+        if (dirPath) {
+          rest = c.dirPath.slice(dirPath.length + 1); // remove prefix and /
+        }
+        if (rest && rest.includes("/")) {
+          // child is deeper, extract immediate child dir name
+          const firstChild = rest.split("/")[0];
+          const childPath = dirPath ? `${dirPath}/${firstChild}` : firstChild;
+          childDirs.add(childPath);
+        } else if (rest) {
+          // concept is directly in a child, but we need to check if there's a subdir
+          const childPath = dirPath ? `${dirPath}/${rest.split("/")[0]}` : rest.split("/")[0];
+          childDirs.add(childPath);
+        }
+      }
+    }
+
+    // Only include child dirs that actually have concepts in their subtree
+    const validChildDirs = [];
+    for (const cd of childDirs) {
+      const conceptsInSubtree = concepts.filter((c) => c.dirPath === cd || c.dirPath.startsWith(cd + "/"));
+      if (conceptsInSubtree.length > 0) {
+        validChildDirs.push({ path: cd, count: conceptsInSubtree.length });
+      }
+    }
+
+    if (validChildDirs.length > 0) {
+      validChildDirs.sort((a, b) => a.path.localeCompare(b.path));
+      lines.push("# Subdirectories");
+      for (const cd of validChildDirs) {
+        const childName = cd.path.split("/").pop();
+        lines.push(`* [${childName}/](${childName}/index.md) - ${cd.count} concept(s)`);
+      }
+      lines.push("");
+    }
+
+    // Build final string with exactly one trailing newline
+    let content = lines.join("\n");
+    if (!content.endsWith("\n")) {
+      content += "\n";
+    }
+    result.set(dirPath, content);
+  }
+
+  return result;
 }
 
 // Commands
@@ -115,48 +201,87 @@ async function main() {
   }
 
   if (mode === "build") {
-    const indexPath = join(bundleDir, "index.md");
-    const content = generate(bundleDir);
     try {
-      writeFileSync(indexPath, content, "utf8");
-      // Count concepts (lines that start with *)
-      const conceptCount = content.split("\n").filter((l) => l.startsWith("*")).length;
-      console.log(`✓ wrote ${bundleDir}/index.md (${conceptCount} concepts)`);
+      const allIndexes = generateAll(bundleDir);
+      let totalConceptCount = 0;
+
+      // Write each index file
+      for (const [dirPath, content] of allIndexes) {
+        const indexPath = dirPath === "" ? join(bundleDir, "index.md") : join(bundleDir, dirPath, "index.md");
+        const dir = dirname(indexPath);
+
+        // Ensure directory exists
+        try {
+          mkdirSync(dir, { recursive: true });
+        } catch {
+          // directory may already exist
+        }
+
+        writeFileSync(indexPath, content, "utf8");
+        // Count concepts in this file (lines starting with * [)
+        const conceptCount = content.split("\n").filter((l) => l.startsWith("* [")).length;
+        totalConceptCount += conceptCount;
+      }
+
+      console.log(`✓ wrote ${allIndexes.size} index file(s) (${totalConceptCount} concepts)`);
       process.exit(0);
     } catch (err) {
-      console.error(`✗ failed to write ${indexPath}: ${err.message}`);
+      console.error(`✗ build failed: ${err.message}`);
       process.exit(1);
     }
   } else if (mode === "check") {
-    const indexPath = join(bundleDir, "index.md");
+    const rootIndexPath = join(bundleDir, "index.md");
 
-    // Check if index.md exists and has okf_version
-    if (!existsSync(indexPath)) {
+    // Check if index.md exists and has okf_version (opt-in check)
+    if (!existsSync(rootIndexPath)) {
       console.log(`okf-index: ${bundleDir} not an OKF bundle (no index.md w/ okf_version) — skipping`);
       process.exit(0);
     }
 
-    let indexContent;
+    let rootIndexContent;
     try {
-      indexContent = readFileSync(indexPath, "utf8");
+      rootIndexContent = readFileSync(rootIndexPath, "utf8");
     } catch {
       console.log(`okf-index: ${bundleDir} not an OKF bundle (no index.md w/ okf_version) — skipping`);
       process.exit(0);
     }
 
-    const indexFm = frontmatter(indexContent);
-    if (!indexFm || !indexFm.okf_version) {
+    const rootFm = frontmatter(rootIndexContent);
+    if (!rootFm || !rootFm.okf_version) {
       console.log(`okf-index: ${bundleDir} not an OKF bundle (no index.md w/ okf_version) — skipping`);
       process.exit(0);
     }
 
-    // Compare byte-for-byte
-    const expected = generate(bundleDir);
-    if (indexContent === expected) {
-      console.log(`✓ ${bundleDir}/index.md up to date`);
+    // Compare byte-for-byte across all index files
+    try {
+      const allIndexes = generateAll(bundleDir);
+
+      for (const [dirPath, expectedContent] of allIndexes) {
+        const indexPath = dirPath === "" ? join(bundleDir, "index.md") : join(bundleDir, dirPath, "index.md");
+
+        if (!existsSync(indexPath)) {
+          console.log(`✗ ${indexPath} is stale — run: node core/gates/okf-build-index.mjs build ${bundleDir}`);
+          process.exit(1);
+        }
+
+        let actualContent;
+        try {
+          actualContent = readFileSync(indexPath, "utf8");
+        } catch {
+          console.log(`✗ ${indexPath} is stale — run: node core/gates/okf-build-index.mjs build ${bundleDir}`);
+          process.exit(1);
+        }
+
+        if (actualContent !== expectedContent) {
+          console.log(`✗ ${indexPath} is stale — run: node core/gates/okf-build-index.mjs build ${bundleDir}`);
+          process.exit(1);
+        }
+      }
+
+      console.log(`✓ ${bundleDir} index tree up to date`);
       process.exit(0);
-    } else {
-      console.log(`✗ ${bundleDir}/index.md is stale — run: node core/gates/okf-build-index.mjs build ${bundleDir}`);
+    } catch (err) {
+      console.error(`✗ check failed: ${err.message}`);
       process.exit(1);
     }
   } else {
