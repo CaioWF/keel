@@ -245,7 +245,7 @@ durable progress live in **[references/dispatch-mechanics.md](references/dispatc
   finding's severity.
 - **Dispatch ONE fix subagent per review** with the full findings list, not one
   fixer per finding.
-- **Track completed tasks in a ledger** (`specs/<feature>/progress.md`) with the
+- **Track completed tasks in a ledger** (`.git/sdd/<feature>/progress.md`, outside the tracked tree — see File Handoffs in dispatch-mechanics) with the
   `write-tree` SHAs. After compaction, trust the ledger — NEVER re-dispatch a
   task it marks complete.
 

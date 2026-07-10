@@ -65,11 +65,32 @@ final whole-branch review. When you fill a reviewer template:
 
 Everything you paste into a dispatch prompt — and everything a subagent
 prints back — stays resident in your context for the rest of the session
-and is re-read on every later turn. Hand artifacts over as files:
+and is re-read on every later turn. Hand artifacts over as files.
 
+**Where these files live — NOT the tracked tree.** Briefs, reports, diff
+packages, and the progress ledger are ephemeral scaffolding, not feature
+deliverables; writing them under `specs/` clutters the working tree and sweeps
+them into the feature commit. Put them under the repo's git dir instead:
+`$(git rev-parse --git-common-dir)/sdd/<feature>/` — i.e. `.git/sdd/<feature>/`
+in the main worktree. Resolving the *common* dir (not `--git-dir`) keeps the
+path shared across dispatch-parallel worktrees, so the controller and every
+isolated implementer read and write one location. Nothing there is ever tracked
+or committed — zero working-tree clutter — and `finishing-a-development-branch`
+sweeps the dir at cycle end.
+
+Hand artifacts over as files:
+
+- **Size gate for the brief.** The file handoff earns its round-trip only when
+  the brief is bulky. A short brief — a few lines, no exact-value tables — costs
+  less pasted inline than written-then-read, so paste it directly in the
+  dispatch prompt and skip the file. Reserve the brief file for tasks carrying
+  exact values to reproduce verbatim (signatures, magic strings, test cases) or
+  long requirement lists. **Reports always go to a file** regardless of size —
+  implementer output is unbounded and would otherwise land in your context in
+  full.
 - **Task brief:** before dispatching an implementer, extract the task's full
   text from the plan into a uniquely named file (e.g.
-  `specs/<feature>/task-N-brief.md`). Compose the dispatch so the brief
+  `.git/sdd/<feature>/task-N-brief.md`). Compose the dispatch so the brief
   stays the single source of requirements. Your dispatch should contain:
   (1) one line on where this task fits in the project; (2) the brief path,
   introduced as "read this first — it is your requirements, with the exact
@@ -98,7 +119,7 @@ sequences — the single most expensive failure observed. Track progress in
 a ledger file, not only in todos.
 
 - At skill start, check for a ledger, e.g.
-  `specs/<active-feature>/progress.md`. Tasks listed there as complete are
+  `.git/sdd/<feature>/progress.md`. Tasks listed there as complete are
   DONE — do not re-dispatch them; resume at the first task not marked
   complete.
 - When a task's review comes back clean, append one line to the ledger in

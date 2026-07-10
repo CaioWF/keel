@@ -83,6 +83,18 @@ WORKTREE_PATH=$(git rev-parse --show-toplevel)
   ```
 - Otherwise the host/keel owns the workspace — do NOT remove it.
 
+**SDD dispatch artifacts.** If `subagent-driven-development` ran, it left the
+feature's ephemeral briefs/reports/diffs/ledger under the git dir (see its
+File Handoffs). Sweep them for Options 1 & 4 only (Keep/PR may still iterate):
+
+```bash
+rm -rf "$(git rev-parse --git-common-dir)/sdd/<active-feature>"
+```
+
+Nothing there is tracked, so this frees scratch space without touching the
+commit. dispatch-parallel's per-implementer worktrees are harness-managed
+(`isolation: "worktree"`) and auto-cleaned — do not `git worktree remove` them.
+
 ## Quick reference
 
 | Option | Merge | Push | Keep worktree | Delete branch |
