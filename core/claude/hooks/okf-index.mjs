@@ -7,7 +7,8 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
 import { readEvent } from "./_lib.mjs";
 
-const MAX = 60; // cap injected concepts to bound the SessionStart token cost
+const BUDGET = parseInt(process.env.KEEL_OKF_BUDGET || "60", 10) || 60; // how many concepts to show in FULL detail
+const HARD_MAX = 2000; // pathological-runaway safety bound only
 const ROOTS = ["docs", "specs", ".specify/memory"]; // where keel keeps structured md
 const SKIP = new Set([".git", "node_modules", ".specify/state"]);
 
@@ -62,9 +63,10 @@ outer: for (const root of ROOTS) {
       name: fm.name || fm.title || relative(cwd, path).replace(/\.md$/, ""),
       type: fm.type,
       path: relative(cwd, path),
+      description: fm.description || "",
       links: [...new Set(links)].slice(0, 5),
     });
-    if (concepts.length >= MAX) break outer;
+    if (concepts.length >= HARD_MAX) break outer;
   }
 }
 
@@ -74,12 +76,44 @@ if (!concepts.length) process.exit(0);
 const byType = {};
 for (const c of concepts) (byType[c.type] ??= []).push(c);
 
-const lines = [`Open Knowledge Format index — ${concepts.length} concept(s), zero tool calls:`];
+// Build header with note about partial disclosure if needed.
+let header = `Open Knowledge Format index — ${concepts.length} concept(s)`;
+if (concepts.length > BUDGET) {
+  header += `, zero tool calls (showing ${BUDGET} in full; rest pointered below)`;
+} else {
+  header += `, zero tool calls`;
+}
+header += ":";
+
+const lines = [header];
+let shown = 0;
+
 for (const [type, items] of Object.entries(byType)) {
   lines.push(`\n[${type}]`);
+
+  // Emit detail lines for concepts within budget, track unshown.
+  const unshown = [];
   for (const c of items) {
-    const lk = c.links.length ? `  -> ${c.links.join(", ")}` : "";
-    lines.push(`  ${c.name} (${c.path})${lk}`);
+    if (shown >= BUDGET) {
+      unshown.push(c);
+    } else {
+      const desc = c.description ? ` — ${c.description}` : "";
+      const lk = c.links.length ? `  -> ${c.links.join(", ")}` : "";
+      lines.push(`  ${c.name} (${c.path})${desc}${lk}`);
+      shown++;
+    }
+  }
+
+  // Emit overflow pointer if this group has unshown concepts.
+  if (unshown.length > 0) {
+    const dirs = new Set();
+    for (const c of unshown) {
+      const dir = c.path.substring(0, c.path.lastIndexOf("/"));
+      dirs.add(dir);
+    }
+    const dirList = Array.from(dirs).sort().slice(0, 4).join(", ");
+    const ellipsis = dirs.size > 4 ? "…" : "";
+    lines.push(`  …and ${unshown.length} more [${type}] concept(s) — Read on demand under: ${dirList}${ellipsis}`);
   }
 }
 
