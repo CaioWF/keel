@@ -26,7 +26,7 @@ A spec OKF marca o link **absoluto bundle-relative** (`/dir/x.md`, `/` = raiz do
 - no **GitHub**, `/` = raiz do **repo**, não do bundle;
 - só o consumidor OKF-aware trata `/` como raiz do bundle.
 
-Nenhuma das três leituras coincide, então o absoluto exigiria ensinar cada resolver (audit, hook, GitHub) e ainda quebraria o render nativo do GitHub. O **relativo** é OKF-conformante, resolve igual no audit + GitHub + Obsidian, e não precisa de mágica. A escolha inicial de `[[wikilinks]]` (path-of-least-resistance, já lida pelo hook) foi revertida a pedido — o hook ainda **lê** `[[]]` por back-compat, mas os docs usam markdown. Ver [Gate vs skill](gates-vs-skills.md): o enforcement OKF (freshness, links) vive em gates determinísticos; o julgamento (o que virar conceito) vive na skill `okf-enrich`.
+Nenhuma das três leituras coincide, então o absoluto exigiria ensinar cada resolver (audit, hook, GitHub) e ainda quebraria o render nativo do GitHub. O **relativo** é OKF-conformante, resolve igual no audit + GitHub + Obsidian, e não precisa de mágica. A escolha inicial de **wiki-links** (a sintaxe de colchetes duplos, path-of-least-resistance por já ser lida pelo hook) foi revertida a pedido — o hook ainda **lê** wiki-links por back-compat, mas os docs usam markdown. Ver [Gate vs skill](gates-vs-skills.md): o enforcement OKF (freshness, links) vive em gates determinísticos; o julgamento (o que virar conceito) vive na skill `okf-enrich`.
 
 ## Fora de escopo (fila, sem blocker)
 
