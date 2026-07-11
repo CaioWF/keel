@@ -70,9 +70,14 @@ Before designing structure, ground the plan in the real tree with the `codebase-
 
 Durable architecture decisions go in `docs/architecture/adr/NNNN-*.md` (use `_template.md`), not in STATE. ADRs are append-only: to change a decision, write a new ADR that supersedes the old one. Rule of thumb: hard-to-reverse decision → ADR; current work state → STATE.
 
-### Open Knowledge Format index
+### Open Knowledge Format (OKF) knowledge bundle
 
-Any `.md` under `docs/`, `specs/`, or `.specify/memory/` that carries a `type:` key in its frontmatter is indexed at SessionStart by the `okf-index` hook (`core/claude/hooks/okf-index.mjs`) and injected as a compact map (concept name, type, path, `[[links]]`) — so documented schemas, metrics, APIs, and decisions are in context from turn one with zero tool calls. To register a concept, give the doc `type:` (e.g. `table`, `metric`, `api`, `service`) and optionally `name:`/`title:` frontmatter, and cross-reference related concepts with `[[wiki-links]]` in the body. Docs without `type:` are ignored, so the index stays signal-only; the injected map is capped at 60 concepts to bound token cost.
+`docs/` is an OKF knowledge bundle. Any `.md` under `docs/`, `specs/`, or `.specify/memory/` that carries a `type:` frontmatter key is a **concept**; the `okf-index` hook (`.claude/hooks/okf-index.mjs`) indexes them at SessionStart and injects a compact map (name, type, path, description, related links) — so documented schemas, metrics, APIs, and decisions are in context from turn one with zero tool calls. Past `KEEL_OKF_BUDGET` concepts (default 60) the map shows the budget in full and pointers the rest per type, reporting the true total, so nothing is silently dropped as the bundle grows.
+
+- **Register a concept:** give the doc `type:` (e.g. `table`, `metric`, `api`, `adr`), a `title:`, and a one-sentence `description:`. Cross-reference related concepts with **relative markdown links** — a `[Title]` link whose target is `../dir/other.md` — which are OKF-conformant and resolve in the audit gate, GitHub, and Obsidian alike (`[[wiki-links]]` are still read for back-compat, but markdown links are preferred). Files without `type:`, and `_`-prefixed or reserved `index.md`/`log.md` files, are not concepts.
+- **Index & freshness gate:** `.specify/gates/okf-build-index.mjs build docs` (re)generates a per-directory `index.md` tree (OKF progressive disclosure); `… check docs` is a freshness gate the commit hook runs — it blocks the commit if any `index.md` is stale, so regenerate after adding or editing concepts. A bundle opts in by carrying a root `docs/index.md` with `okf_version: "0.1"`.
+- **Visualize:** `.specify/gates/okf-visualize.mjs docs` writes a self-contained HTML graph of the bundle (nodes by type, edges from cross-links).
+- **Grow it:** the `okf-enrich` skill ingests a source (file / URL / text) into the bundle — distills concept pages, refreshes the index, and appends the OKF `log.md` change history.
 
 ## Multi-client views
 

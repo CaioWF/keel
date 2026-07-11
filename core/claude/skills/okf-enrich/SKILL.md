@@ -47,7 +47,7 @@ Run:
 node .specify/gates/okf-build-index.mjs build <bundle>
 ```
 
-This rewrites `<bundle>/index.md` from the current concepts (freshness is verified separately in Step 6 with `check`, and again by the commit gate).
+This regenerates the bundle's per-directory `index.md` tree from the current concepts (freshness is verified separately in Step 6 with `check`, and again by the commit gate).
 
 ### Step 5: Log the Change
 
