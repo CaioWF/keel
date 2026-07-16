@@ -15,8 +15,8 @@ Atualize `docs/STATE.md` com o estado real desta sessão:
 
 1. **Em andamento / próximo passo** — a feature/spec ativa e a **próxima ação concreta** e
    específica ("implementar AC-3 no adapter X", não "continuar a feature").
-2. **Decisões recentes** — o que foi decidido. Se for difícil de reverter, **crie/atualize um ADR**
-   (`docs/architecture/adr/`, use `_template.md`) e linke; o STATE só resume.
+2. **Decisões recentes** — o que foi decidido. Se for difícil de reverter, registre com a skill
+   `adr-writer` (`docs/architecture/adr/`) e linke; o STATE só resume.
 3. **Bloqueios** — o que trava e quem/como destrava.
 4. **Ideias adiadas / todos** — o que ficou de fora de propósito, com o gatilho para reconsiderar.
 5. Marque a data e o autor. Se houver `SPEC_DEVIATION` aberto no código, registre como bloqueio.
@@ -35,5 +35,7 @@ aprovação, conforme a regra de commits do projeto.
 ## Regras
 
 - STATE.md é **volátil**; ADR é **durável**. Nunca escreva uma decisão estrutural só no STATE.
+- ADR aceito é **append-only**: para mudar uma decisão, `adr-writer` escreve um novo que substitui
+  o antigo — nunca edite o ADR aceito (só a linha `Status`).
 - Não invente progresso: relate fielmente o que foi feito, o que falta e o que está bloqueado.
 - O STATE já é injetado no contexto no SessionStart; ao retomar, confie nele como ponto de partida.

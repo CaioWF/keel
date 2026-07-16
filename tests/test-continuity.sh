@@ -26,3 +26,18 @@ assert_contains "$C" "adr/" "CLAUDE.md references ADRs"
 assert_contains "$C" "SPEC_DEVIATION" "CLAUDE.md documents SPEC_DEVIATION marker"
 assert_contains "$C" "eval-spec-fidelity" "CLAUDE.md documents the fidelity gate"
 assert_contains "$C" "audit-structure" "CLAUDE.md documents the structure gate"
+
+# adr-writer: the skill that authors the ADR scaffold above (numbering, template, supersede).
+A="$SK/adr-writer/SKILL.md"
+assert_file "$A" "adr-writer skill exists"
+assert_contains "$A" "name: adr-writer" "adr-writer has name frontmatter"
+assert_contains "$A" "description:" "adr-writer has description frontmatter"
+assert_contains "$A" "docs/architecture/adr/" "adr-writer writes into the ADR dir"
+assert_contains "$A" "_template.md" "adr-writer builds from the ADR template"
+assert_contains "$A" "append-only" "adr-writer states ADR immutability"
+assert_contains "$A" "type: adr" "adr-writer registers the ADR as an OKF concept"
+assert_contains "$A" "okf-build-index" "adr-writer refreshes the index for the freshness gate"
+
+# Wired: skills that used to only mention ADRs now delegate authorship to adr-writer.
+assert_contains "$SK/handoff/SKILL.md" "adr-writer" "handoff delegates durable decisions to adr-writer"
+assert_contains "$C" "adr-writer" "CLAUDE.md wires adr-writer"

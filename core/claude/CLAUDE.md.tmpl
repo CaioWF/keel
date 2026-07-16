@@ -68,7 +68,7 @@ Before designing structure, ground the plan in the real tree with the `codebase-
 
 `docs/STATE.md` is the **volatile** work memory — where we stopped, the next concrete step, blockers. It is injected into context at SessionStart. Use the `handoff` skill to write it when pausing and to recompose context when resuming. Keep it short and actionable.
 
-Durable architecture decisions go in `docs/architecture/adr/NNNN-*.md` (use `_template.md`), not in STATE. ADRs are append-only: to change a decision, write a new ADR that supersedes the old one. Rule of thumb: hard-to-reverse decision → ADR; current work state → STATE.
+Durable architecture decisions go in `docs/architecture/adr/NNNN-*.md`, not in STATE — use the `adr-writer` skill, which owns the numbering, the template, and the supersede protocol. ADRs are append-only: to change a decision, write a new ADR that supersedes the old one; never edit an accepted ADR beyond its `Status` line. Rule of thumb: hard-to-reverse decision → ADR; current work state → STATE.
 
 ### Open Knowledge Format (OKF) knowledge bundle
 

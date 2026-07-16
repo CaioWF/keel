@@ -63,6 +63,8 @@ For multi-item feedback: clarify the unclear FIRST, then implement blocking issu
 
 Push back when the suggestion: breaks existing functionality · the reviewer lacks full context · violates YAGNI · is technically incorrect for this stack · has legacy/compatibility reasons · conflicts with the user's architectural decisions (constitution / ADRs).
 
+**Blocking claims need a citation.** A reviewer calling something a violation must quote the rule — a constitution line, an `AC-N`, a checklist item, a failing gate. Uncited, it is a suggestion: evaluate it on technical merit like any other, but it does not block. Ask for the citation instead of assuming it exists — "Which rule does this break? I don't find it in the constitution." This cuts both ways: when the citation IS there, the rule was already agreed — implement it, or take it to the user to change the rule. Do not relitigate an agreed rule inside the review.
+
 How: technical reasoning, not defensiveness · ask specific questions · reference working tests/code · involve the user if architectural. If uncomfortable pushing back, name the tension and tell the user what you saw.
 
 ## Acknowledging / Correcting

@@ -19,3 +19,11 @@ assert_file "$REG" "core seeds review-lenses registry"
 assert_contains "$REG" "code-review" "registry seeds code-review lens"
 assert_contains "$REG" "security-review" "registry seeds security-review lens"
 assert_contains "$R" "review-lenses.txt" "review-and-simplify reads the lens registry"
+
+# Citation discipline: a finding only blocks if it quotes the rule it breaks. Both sides of
+# the review must agree on it, so assert the reviewer and the receiver.
+CR="$SK/code-review/SKILL.md"
+assert_contains "$CR" "No citation, no blocker" "code-review requires a citation to block"
+assert_contains "$CR" "verbatim" "code-review quotes the broken rule verbatim"
+assert_contains "$CR" "suggestion" "code-review reports uncited findings as suggestions"
+assert_contains "$SK/receiving-code-review/SKILL.md" "Blocking claims need a citation" "receiving-code-review treats uncited findings as non-blocking"
