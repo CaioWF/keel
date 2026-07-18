@@ -1,4 +1,5 @@
 # design-note
+* [Autonomous implementation loop](autonomous-implementation-loop.md) - Why keel's autonomous implementation mode is a thin opt-in envelope over implement-and-evaluate, not a new loop — the loop-engineering 2026 framing, the three gaps it closes, and why the driver is in-session
 * [Concept layer](concepts-layer.md) - How the concept layer standardizes engineering principles (Clean Architecture, SOLID, etc.) agnostically across languages using skills, constitution rules, and structure templates
 * [Execution mode routing](execution-mode-routing.md) - Why implement-and-evaluate picks inline vs dispatch vs dispatch-parallel execution modes based on task count and coupling, with parallelization via scope declaration and worktree isolation
 * [Gate vs skill](gates-vs-skills.md) - Decision rule for splitting review concerns: mechanical/deterministic rules belong in gates, judgment-based concerns in skills
