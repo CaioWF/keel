@@ -49,8 +49,11 @@ the ledger.
   with explicit human approval (see `subagent-driven-development`). The loop finishing
   is NOT permission to commit.
 - **Destructive command** — never run `rm -rf`, `git push --force`, `git reset --hard`,
-  a DB drop, or a prod deploy unattended. Stop and ask. (Until the mechanical
-  PreToolUse guard exists, this is a prompt-level rule — treat it as hard.)
+  a DB drop, or a prod deploy unattended. Stop and ask. The `destructive-guard`
+  PreToolUse hook (`core/claude/hooks/destructive-guard.mjs`) now enforces this
+  mechanically — it blocks the worst families and turns the rest into an `ask`, so an
+  unattended loop cannot silently run one — but treat the rule as hard regardless; do
+  not lean on the guard to catch a command you should not have issued.
 - **Plan is wrong** — if implementation reveals the plan itself is wrong (not just a
   task), escalate to the human; do not rewrite the plan autonomously.
 - **Budget or stall exhausted** — see below.
