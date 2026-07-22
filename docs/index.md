@@ -7,5 +7,5 @@ okf_version: "0.1"
 
 # Subdirectories
 * [design-notes/](design-notes/index.md) - 7 concept(s)
-* [plans/](plans/index.md) - 4 concept(s)
+* [plans/](plans/index.md) - 5 concept(s)
 * [specs/](specs/index.md) - 1 concept(s)

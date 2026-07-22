@@ -21,38 +21,42 @@ Every project goes through this process. A todo list, a single-function utility,
 
 You MUST create a task for each of these items and complete them in order:
 
-1. **Explore project context** — check files, docs, recent commits
-2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-3. **Propose 2-3 approaches** — with trade-offs and your recommendation
-4. **Present design** — in sections scaled to their complexity, get user approval after each section
-5. **Write design doc** — save to `specs/<feature>/brainstorm.md`
-6. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-7. **User reviews written spec** — ask user to review the spec file before proceeding
-8. **Hand off** — set `.specify/state` to the feature name and hand off to `prd-writer`
+1. **Set the depth dial** — `padrão` (conversational, the default) or `deep` (opt-in framed divergence). See `## Depth dial`.
+2. **Explore project context** — check files, docs, recent commits
+3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
+4. **Explore approaches** — `padrão`: propose 2-3 inline with trade-offs and your recommendation. `deep`: dispatch framed divergence, then converge into 2-3 (see `## Depth dial`).
+5. **Present design** — in sections scaled to their complexity, get user approval after each section
+6. **Write design doc** — copy `.specify/templates/brainstorm-template.md` to `specs/<feature>/brainstorm.md` and fill each section
+7. **Adversarial gate** — run `doubt-driven-development` against the written design before handoff; fix actionable findings (see below)
+8. **User reviews written spec** — ask user to review the spec file before proceeding
+9. **Hand off** — set `.specify/state` to the feature name and hand off to `prd-writer`
 
 ## Process Flow
 
 ```dot
 digraph brainstorming {
+    "Set depth dial\n(padrão | deep)" [shape=box];
     "Explore project context" [shape=box];
     "Ask clarifying questions" [shape=box];
-    "Propose 2-3 approaches" [shape=box];
+    "Explore approaches\n(padrão: inline | deep: dispatch)" [shape=box];
     "Present design sections" [shape=box];
     "User approves design?" [shape=diamond];
-    "Write design doc" [shape=box];
-    "Spec self-review\n(fix inline)" [shape=box];
+    "Write design doc\n(from template)" [shape=box];
+    "Adversarial gate\n(doubt-driven-development)" [shape=box];
     "User reviews spec?" [shape=diamond];
     "Hand off to prd-writer" [shape=doublecircle];
 
+    "Set depth dial\n(padrão | deep)" -> "Explore project context";
     "Explore project context" -> "Ask clarifying questions";
-    "Ask clarifying questions" -> "Propose 2-3 approaches";
-    "Propose 2-3 approaches" -> "Present design sections";
+    "Ask clarifying questions" -> "Explore approaches\n(padrão: inline | deep: dispatch)";
+    "Explore approaches\n(padrão: inline | deep: dispatch)" -> "Present design sections";
     "Present design sections" -> "User approves design?";
     "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Write design doc" [label="yes"];
-    "Write design doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "User reviews spec?";
-    "User reviews spec?" -> "Write design doc" [label="changes requested"];
+    "User approves design?" -> "Write design doc\n(from template)" [label="yes"];
+    "Write design doc\n(from template)" -> "Adversarial gate\n(doubt-driven-development)";
+    "Adversarial gate\n(doubt-driven-development)" -> "Write design doc\n(from template)" [label="actionable findings"];
+    "Adversarial gate\n(doubt-driven-development)" -> "User reviews spec?" [label="clean"];
+    "User reviews spec?" -> "Write design doc\n(from template)" [label="changes requested"];
     "User reviews spec?" -> "Hand off to prd-writer" [label="approved"];
 }
 ```
@@ -73,9 +77,9 @@ digraph brainstorming {
 
 **Exploring approaches:**
 
-- Propose 2-3 different approaches with trade-offs
-- Present options conversationally with your recommendation and reasoning
-- Lead with your recommended option and explain why
+- `padrão` (default): propose 2-3 different approaches with trade-offs, present them conversationally, lead with your recommended option and explain why.
+- `deep` (opt-in): when the design has real forks and the user opted in, run the framed divergence in `## Depth dial` instead — the 2-3 approaches you present are the critic's survivors, not options you anchored inline.
+- Either way, the approaches (and which won, and why) land in the **Abordagens consideradas** section of the brainstorm doc.
 
 **Presenting the design:**
 
@@ -102,22 +106,22 @@ digraph brainstorming {
 
 **Documentation:**
 
-- Write the validated design to `specs/<feature>/brainstorm.md`, where `<feature>` is the next `NNN-kebab-name` ordinal (same numbering scheme `prd-writer` uses: highest existing `specs/*` ordinal + 1, zero-padded to 3 digits).
+- Copy `.specify/templates/brainstorm-template.md` to `specs/<feature>/brainstorm.md`, where `<feature>` is the next `NNN-kebab-name` ordinal (same numbering scheme `prd-writer` uses: highest existing `specs/*` ordinal + 1, zero-padded to 3 digits). Fill each section (Entendimento / Investigação / Abordagens consideradas / Decisões em aberto / Esboço da solução) and the `status`/`feature`/`date` frontmatter. This template is the durable capture of the reasoning trail — the exploration, the trade-offs, the open points — upstream of `spec.md`/`plan.md`. No code, only intent and contracts.
 - Set `.specify/state` (single line, no trailing content) to `NNN-kebab-name` so it becomes the active feature for `prd-writer`.
 - Do NOT commit the design document — this repo commits at feature/milestone boundaries with explicit human approval, not per artifact.
 
-**Spec Self-Review:**
-After writing the spec document, look at it with fresh eyes:
+**Adversarial Gate:**
+After writing the design doc, run `doubt-driven-development` against it before handing off — a fresh-context reviewer that tries to *disprove* the design while course-correction is still cheap. This replaces the old cosmetic self-review: the point is an attack, not a proofread.
 
-1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
-2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
-3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
-4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+- **EXTRACT** the design's contract (the Esboço + the closed decisions) and hand the reviewer that artifact **without** your reasoning or your conclusion.
+- **DOUBT:** the adversarial brief is *"here is a proposed design and its constraints — find where it is wrong, unsafe, under-scoped, or built on an unstated assumption."*
+- **RECONCILE** each finding: actionable → fix the doc; contract misread → tighten the EXTRACT; trade-off → record it in Decisões em aberto (or as closed, with the rationale); noise → discard. Bounded at 3 cycles; escalate rather than grind a fourth.
+- Fold the old quick checks into this pass: placeholder scan (no "TBD"/"TODO"/vague requirements), internal consistency, scope (single plan or decompose?), and ambiguity (each requirement interpretable one way). A finding here is just another actionable.
 
-Fix any issues inline. No need to re-review — just fix and move on.
+Skip the full adversarial dispatch only for a truly trivial, reversible design (`padrão` on a one-liner) — there, the fold-in checks alone suffice; say so explicitly.
 
 **User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+After the adversarial gate comes back clean, ask the user to review the written spec before proceeding:
 
 > "Design written to `specs/<feature>/brainstorm.md`. Please review it and let me know if you want to make any changes before we hand off to prd-writer."
 
@@ -127,6 +131,20 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 - Hand off to the `prd-writer` skill to turn the approved design into the feature's PRD.
 - Do NOT invoke any other skill. `prd-writer` is the next step.
+
+## Depth dial
+
+Set once, up front. The dial scales the **process**, not just the doc length — small features stay conversational, real design forks unlock divergence.
+
+**`padrão` (default).** The conversational flow: explore context, ask one question at a time, propose 2-3 approaches inline, present the design. This is the right choice for most features, and for anything the off-signals already wave through (a typo, a rename, a trivial config, a 1-file change) — those barely need a dial at all. Do not reach for `deep` by default; it costs subagents.
+
+**`deep` (opt-in).** For a design with **genuine forks** — an architecture choice under real uncertainty, an API surface, a naming/modeling decision where the first idea anchors all the others. Offer it; do not impose it. When the user opts in, run framed divergence → convergence:
+
+1. **Diverge.** Dispatch a small fixed set of **isolated** idea-agents (via `dispatching-parallel-agents`, cheapest capable model — divergence is generative, not precise). Each agent sees the problem plus **one cognitive frame** and is told to generate, **not** evaluate. Agents do not see each other — no cross-anchoring. A lean, generic frame set (not codebase-specific): `usuário-cético`, `manutenção-6-meses-depois`, `pior-caso-de-carga`, `primeiro-princípio`, `caminho-mais-simples`. Pick 3-4 relevant to the fork.
+2. **Converge (critic).** A single fresh pass over all branches: score each idea (novelty / viability / fit), flag traps (seductive-but-broken, with the reason), cluster by underlying angle, and deepen the top 2-3 survivors into approaches with risks and first steps.
+3. The survivors become the 2-3 approaches you present, and land in **Abordagens consideradas** with the trade-off trail.
+
+`deep` is the framed-divergence primitive borrowed from the adhd pattern, built entirely on keel's own dispatch — not a separate framework. It is a rare, opt-in mode, never the default.
 
 ## Key Principles
 
