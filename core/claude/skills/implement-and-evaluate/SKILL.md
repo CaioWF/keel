@@ -21,12 +21,23 @@ Choose the execution mode ONCE, before the loop, by reading `tasks.md` (task cou
 | ≥3 mostly-independent tasks, scopes overlap or undeclared | **dispatch** | delegate the whole task loop to `subagent-driven-development` — fresh implementer subagent per task, one at a time, tree snapshots, per-role model routing |
 | ≥3 independent tasks with declared, **pairwise-disjoint** `[scope: …]` | **dispatch-parallel** | delegate to `subagent-driven-development` in parallel-batch mode — disjoint tasks run concurrently, each in its own worktree (`isolation: "worktree"`), merged back per batch |
 
-`dispatch` and `dispatch-parallel` are the same skill (`subagent-driven-development`) — the difference is whether it fans out a batch of disjoint tasks or runs one implementer at a time. To pick `dispatch-parallel`, confirm the partition is real: run `node .specify/gates/validate-parallel-scope.mjs partition specs/<active-feature>/tasks.md` and read the batches it computes. If it reports no batch larger than one task, there is nothing to parallelize — use plain `dispatch`.
+`dispatch` and `dispatch-parallel` are the same skill (`subagent-driven-development`) — the difference is whether it fans out a batch of disjoint tasks or runs one implementer at a time.
+
+**Always run the partition — it is the visible input to this decision, not an afterthought.** Before choosing the mode, run:
+
+```
+node .specify/gates/validate-parallel-scope.mjs partition specs/<active-feature>/tasks.md
+```
+
+Read the batches it computes and **announce the result in one line before the loop** — how many tasks, how the partition grouped them, and the mode you picked — e.g. `Mode: dispatch-parallel — 6 tasks → batches [T1,T3,T4][T2,T5][T6]` or `Mode: inline — 2 tasks, coupled`. This makes the mode decision auditable instead of silent; a partition that finds a real multi-task batch but gets run as plain `dispatch` or `inline` anyway is a missed parallelization the human can now catch. If the partition reports no batch larger than one task, say so (`no disjoint batch → dispatch`) — there is nothing to parallelize, so `dispatch-parallel` is off the table regardless of task count.
+
+The partition output feeds the table: a real batch larger than one ⇒ `dispatch-parallel` is available (take it when the tasks are ≥3 and independent); no batch larger than one ⇒ choose between `inline` (≤2 or coupled) and `dispatch` (≥3 but scopes overlap/undeclared).
 
 Dispatch carries real overhead (tree snapshot, brief file, round-trip, re-integration); the parallel variant adds worktree setup + merge-back per batch. It pays off only when parallelism or bulk context-pollution justify it; a short or coupled feature is cheaper inline. When in doubt on a borderline count, prefer inline — the review loop is the same either way.
 
 Steps:
 1. Resolve the active feature from `.specify/state` (fallback: newest dir under `specs/`).
+1a. Run the partition (`validate-parallel-scope.mjs partition …`) and announce the chosen mode + batch plan in one line, per `## Mode Selection`. Do this once, before the loop.
 2. Loop while `specs/<active-feature>/tasks.md` has unchecked top-level tasks:
    a. Execute the next unit of work per the mode chosen above:
       - **inline** → invoke `implement-feature` for the next unchecked task (ONE task per iteration).

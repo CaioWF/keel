@@ -15,3 +15,13 @@ assert_contains "$SK/analyze/SKILL.md" "architecture divergence" "analyze flags 
 
 # Data-layer contract: plan-writer fills the conditional section when DB is touched.
 assert_contains "$SK/plan-writer/SKILL.md" "Contrato da Camada de Dados" "plan-writer fills data-layer contract"
+
+# Slice-vs-layer decomposition axis: plan-writer chooses it, tasks-writer honors it,
+# implement-and-evaluate makes the partition/mode decision visible. This is what unlocks
+# dispatch-parallel — an edit that drops the guidance silently kills parallelization.
+assert_contains "$SK/plan-writer/SKILL.md" "decomposition axis" "plan-writer chooses slice-vs-layer axis"
+assert_contains "$SK/plan-writer/SKILL.md" "Vertical slice" "plan-writer names the vertical-slice axis"
+assert_contains "$SK/tasks-writer/SKILL.md" "decomposition axis" "tasks-writer honors the plan's axis"
+assert_file "$SK/implement-and-evaluate/SKILL.md" "implement-and-evaluate skill exists"
+assert_contains "$SK/implement-and-evaluate/SKILL.md" "validate-parallel-scope.mjs partition" "implement-and-evaluate runs the partition"
+assert_contains "$SK/implement-and-evaluate/SKILL.md" "announce" "implement-and-evaluate announces mode + batch plan"
