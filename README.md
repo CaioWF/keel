@@ -41,6 +41,14 @@ bash bootstrap.sh --agent=codex,cursor   # or --all
 
 Requires Node (for the hooks/gates). No other dependency.
 
+Every install stamps `.specify/keel.json` (keel version, source commit, agents, packs,
+install/update timestamps). Check what a project has — and whether it's behind the keel
+you're running from:
+
+```bash
+bash /path/to/keel/bootstrap.sh --status
+```
+
 ## The SDD flow
 
 ```

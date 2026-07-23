@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SELF="$(cd "$(dirname "$0")" && pwd)"
-TARGET="$PWD"; FORCE=0; AGENTS=""; PACKS=""
+TARGET="$PWD"; FORCE=0; AGENTS=""; PACKS=""; STATUS=0
 ALL_EXTRA="codex,cursor,copilot,gemini,windsurf"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -10,10 +10,26 @@ while [ $# -gt 0 ]; do
     --all) AGENTS="$ALL_EXTRA"; shift ;;
     --agent=*) AGENTS="${1#--agent=}"; shift ;;
     --pack=*) PACKS="${1#--pack=}"; shift ;;
+    --status) STATUS=1; shift ;;
     *) echo "[keel] unknown arg: $1" >&2; exit 2 ;;
   esac
 done
+
+# keel source version (semver from VERSION file) + exact commit of this clone.
+# VERSION is the in-repo source of truth; the sha pins what was actually installed.
+# Both degrade to "unknown" gracefully (no file / SELF not a git repo).
+KEEL_VERSION="$( [ -f "$SELF/VERSION" ] && head -n1 "$SELF/VERSION" | tr -d '[:space:]' || echo "unknown" )"
+KEEL_COMMIT="$(git -C "$SELF" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
+
+# --status: read the target's manifest and report; do not install.
+if [ "$STATUS" -eq 1 ]; then
+  node "$SELF/lib/keel-status.mjs" --dir "$TARGET" --source-version "$KEEL_VERSION" --source-commit "$KEEL_COMMIT"
+  exit $?
+fi
+
 mkdir -p "$TARGET"
+INSTALLED_PACKS=""  # accumulates packs actually installed (explicit + detected), for the manifest
+note_pack() { case ",$INSTALLED_PACKS," in *",$1,"*) : ;; *) INSTALLED_PACKS="${INSTALLED_PACKS:+$INSTALLED_PACKS,}$1" ;; esac; }
 
 # copy_file <src> <dest>
 copy_file() {
@@ -97,6 +113,7 @@ if [ -n "$PACKS" ]; then
     PACK_SH="$SELF/packs/$p/install.sh"
     if [ -f "$PACK_SH" ]; then
       if [ "$FORCE" -eq 1 ]; then bash "$PACK_SH" --dir "$TARGET" --force; else bash "$PACK_SH" --dir "$TARGET"; fi
+      note_pack "$p"
     else
       echo "[keel] unknown pack: $p (no $PACK_SH)" >&2; exit 2
     fi
@@ -110,6 +127,7 @@ run_detected_pack() {
   case ",$PACKS," in *",$name,"*) return 0 ;; esac  # already ran via --pack
   [ -f "$sh" ] || return 0
   if [ "$FORCE" -eq 1 ]; then bash "$sh" --dir "$TARGET" --force; else bash "$sh" --dir "$TARGET"; fi
+  note_pack "$name"
 }
 
 # stack-conventions: implementation-time convention lenses. Auto-installed when a TS
@@ -127,7 +145,15 @@ if [ -f "$TARGET/package.json" ] && [ -f "$TARGET/tsconfig.json" ]; then
   PACK="$SELF/packs/ts-clean-arch/install.sh"
   if [ -f "$PACK" ]; then
     if [ "$FORCE" -eq 1 ]; then bash "$PACK" --dir "$TARGET" --force; else bash "$PACK" --dir "$TARGET"; fi
+    note_pack "ts-clean-arch"
   fi
 fi
+
+# Install manifest: always stamp .specify/keel.json (version + commit + agents + packs +
+# install/update timestamps). Unlike clients.json this is unconditional, so any project
+# can answer "which keel is this?" and `bootstrap.sh --status` can report/flag staleness.
+node "$SELF/lib/write-manifest.mjs" --dir "$TARGET" \
+  --version "$KEEL_VERSION" --commit "$KEEL_COMMIT" \
+  --agents "${AGENTS:-}" --packs "${INSTALLED_PACKS:-}"
 
 echo "[keel] core installed at $TARGET"
