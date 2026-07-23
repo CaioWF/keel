@@ -20,6 +20,15 @@ Steps:
    - `Hipótese` — the solution hypothesis and why it should work.
    - `Usuário/Contexto` — target user, usage scenarios, constraints.
    - `Métrica de Sucesso` — measurable KPI/OKR for success.
+   - `Dependências e Interfaces` — the feature's seams, stated at product level (the
+     technical contract belongs in `plan.md`):
+     - **Consome** — every input the feature needs to work: data, endpoints, events,
+       features it reads from. Name the origin, not just the thing.
+     - **Expõe** — what the feature newly offers others: endpoints, events, data,
+       screens. If nothing is exposed, write "nada" — an empty seam is a real answer.
+     - **Dependências** — coupled features/systems with direction: link sibling features
+       as `specs/NNN-nome` and say which blocks which. A feature that cannot ship before
+       another must say so here, not discover it at plan time.
    - `Fora de Escopo` — what this phase explicitly excludes.
 5. Write `NNN-name` (single line, no trailing content) to `.specify/state` so it becomes the active feature for subsequent skills.
 

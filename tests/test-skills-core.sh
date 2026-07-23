@@ -13,6 +13,12 @@ assert_contains "$SK/plan-writer/SKILL.md" "codebase-map" "plan-writer grounds i
 assert_contains "$SK/plan-writer/SKILL.md" "Replicate before inventing" "plan-writer mandates pattern replication"
 assert_contains "$SK/analyze/SKILL.md" "architecture divergence" "analyze flags unjustified pattern divergence"
 
+# Feature seams: the PRD states dependencies + what the feature consumes/exposes, so
+# coupling surfaces at product time instead of being discovered during planning.
+assert_contains "$SK/prd-writer/SKILL.md" "Dependências e Interfaces" "prd-writer fills the seams section"
+assert_contains "$SK/prd-writer/SKILL.md" "Consome" "prd-writer names the feature's inputs"
+assert_contains "$SK/prd-writer/SKILL.md" "Expõe" "prd-writer names what the feature exposes"
+
 # Data-layer contract: plan-writer fills the conditional section when DB is touched.
 assert_contains "$SK/plan-writer/SKILL.md" "Contrato da Camada de Dados" "plan-writer fills data-layer contract"
 
