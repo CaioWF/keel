@@ -13,6 +13,20 @@ assert_contains "$SK/plan-writer/SKILL.md" "codebase-map" "plan-writer grounds i
 assert_contains "$SK/plan-writer/SKILL.md" "Replicate before inventing" "plan-writer mandates pattern replication"
 assert_contains "$SK/analyze/SKILL.md" "architecture divergence" "analyze flags unjustified pattern divergence"
 
+# Interview discipline in clarify (adapted from mattpocock/skills `grilling`, MIT): the
+# questioning phase must fact-check first, recommend, order by dependency, and refuse to
+# hand off with an open branch. Dropping these turns clarify back into a flat question dump.
+assert_contains "$SK/clarify/SKILL.md" "Fact-check before asking" "clarify verifies before asking"
+assert_contains "$SK/clarify/SKILL.md" "Order by dependency" "clarify orders questions by dependency"
+assert_contains "$SK/clarify/SKILL.md" "Carry a recommendation" "clarify recommends an answer per question"
+assert_contains "$SK/clarify/SKILL.md" "branch left open" "clarify refuses to hand off with an open branch"
+assert_contains "$SK/clarify/SKILL.md" "mattpocock/skills" "clarify attributes the adapted source"
+# Prior-art scan feeds the questions but must not anchor them: research is input to a
+# question, never an answer, and one question must probe NOT following the convention.
+assert_contains "$SK/clarify/SKILL.md" "Scan prior art" "clarify scans prior art before asking"
+assert_contains "$SK/clarify/SKILL.md" "input to a question, never an answer" "clarify forbids prior art as the answer"
+assert_contains "$SK/clarify/SKILL.md" "Reserve a creative branch" "clarify reserves a non-conventional branch"
+
 # Feature seams: the PRD states dependencies + what the feature consumes/exposes, so
 # coupling surfaces at product time instead of being discovered during planning.
 assert_contains "$SK/prd-writer/SKILL.md" "Dependências e Interfaces" "prd-writer fills the seams section"
