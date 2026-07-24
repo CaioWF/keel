@@ -39,7 +39,7 @@ ok(!!gcmd, "gemini command path is toml");
 ok(gcmd.content.startsWith('description = "'), "gemini toml has description");
 ok(gcmd.content.includes('prompt = """'), "gemini toml has prompt block");
 ok(gcmd.content.includes('\\"foo\\"'), "gemini toml escapes quotes in description");
-ok(/companheiros/.test(gcmd.content), "gemini flat carries companion pointer");
+ok(/Companion prompts/.test(gcmd.content), "gemini flat carries companion pointer");
 
 // gemini toml: a frontmatter description already wrapped in quotes is not doubled
 const QSKILL = '---\nname: bar\ndescription: "You MUST do bar"\n---\nbody\n';

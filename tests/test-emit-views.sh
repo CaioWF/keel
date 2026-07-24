@@ -24,7 +24,7 @@ assert_file "$S/.github/prompts/foo.prompt.md" "emit: copilot prompt"
 assert_file "$S/.windsurf/workflows/foo.md" "emit: windsurf workflow"
 # flat clients drop companion file but keep a pointer
 assert_nofile "$S/.cursor/commands/impl-prompt.md" "emit: flat client does not emit companion file"
-assert_contains "$S/.cursor/commands/foo.md" "companheiros" "emit: flat command carries companion pointer"
+assert_contains "$S/.cursor/commands/foo.md" "Companion prompts" "emit: flat command carries companion pointer"
 # advisory banner in instructions
 assert_contains "$S/GEMINI.md" "advisory" "emit: instructions carry advisory banner"
 # manifest

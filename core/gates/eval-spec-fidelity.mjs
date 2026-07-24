@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// Eval de fidelidade spec→implementação (zero-dep, só builtins node:).
-// Para cada specs/NNNN-*/ que JÁ TEM tasks.md: cada AC-N declarado na spec precisa estar
-// coberto por uma task (token AC-N em tasks.md). AC sem task => rastreabilidade quebrada (exit 1).
-// AC sem referência em código/teste (token AC-N no código) => aviso, não bloqueia.
-// Features ainda na fase de spec (sem tasks.md) são puladas — o gate só vale após o tasks-writer.
-// SPEC_DEVIATION no código é contado e reportado (marcador de divergência consciente).
-// Uso: node eval-spec-fidelity.mjs [dir]   (default: ".")
+// Spec→implementation fidelity eval (zero-dep, node: builtins only).
+// For every specs/NNNN-*/ that ALREADY HAS tasks.md: every AC-N declared in the spec must be
+// covered by a task (AC-N token in tasks.md). AC with no task => broken traceability (exit 1).
+// AC with no reference in code/test (AC-N token in code) => warning, doesn't block.
+// Features still in the spec phase (no tasks.md) are skipped — the gate only applies after tasks-writer.
+// SPEC_DEVIATION in code is counted and reported (marker of a conscious deviation).
+// Usage: node eval-spec-fidelity.mjs [dir]   (default: ".")
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, resolve, extname } from "node:path";
 
@@ -39,7 +39,7 @@ const deviations = (codeBlob.match(/SPEC_DEVIATION/g) || []).length;
 let hardFail = 0;
 const rows = [];
 for (const name of readdirSync(specsDir)) {
-  if (!/^\d+-/.test(name)) continue; // aceita NNN- (skills) e NNNN- (qualquer nº de dígitos)
+  if (!/^\d+-/.test(name)) continue; // accepts NNN- (skills) and NNNN- (any number of digits)
   const dir = join(specsDir, name);
   if (!existsSync(join(dir, "spec.md"))) continue;
   const acs = [...acTokens(readFileSync(join(dir, "spec.md"), "utf8"))].sort();
@@ -52,18 +52,18 @@ for (const name of readdirSync(specsDir)) {
   rows.push({ name, acs, byTask: acs.length - uncovered.length, byTest: acs.length - noTest.length, uncovered, noTest });
 }
 
-console.log("\nEval de fidelidade spec→implementação\n");
+console.log("\nSpec→implementation fidelity eval\n");
 for (const r of rows) {
   console.log(`  ${r.name}`);
-  if (r.pending) { console.log(`    AC: ${r.acs.length} · sem tasks.md ainda (fase de spec) — rastreabilidade não exigida`); continue; }
-  console.log(`    AC: ${r.acs.length} · por task: ${r.byTask}/${r.acs.length} · em código/teste: ${r.byTest}/${r.acs.length}`);
-  if (r.uncovered.length) console.log(`    ✗ AC sem task (rastreabilidade): ${r.uncovered.join(", ")}`);
-  if (r.noTest.length) console.log(`    ⚠ AC sem referência em código/teste: ${r.noTest.join(", ")}`);
+  if (r.pending) { console.log(`    AC: ${r.acs.length} · no tasks.md yet (spec phase) — traceability not required`); continue; }
+  console.log(`    AC: ${r.acs.length} · by task: ${r.byTask}/${r.acs.length} · in code/test: ${r.byTest}/${r.acs.length}`);
+  if (r.uncovered.length) console.log(`    ✗ AC with no task (traceability): ${r.uncovered.join(", ")}`);
+  if (r.noTest.length) console.log(`    ⚠ AC with no reference in code/test: ${r.noTest.join(", ")}`);
 }
-console.log(`\n  SPEC_DEVIATION abertos no código: ${deviations}`);
+console.log(`\n  SPEC_DEVIATION open in code: ${deviations}`);
 
 if (hardFail) {
-  console.error(`\n✗ ${hardFail} AC sem cobertura de task — rastreabilidade quebrada.\n`);
+  console.error(`\n✗ ${hardFail} AC with no task coverage — broken traceability.\n`);
   process.exit(1);
 }
-console.log(`\n✓ Rastreabilidade spec→task OK (referência em teste é aviso até implementar).\n`);
+console.log(`\n✓ Spec→task traceability OK (test reference is a warning until implemented).\n`);

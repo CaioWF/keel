@@ -12,6 +12,16 @@ OUTS=$(printf '{"cwd":"%s"}' "$S" | node "$H")
 echo "$OUTS" | grep -qF "NEXT STEP: implement AC-3" && pass "injects STATE.md text" || fail "should inject STATE.md"
 echo "$OUTS" | grep -qF "PRINCIPLE: ship small" && pass "still injects constitution alongside STATE" || fail "should keep constitution"
 
+# also injects the product brief (product layer), with .md.tmpl fallback like the constitution
+echo "PRODUCT: north-star is weekly active teams" > "$S/.specify/memory/product.md"
+OUTP=$(printf '{"cwd":"%s"}' "$S" | node "$H")
+echo "$OUTP" | grep -qF "PRODUCT: north-star is weekly active teams" && pass "injects product brief text" || fail "should inject product brief"
+S6="$(new_sandbox)"; mkdir -p "$S6/.specify/memory"
+echo "TMPL PRODUCT" > "$S6/.specify/memory/product.md.tmpl"
+OUT6=$(printf '{"cwd":"%s"}' "$S6" | node "$H")
+echo "$OUT6" | grep -qF "TMPL PRODUCT" && pass "injects product.md.tmpl fallback" || fail "should fall back to product .md.tmpl"
+rm -rf "$S6"
+
 # constitution.md.tmpl fallback: a freshly-installed template (no .md yet) still injects
 S5="$(new_sandbox)"; mkdir -p "$S5/.specify/memory"
 echo "TMPL PRINCIPLE" > "$S5/.specify/memory/constitution.md.tmpl"

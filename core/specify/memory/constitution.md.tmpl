@@ -1,37 +1,38 @@
-# Constituição do Projeto
+# Project Constitution
 
-## Princípios
+## Principles
 
-- [Princípio 1: Descrição breve]
-- [Princípio 2: Descrição breve]
-- [Princípio 3: Descrição breve]
+- [Principle 1: Brief description]
+- [Principle 2: Brief description]
+- [Principle 3: Brief description]
 
-## Padrões de Código
+## Code Standards
 
-- [Padrão 1: Convenção e exemplo]
-- [Padrão 2: Convenção e exemplo]
-- [Padrão 3: Convenção e exemplo]
+- [Standard 1: Convention and example]
+- [Standard 2: Convention and example]
+- [Standard 3: Convention and example]
 
-## Princípios de arquitetura
+## Architecture Principles
 
-> Não-negociáveis destilados da camada de conceito (skill `architecture`). A profundidade e o
-> racional ficam nos guias; aqui só as regras que o agente deve seguir sempre.
+> Non-negotiables distilled from the concept layer (`architecture` skill). Depth and rationale
+> live in the guides; here only the rules the agent must always follow.
 
-- **Dependency rule:** dependências apontam para dentro. O domínio (entidades, regras de negócio)
-  NÃO importa framework, I/O, banco, HTTP nem detalhes de infra. Infra depende do domínio, nunca o contrário.
-- **Domínio puro:** lógica de negócio fica testável sem subir framework/rede/banco. Efeitos colaterais
-  ficam nas bordas (adapters/infra).
-- **Fronteira de agregado (DDD):** mutações passam pela raiz do agregado; invariantes são garantidas
-  ali. Não altere entidades internas por fora da raiz.
-- **Teste comportamento, não implementação:** testes verificam entradas/saídas/efeitos observáveis,
-  nunca mocks ou detalhes internos (ver skill `test-driven-development`).
-- **Mínimo viável:** suba a laziness ladder (precisa existir? → reuso → stdlib → nativo → dep
-  instalada → one-liner → mínimo) antes de adicionar dep, abstração ou feature. Nunca à custa de
-  validação de trust-boundary, perda de dados, segurança ou a11y (ver guia `minimalism.md`).
+- **Dependency rule:** dependencies point inward. The domain (entities, business rules) does
+  NOT import framework, I/O, database, HTTP, or infra details. Infra depends on the domain, never the reverse.
+- **Pure domain:** business logic stays testable without spinning up a framework/network/database.
+  Side effects stay at the edges (adapters/infra).
+- **Aggregate boundary (DDD):** mutations go through the aggregate root; invariants are guaranteed
+  there. Do not alter internal entities from outside the root.
+- **Test behavior, not implementation:** tests verify inputs/outputs/observable effects, never
+  mocks or internal details (see the `test-driven-development` skill).
+- **Minimum viable:** climb the laziness ladder (does it need to exist? → reuse → stdlib → native
+  → installed dep → one-liner → minimum) before adding a dep, abstraction, or feature. Never at
+  the expense of trust-boundary validation, data loss, security, or a11y (see the `minimalism.md`
+  guide).
 
-## Processo SDD
+## SDD Process
 
-- [Fase 1: Investigação e Spec]
-- [Fase 2: Implementação]
-- [Fase 3: Review e Validação]
-- [Fase 4: Merge e Deploy]
+- [Phase 1: Investigation and Spec]
+- [Phase 2: Implementation]
+- [Phase 3: Review and Validation]
+- [Phase 4: Merge and Deploy]

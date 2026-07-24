@@ -1,35 +1,35 @@
-# Tarefas — [Feature]
+# Tasks — [Feature]
 
-## Checklist de Implementação
+## Implementation Checklist
 
-> Cada task que entrega um critério de aceitação deve citar o `AC-N` correspondente da spec
-> (ex.: `(AC-1)`). O gate `eval-spec-fidelity` falha se algum `AC-N` da spec não tiver task.
+> Every task that delivers an acceptance criterion must cite the corresponding `AC-N` from the
+> spec (e.g. `(AC-1)`). The `eval-spec-fidelity` gate fails if any `AC-N` in the spec has no task.
 >
-> Cada task pode declarar seu **scope de arquivos** com `[scope: glob, glob]` — os globs que
-> ela vai tocar (deriva do `Estrutura de Arquivos` do plan). Tasks com scopes disjuntos podem
-> rodar em paralelo no modo `dispatch-parallel` (ver `execution-mode-routing`). Sem `[scope: …]`,
-> ou com glob amplo (`**`, `*`), a task nunca paraleliza — roda sozinha (default seguro).
+> Each task can declare its **file scope** with `[scope: glob, glob]` — the globs it will
+> touch (derived from the plan's `File Structure`). Tasks with disjoint scopes can run in
+> parallel in `dispatch-parallel` mode (see `execution-mode-routing`). Without `[scope: …]`,
+> or with a broad glob (`**`, `*`), the task never parallelizes — it runs alone (safe default).
 
-- [ ] Task 1: Descrição da tarefa (AC-1) [scope: src/moduloA/**, tests/moduloA/**]
-- [ ] Task 2: Descrição da tarefa (AC-2) [scope: src/moduloB/**, tests/moduloB/**]
-- [ ] Task 3: Descrição da tarefa
-- [ ] Task 4: Descrição da tarefa
-- [ ] Task 5: Descrição da tarefa
+- [ ] Task 1: Task description (AC-1) [scope: src/moduleA/**, tests/moduleA/**]
+- [ ] Task 2: Task description (AC-2) [scope: src/moduleB/**, tests/moduleB/**]
+- [ ] Task 3: Task description
+- [ ] Task 4: Task description
+- [ ] Task 5: Task description
 
-## Subtarefas
+## Subtasks
 
 ### Task 1
-- [ ] Subtarefa 1.1
-- [ ] Subtarefa 1.2
+- [ ] Subtask 1.1
+- [ ] Subtask 1.2
 
 ### Task 2
-- [ ] Subtarefa 2.1
-- [ ] Subtarefa 2.2
+- [ ] Subtask 2.1
+- [ ] Subtask 2.2
 
-## Bloqueadores
+## Blockers
 
-- [Listagem de bloqueadores conhecidos ou dependências]
+- [List of known blockers or dependencies]
 
-## Notas
+## Notes
 
-- [Anotações importantes para execução]
+- [Important notes for execution]

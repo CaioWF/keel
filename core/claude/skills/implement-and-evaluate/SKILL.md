@@ -1,6 +1,6 @@
 ---
 name: implement-and-evaluate
-description: Orchestrates the implement-feature, evaluator, fix-runner loop for the active feature until all Criterios de Aceitacao are met and quality gates are green.
+description: Orchestrates the implement-feature, evaluator, fix-runner loop for the active feature until all Acceptance Criteria are met and quality gates are green.
 ---
 
 # implement-and-evaluate
@@ -9,7 +9,7 @@ When: analyze has reported clean and spec.md + plan.md both carry `status: appro
 
 Template: none — this skill orchestrates other skills, it does not fill or produce a template-based artifact itself.
 
-Output: a fully implemented, gate-green feature with every `tasks.md` checkbox ticked and every `spec.md` `Critérios de Aceitação` scenario passing.
+Output: a fully implemented, gate-green feature with every `tasks.md` checkbox ticked and every `spec.md` `Acceptance Criteria` scenario passing.
 
 ## Mode Selection
 
@@ -43,11 +43,11 @@ Steps:
       - **inline** → invoke `implement-feature` for the next unchecked task (ONE task per iteration).
       - **dispatch** → hand the next unchecked task to `subagent-driven-development`, which owns the snapshot + brief + implementer dispatch + model routing for it; then resume this loop at step 2b with the task's result.
       - **dispatch-parallel** → hand the next unchecked **batch** (the disjoint-scope group from `validate-parallel-scope partition`) to `subagent-driven-development`, which owns the batch snapshot + per-task briefs + concurrent worktree-isolated implementer dispatch + merge-back for it; then resume this loop at step 2b, evaluating the ACs of every task in the batch.
-   b. Invoke evaluator to score the relevant `Critérios de Aceitação` against the new state.
+   b. Invoke evaluator to score the relevant `Acceptance Criteria` against the new state.
    c. If evaluator reports any FAIL, invoke fix-runner, then re-invoke evaluator to confirm.
    d. Repeat b-c until evaluator reports all relevant scenarios PASS and gates are green, then proceed to the next task.
 3. Stop the loop early and report the blocker if: the phase-gate blocks an edit (spec/plan not approved), a fix-runner attempt requires scope beyond the current task, or the same scenario fails three iterations in a row without progress.
-4. Once all tasks are checked and a final fix-runner pass confirms `.specify/gates/run-gates.sh` is green, run evaluator once more over the full `Critérios de Aceitação` list as a final confirmation before handing off.
+4. Once all tasks are checked and a final fix-runner pass confirms `.specify/gates/run-gates.sh` is green, run evaluator once more over the full `Acceptance Criteria` list as a final confirmation before handing off.
 5. Do not commit. Accumulate changes; commit happens later, once code-review and the human both sign off.
 
 Next: review-and-simplify.

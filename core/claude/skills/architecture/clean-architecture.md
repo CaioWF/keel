@@ -1,46 +1,46 @@
-# Clean Architecture (agnóstico de linguagem)
+# Clean Architecture (language-agnostic)
 
-Fonte: Robert C. Martin, *Clean Architecture*. Objetivo: manter regras de negócio
-independentes de framework, UI, banco e detalhes externos — para que detalhes possam mudar
-sem reescrever o núcleo.
+Source: Robert C. Martin, *Clean Architecture*. Goal: keep business rules
+independent of framework, UI, database, and external details — so details can change
+without rewriting the core.
 
-## As camadas (de dentro para fora)
+## The layers (from inside out)
 
-1. **Entities / Domínio** — regras de negócio mais estáveis. Tipos e invariantes do negócio.
-   Não conhecem nada de fora.
-2. **Use cases / Application** — orquestram entidades para realizar uma intenção do usuário.
-   Definem **portas** (interfaces) do que precisam do mundo externo.
-3. **Interface adapters** — convertem entre o formato dos use cases e o mundo externo:
-   controllers, presenters, gateways, mapeadores de repositório.
-4. **Frameworks & drivers** — web framework, banco, fila, SDKs. O anel mais volátil.
+1. **Entities / Domain** — the most stable business rules. Business types and invariants.
+   Know nothing about the outside.
+2. **Use cases / Application** — orchestrate entities to fulfill a user intent.
+   Define **ports** (interfaces) for what they need from the outside world.
+3. **Interface adapters** — convert between the use cases' format and the outside world:
+   controllers, presenters, gateways, repository mappers.
+4. **Frameworks & drivers** — web framework, database, queue, SDKs. The most volatile ring.
 
-## A dependency rule (a regra central)
+## The dependency rule (the central rule)
 
-**Dependências de código apontam só para dentro.** Um anel interno nunca conhece um externo.
+**Code dependencies point only inward.** An inner ring never knows about an outer one.
 
-- O domínio NÃO importa framework, I/O, ORM, HTTP, nem tipos de infra.
-- Use cases dependem de **abstrações** (portas) que eles declaram; a infra **implementa** essas
-  portas (inversão de dependência). O fluxo de controle pode ir para fora; o de **dependência de
-  código**, não.
-- Dado cruza fronteira como estrutura simples (DTO), nunca uma entidade do ORM vazando para o
-  domínio.
+- The domain does NOT import framework, I/O, ORM, HTTP, or infra types.
+- Use cases depend on **abstractions** (ports) they declare; infra **implements** these
+  ports (dependency inversion). Control flow can go outward; **code dependency**
+  cannot.
+- Data crosses the boundary as a plain structure (DTO), never an ORM entity leaking into
+  the domain.
 
-## Como mapeia para estrutura
+## How it maps to structure
 
-`domain/` (entities) · `application/` (use cases + portas) · `infrastructure/` (adapters/impl
-das portas) · `interface/` (entrega: HTTP, CLI). Direção de import: `interface → application →
-domain`, `infrastructure → application/domain` (implementando portas). Ver
-`architecture-template.md` para o formato; cada linguagem realiza com seu idioma.
+`domain/` (entities) · `application/` (use cases + ports) · `infrastructure/` (adapters/port
+implementations) · `interface/` (delivery: HTTP, CLI). Import direction: `interface → application →
+domain`, `infrastructure → application/domain` (implementing ports). See
+`architecture-template.md` for the format; each language realizes it in its own idiom.
 
-## Sinais de violação (red flags)
+## Violation signals (red flags)
 
-- `import` de framework/banco dentro de `domain/`.
-- Use case instanciando um cliente HTTP/SQL concreto em vez de receber uma porta.
-- Entidade do ORM usada como modelo de domínio.
-- Regra de negócio dentro de controller/handler.
+- `import` of framework/database inside `domain/`.
+- Use case instantiating a concrete HTTP/SQL client instead of receiving a port.
+- ORM entity used as the domain model.
+- Business rule inside a controller/handler.
 
 ## Enforcement
 
-Agnóstico aqui é guia. A imposição mecânica (proibir o import cruzando a fronteira) é por
-linguagem: TS `dependency-cruiser`/`eslint-plugin-boundaries`, Python `import-linter`, Go
-arch-tests + `internal/`, Java ArchUnit. Vem de um pack (ex.: `ts-clean-arch`), não do core.
+Language-agnostic here is guidance. Mechanical enforcement (forbidding the import across the
+boundary) is per language: TS `dependency-cruiser`/`eslint-plugin-boundaries`, Python `import-linter`, Go
+arch-tests + `internal/`, Java ArchUnit. It comes from a pack (e.g. `ts-clean-arch`), not from core.

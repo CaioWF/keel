@@ -1,41 +1,42 @@
-# DDD tático (agnóstico de linguagem)
+# Tactical DDD (language-agnostic)
 
-Fonte: Eric Evans, *Domain-Driven Design*. Os padrões táticos modelam o domínio dentro da camada
-mais interna da Clean Architecture. Use quando há **regras de negócio e invariantes** de verdade
-(não para CRUD anêmico).
+Source: Eric Evans, *Domain-Driven Design*. Tactical patterns model the domain within
+the innermost layer of Clean Architecture. Use when there are **real business rules and
+invariants** (not for anemic CRUD).
 
-## Os blocos
+## The building blocks
 
-- **Value Object** — definido pelos valores, sem identidade; imutável. Ex.: `Money`, `Email`,
-  `DateRange`. Comparado por valor. Carrega validação no construtor (não existe `Email` inválido).
-- **Entity** — tem **identidade** estável ao longo do tempo, mesmo que os atributos mudem. Ex.:
-  `Order`, `User`. Igualdade por id, não por atributos.
-- **Aggregate** — cluster de entities/value objects tratado como uma unidade de consistência. Tem
-  uma **raiz** (aggregate root); o mundo externo só referencia a raiz.
-- **Repository** — abstração de coleção para carregar/salvar **aggregates** pela raiz. É uma
-  **porta** (Clean Architecture): definida no domínio/application, implementada na infra.
-- **Domain Service** — lógica de negócio que não pertence naturalmente a uma entity/value object
-  (envolve várias). Sem estado.
-- **Domain Event** — algo relevante que aconteceu no domínio (`OrderPlaced`); permite reações
-  desacopladas.
+- **Value Object** — defined by its values, no identity; immutable. E.g.: `Money`, `Email`,
+  `DateRange`. Compared by value. Carries validation in the constructor (there's no such thing as an
+  invalid `Email`).
+- **Entity** — has a stable **identity** over time, even as attributes change. E.g.:
+  `Order`, `User`. Equality by id, not by attributes.
+- **Aggregate** — cluster of entities/value objects treated as a consistency unit. Has
+  a **root** (aggregate root); the outside world only references the root.
+- **Repository** — collection abstraction for loading/saving **aggregates** by their root. It is a
+  **port** (Clean Architecture): defined in domain/application, implemented in infra.
+- **Domain Service** — business logic that doesn't naturally belong to a single entity/value
+  object (involves several). Stateless.
+- **Domain Event** — something relevant that happened in the domain (`OrderPlaced`); enables
+  decoupled reactions.
 
-## Fronteira de agregado (a regra que vira constituição)
+## Aggregate boundary (the rule that becomes constitution)
 
-- **Toda mutação passa pela raiz do agregado.** Ela garante as invariantes. Não altere entities
-  internas por fora da raiz.
-- Mantenha agregados **pequenos** — só o que precisa ser consistente na mesma transação.
-- Entre agregados, referencie **por id**, não por objeto. Consistência entre agregados é eventual.
-- Um repository por **aggregate root**, não por tabela.
+- **Every mutation goes through the aggregate root.** It guarantees the invariants. Don't
+  change internal entities from outside the root.
+- Keep aggregates **small** — only what needs to be consistent within the same transaction.
+- Between aggregates, reference **by id**, not by object. Consistency between aggregates is eventual.
+- One repository per **aggregate root**, not per table.
 
 ## Red flags
 
-- Entity anêmica (só getters/setters) com a regra de negócio espalhada em "services" de aplicação.
-- Repository devolvendo entities internas de outro agregado.
-- Invariante checada no controller em vez da raiz do agregado.
-- Value object mutável ou aceitando estado inválido.
+- Anemic entity (only getters/setters) with the business rule spread across application "services."
+- Repository returning internal entities of another aggregate.
+- Invariant checked in the controller instead of the aggregate root.
+- Mutable value object, or one that accepts invalid state.
 
-## Como aplicar
+## How to apply
 
-No plan-writer, identifique agregados e suas raízes antes de modelar persistência. Os repositories
-são portas → casam com a dependency rule (domínio define, infra implementa). Profundidade
-estratégica (bounded contexts, ubiquitous language) está fora deste guia tático.
+In plan-writer, identify aggregates and their roots before modeling persistence. Repositories
+are ports → they align with the dependency rule (domain defines, infra implements). Strategic
+depth (bounded contexts, ubiquitous language) is out of scope for this tactical guide.

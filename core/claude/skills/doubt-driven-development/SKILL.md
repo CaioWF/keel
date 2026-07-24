@@ -34,7 +34,7 @@ Natural touchpoints in the keel chain: before flipping `spec.md`/`plan.md` to `s
 4. **RECONCILE** — Classify each finding:
    - **contract misread** — the reviewer misunderstood the contract → tighten the EXTRACT, not the code.
    - **actionable** — a real defect or gap → fix it.
-   - **trade-off** — a legitimate tension → record the decision (ADR / `Decisões Técnicas`) and move on.
+   - **trade-off** — a legitimate tension → record the decision (ADR / `Technical Decisions`) and move on.
    - **noise** — irrelevant → discard.
 
 5. **STOP** — Bounded at **3 cycles**. Stop earlier when findings are trivial or the user overrides. Three unresolved cycles means escalate to the human, not grind further.

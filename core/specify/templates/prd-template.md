@@ -1,41 +1,46 @@
-# Documento de Requisitos do Produto (PRD)
+# Product Requirements Document (PRD)
 
-## Problema
+> Product context (who the user is, what the product is, the north-star metric) lives in the
+> brief at `.specify/memory/product.md`. This PRD **references** that brief and records only what
+> is specific to THIS feature — do not repeat the user profile or the product's value proposition.
 
-- [Descrever o problema ou oportunidade identificada]
-- [Impacto no negócio ou no usuário]
+## Problem
 
-## Hipótese
+- [The problem/opportunity specific to THIS feature]
+- [How it connects to the product's core problem (see `product.md`) — without repeating it]
 
-- [Enunciado da hipótese sobre a solução]
-- [Por que acreditamos que isso funcionará]
+## Hypothesis
 
-## Usuário/Contexto
+- [Statement of the hypothesis about the solution]
+- [Why we believe this will work]
 
-- [Perfil do usuário alvo]
-- [Cenários de uso]
-- [Contexto e constraints]
+## User/Context
 
-## Métrica de Sucesso
+- [Inherits the target user from the product brief (`.specify/memory/product.md`); record only
+  what this feature adds or restricts]
+- [Usage scenarios specific to this feature]
+- [Context and constraints specific to this feature]
 
-- [KPI ou OKR mensurável]
-- [Como avaliar sucesso da feature]
+## Success Metric
 
-## Dependências e Interfaces
+- [Measurable KPI or OKR]
+- [How to evaluate the feature's success]
 
-**Consome (entradas)** — do que esta feature depende para funcionar:
+## Dependencies & Interfaces
 
-- [Origem (feature `NNN-nome` / serviço / sistema externo) → o que é consumido]
+**Consumes (inputs)** — what this feature depends on to work:
 
-**Expõe (saídas)** — o que esta feature passa a oferecer a terceiros:
+- [Source (feature `NNN-name` / service / external system) → what is consumed]
 
-- [Contrato/endpoint/evento/dado/tela exposto → quem consome]
+**Exposes (outputs)** — what this feature now offers to others:
 
-**Dependências** — acoplamentos com direção explícita:
+- [Contract/endpoint/event/data/screen exposed → who consumes it]
 
-- [`specs/NNN-nome` ou sistema externo — bloqueia esta feature / é desbloqueado por ela]
+**Dependencies** — couplings with explicit direction:
 
-## Fora de Escopo
+- [`specs/NNN-name` or external system — blocks this feature / is unblocked by it]
 
-- [O que não será entregue nesta fase]
-- [Melhorias futuras consideradas]
+## Out of Scope
+
+- [What will not be delivered in this phase]
+- [Future improvements considered]

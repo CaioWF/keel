@@ -26,14 +26,14 @@ assert_contains "$SK/testing-strategy.md" "test-driven-development" "testing-str
 assert_contains "$SK/clean-architecture.md" "dependency rule" "clean-architecture states dependency rule"
 
 # constitution carries the hard rules
-assert_contains "$CONST" "Princípios de arquitetura" "constitution has architecture principles section"
+assert_contains "$CONST" "Architecture Principles" "constitution has architecture principles section"
 assert_contains "$CONST" "Dependency rule" "constitution states the dependency rule"
-assert_contains "$CONST" "agregado" "constitution states aggregate boundary"
+assert_contains "$CONST" "Aggregate boundary" "constitution states aggregate boundary"
 
 # structure template
 assert_file "$TPL/architecture-template.md" "architecture-template exists"
 assert_contains "$TPL/architecture-template.md" "domain" "template names the domain layer"
-assert_contains "$TPL/architecture-template.md" "realiza com seu idioma" "template has per-language realization note"
+assert_contains "$TPL/architecture-template.md" "realizes it in its own idiom" "template has per-language realization note"
 
 # design note recipe
 assert_file "$HERE/../docs/design-notes/concepts-layer.md" "concepts-layer design note exists"

@@ -1,30 +1,30 @@
 #!/usr/bin/env node
-// Partição e verificação de file-scope para dispatch-parallel (zero-dep, só builtins node:).
+// File-scope partitioning and verification for dispatch-parallel (zero-dep, node: builtins only).
 //
-// Dois modos:
+// Two modes:
 //
 //   partition <tasks.md>
-//     Lê as linhas de checklist de tasks.md, extrai o `[scope: glob, glob]` de cada task e
-//     agrupa em batches CONSECUTIVOS onde os scopes são disjuntos par-a-par (nenhum par toca o
-//     mesmo arquivo). Task sem scope, ou com glob amplo (prefixo vazio, ex.: `**`, `**/*.ts`),
-//     roda sozinha (batch de um). Imprime os batches em ordem. Determinístico, informativo
-//     (exit 0), exceto scope malformado → exit 1.
-//     Tamanho máximo do batch: env KEEL_PARALLEL_MAX (default 4).
+//     Reads the checklist lines from tasks.md, extracts the `[scope: glob, glob]` of each task and
+//     groups them into CONSECUTIVE batches where the scopes are pairwise disjoint (no pair touches the
+//     same file). A task with no scope, or with a broad glob (empty prefix, e.g. `**`, `**/*.ts`),
+//     runs alone (batch of one). Prints the batches in order. Deterministic, informational
+//     (exit 0), except malformed scope → exit 1.
+//     Max batch size: env KEEL_PARALLEL_MAX (default 4).
 //
-//   check "<glob, glob>" <arquivo>...
-//     Verifica que TODO arquivo alterado casa ao menos um glob do scope declarado. Qualquer
-//     arquivo fora do scope → exit 1 (write out-of-scope pode colidir com uma task irmã).
-//     Todos dentro → exit 0.
+//   check "<glob, glob>" <file>...
+//     Verifies that EVERY changed file matches at least one glob of the declared scope. Any
+//     file outside the scope → exit 1 (an out-of-scope write could collide with a sibling task).
+//     All inside → exit 0.
 //
-// Disjunção é conservadora (whitelist): na dúvida, trata como sobreposto e serializa. Nunca
-// declara disjunto o que pode colidir.
+// Disjointness is conservative (whitelist): when in doubt, treat as overlapping and serialize. Never
+// declares disjoint something that could collide.
 import { readFileSync } from "node:fs";
 
 const MAX = Math.max(1, parseInt(process.env.KEEL_PARALLEL_MAX || "4", 10) || 4);
 const WILDCARD = /[*?[\]{}]/;
 
-// Segmentos literais de um glob: prefixo de path antes do primeiro segmento com wildcard.
-// `src/auth/**` -> ["src","auth"] · `src/*.ts` -> ["src"] · `**/*.ts` -> [] (amplo, casa tudo).
+// Literal segments of a glob: path prefix before the first segment with a wildcard.
+// `src/auth/**` -> ["src","auth"] · `src/*.ts` -> ["src"] · `**/*.ts` -> [] (broad, matches everything).
 function litSegs(glob) {
   const segs = [];
   for (const seg of glob.split("/")) {
@@ -36,14 +36,14 @@ function litSegs(glob) {
 
 const isSegPrefix = (a, b) => a.length <= b.length && a.every((s, i) => s === b[i]);
 
-// Dois globs sobrepõem se um prefixo literal é seg-prefixo do outro (ou igual). Prefixo vazio
-// (glob amplo) é seg-prefixo de qualquer coisa → sobrepõe tudo.
+// Two globs overlap if one literal prefix is a seg-prefix of the other (or equal). An empty prefix
+// (broad glob) is a seg-prefix of anything → overlaps everything.
 function globsOverlap(gA, gB) {
   const a = litSegs(gA), b = litSegs(gB);
   return isSegPrefix(a, b) || isSegPrefix(b, a);
 }
 
-// Scope = lista de globs. Dois scopes sobrepõem se algum par de globs sobrepõe.
+// Scope = list of globs. Two scopes overlap if some pair of globs overlaps.
 function scopesOverlap(sA, sB) {
   for (const a of sA) for (const b of sB) if (globsOverlap(a, b)) return true;
   return false;
@@ -55,7 +55,7 @@ function parseScope(raw) {
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-// glob -> RegExp ancorado. `**/`->(?:.*/)?  `**`->.*  `*`->[^/]*  `?`->[^/]
+// glob -> anchored RegExp. `**/`->(?:.*/)?  `**`->.*  `*`->[^/]*  `?`->[^/]
 function globToRe(glob) {
   let re = "";
   for (let i = 0; i < glob.length; i++) {
@@ -75,7 +75,7 @@ const norm = (f) => f.replace(/^\.\//, "");
 const fileInScope = (file, scope) => scope.some((g) => globToRe(g).test(norm(file)));
 
 // --- tasks.md parsing ---
-// Linha de checklist top-level: `- [ ] Task N: ... [scope: a, b]` (ou `- [x] ...`).
+// Top-level checklist line: `- [ ] Task N: ... [scope: a, b]` (or `- [x] ...`).
 function parseTasks(md) {
   const tasks = [];
   for (const line of md.split("\n")) {
@@ -85,7 +85,7 @@ function parseTasks(md) {
     const label = (text.match(/^(Task\s+\d+)/i) || [, text.slice(0, 40)])[1];
     const open = text.indexOf("[scope:");
     if (open !== -1 && text.indexOf("]", open) === -1) {
-      throw new Error(`scope malformado (sem ']') em: ${line.trim()}`);
+      throw new Error(`malformed scope (missing ']') in: ${line.trim()}`);
     }
     const sm = text.match(/\[scope:\s*([^\]]*)\]/i);
     tasks.push({ label, scope: sm ? parseScope(sm[1]) : [] });
@@ -96,13 +96,13 @@ function parseTasks(md) {
 function partition(tasksPath) {
   let md;
   try { md = readFileSync(tasksPath, "utf8"); }
-  catch { console.error(`✗ não consegui ler ${tasksPath}`); process.exit(1); }
+  catch { console.error(`✗ could not read ${tasksPath}`); process.exit(1); }
 
   let tasks;
   try { tasks = parseTasks(md); }
   catch (e) { console.error(`✗ ${e.message}`); process.exit(1); }
 
-  if (!tasks.length) { console.log("Sem tasks de checklist em tasks.md — nada a particionar."); process.exit(0); }
+  if (!tasks.length) { console.log("No checklist tasks in tasks.md — nothing to partition."); process.exit(0); }
 
   const batches = [];
   let cur = null;
@@ -112,31 +112,31 @@ function partition(tasksPath) {
     else { cur = [t]; batches.push(cur); }
   }
 
-  console.log("\nPartição de tasks para dispatch-parallel\n");
+  console.log("\nTask partition for dispatch-parallel\n");
   let parallel = 0;
   batches.forEach((b, i) => {
-    const tag = b.length > 1 ? `paralelo ×${b.length}` : "sozinho";
+    const tag = b.length > 1 ? `parallel ×${b.length}` : "solo";
     if (b.length > 1) parallel++;
     console.log(`  Batch ${i + 1} (${tag}): ${b.map((t) => t.label).join(", ")}`);
-    for (const t of b) console.log(`      ${t.label}: ${t.scope.length ? t.scope.join(", ") : "(sem scope)"}`);
+    for (const t of b) console.log(`      ${t.label}: ${t.scope.length ? t.scope.join(", ") : "(no scope)"}`);
   });
-  console.log(`\n  ${batches.length} batch(es), ${parallel} paralelizável(is) (max ${MAX}/batch).`);
-  if (!parallel) console.log("  Nenhum batch >1 — sem ganho paralelo; use dispatch sequencial.");
+  console.log(`\n  ${batches.length} batch(es), ${parallel} parallelizable (max ${MAX}/batch).`);
+  if (!parallel) console.log("  No batch >1 — no parallel gain; use sequential dispatch.");
   console.log("");
   process.exit(0);
 }
 
 function check(scopeRaw, files) {
   const scope = parseScope(scopeRaw);
-  if (!scope.length) { console.error("✗ check exige um scope não-vazio como 1º argumento"); process.exit(1); }
+  if (!scope.length) { console.error("✗ check requires a non-empty scope as the 1st argument"); process.exit(1); }
   const outside = files.map(norm).filter((f) => !fileInScope(f, scope));
   if (outside.length) {
-    console.error(`\n✗ ${outside.length} arquivo(s) fora do scope declarado [${scope.join(", ")}]:`);
+    console.error(`\n✗ ${outside.length} file(s) outside the declared scope [${scope.join(", ")}]:`);
     for (const f of outside) console.error(`    ${f}`);
     console.error("");
     process.exit(1);
   }
-  console.log(`✓ ${files.length} arquivo(s) dentro do scope [${scope.join(", ")}].`);
+  console.log(`✓ ${files.length} file(s) inside the scope [${scope.join(", ")}].`);
   process.exit(0);
 }
 
@@ -144,7 +144,7 @@ const [mode, ...rest] = process.argv.slice(2);
 if (mode === "partition") partition(rest[0] || "tasks.md");
 else if (mode === "check") check(rest[0] || "", rest.slice(1));
 else {
-  console.error("uso: validate-parallel-scope.mjs partition <tasks.md>");
-  console.error("     validate-parallel-scope.mjs check \"<glob, glob>\" <arquivo>...");
+  console.error("usage: validate-parallel-scope.mjs partition <tasks.md>");
+  console.error("       validate-parallel-scope.mjs check \"<glob, glob>\" <file>...");
   process.exit(2);
 }

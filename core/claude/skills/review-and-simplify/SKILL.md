@@ -5,7 +5,7 @@ description: MANDATORY pre-commit orchestrator — fans out review lenses (code-
 
 # review-and-simplify
 
-When: after `implement-and-evaluate` reports all tasks done, all `Critérios de Aceitação` met, and gates green — before any commit is proposed. **This is a MANDATORY pre-commit step. A commit MUST NOT be proposed without it having run and come back clean.** Skipping it is not allowed, regardless of how small or "obviously fine" the diff looks.
+When: after `implement-and-evaluate` reports all tasks done, all `Acceptance Criteria` met, and gates green — before any commit is proposed. **This is a MANDATORY pre-commit step. A commit MUST NOT be proposed without it having run and come back clean.** Skipping it is not allowed, regardless of how small or "obviously fine" the diff looks.
 
 Output: an aggregated findings report (by severity) from all lenses, a simplified diff with gates confirmed green, and — only once both are clean — a proposed commit message awaiting human approval.
 

@@ -1,42 +1,42 @@
 ---
 name: architecture
-description: Use ao desenhar a estrutura de uma feature ou módulo (na fase de plano, ou ao refatorar) para aplicar princípios de engenharia agnósticos de linguagem — Clean Architecture, SOLID, estratégia de testes e DDD tático. Container de guias; cada conceito é um companheiro.
+description: Use when designing the structure of a feature or module (in the plan phase, or when refactoring) to apply language-agnostic engineering principles — Clean Architecture, SOLID, testing strategy, and tactical DDD. Container of guides; each concept is a companion.
 ---
 
-# architecture — princípios de engenharia agnósticos
+# architecture — language-agnostic engineering principles
 
-Container dos conceitos de arquitetura do keel. Agnóstico de linguagem: descreve **como
-pensar** a estrutura; cada linguagem realiza com seu idioma, e o enforcement mecânico (quando
-existe) vem de um pack por linguagem, não daqui.
+Container for keel's architecture concepts. Language-agnostic: it describes **how
+to think about** structure; each language realizes it in its own idiom, and mechanical
+enforcement (when it exists) comes from a per-language pack, not from here.
 
-## Quando usar
+## When to use
 
-- Na fase **plan-writer**, ao decidir camadas/módulos/fronteiras da feature.
-- Ao **refatorar** estrutura existente, ou quando o `architecture-template.md` for preenchido.
-- Sempre que uma decisão de dependência ou de fronteira aparecer.
+- In the **plan-writer** phase, when deciding the feature's layers/modules/boundaries.
+- When **refactoring** existing structure, or when `architecture-template.md` is filled in.
+- Whenever a dependency or boundary decision comes up.
 
-Os não-negociáveis já estão na constituição (`## Princípios de arquitetura`, injetada no
-SessionStart) — esta skill é a profundidade e o racional por trás deles.
+The non-negotiables already live in the constitution (`## Architecture Principles`, injected on
+SessionStart) — this skill is the depth and rationale behind them.
 
-## Como aplicar (na cadeia SDD)
+## How to apply (in the SDD chain)
 
-1. Identifique o **domínio** da feature (entidades, regras de negócio) e separe-o do que é
-   framework/I/O/infra.
-2. Aplique a **dependency rule**: dependências apontam para dentro (ver `clean-architecture.md`).
-3. Modele o domínio com **DDD tático** quando houver invariantes/estado (ver `ddd-tactical.md`).
-4. Verifique o desenho contra **SOLID** (ver `solid.md`) — uma responsabilidade por unidade,
-   dependa de abstração, não de detalhe.
-5. Planeje os testes pela **estratégia de testes** (ver `testing-strategy.md`), que reforça a
-   skill `test-driven-development` (comportamento > implementação).
-6. Antes de adicionar dep/abstração/feature, suba a **laziness ladder** (ver `minimalism.md`) —
-   o desenho mais simples que satisfaz o requisito, sem cortar segurança/validação/data-loss/a11y.
+1. Identify the feature's **domain** (entities, business rules) and separate it from what is
+   framework/I-O/infra.
+2. Apply the **dependency rule**: dependencies point inward (see `clean-architecture.md`).
+3. Model the domain with **tactical DDD** when there are invariants/state (see `ddd-tactical.md`).
+4. Check the design against **SOLID** (see `solid.md`) — one responsibility per unit,
+   depend on abstraction, not on detail.
+5. Plan the tests via the **testing strategy** (see `testing-strategy.md`), which reinforces the
+   `test-driven-development` skill (behavior over implementation).
+6. Before adding a dep/abstraction/feature, climb the **laziness ladder** (see `minimalism.md`) —
+   the simplest design that satisfies the requirement, without cutting security/validation/data-loss/a11y.
 
-## Conceitos (companheiros)
+## Concepts (companions)
 
-- `clean-architecture.md` — camadas + dependency rule.
-- `solid.md` — os 5 princípios como heurísticas.
-- `testing-strategy.md` — pirâmide/estratégia; referencia `test-driven-development`.
+- `clean-architecture.md` — layers + dependency rule.
+- `solid.md` — the 5 principles as heuristics.
+- `testing-strategy.md` — pyramid/strategy; references `test-driven-development`.
 - `ddd-tactical.md` — entity, value object, aggregate, repository, domain service.
-- `minimalism.md` — a laziness ladder; minimalismo pré-escrita (vs `simplify` pós-escrita).
+- `minimalism.md` — the laziness ladder; pre-write minimalism (vs `simplify` post-write).
 
-Adicionar um conceito: ver `docs/design-notes/concepts-layer.md` (a receita do container).
+To add a concept, see `docs/design-notes/concepts-layer.md` (the container's recipe).

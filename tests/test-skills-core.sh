@@ -1,5 +1,5 @@
 SK="$HERE/../core/claude/skills"
-for s in constitution-writer prd-writer spec-writer clarify plan-writer tasks-writer analyze codebase-map; do
+for s in constitution-writer product-writer prd-writer spec-writer clarify plan-writer tasks-writer analyze codebase-map; do
   assert_file "$SK/$s/SKILL.md" "$s skill exists"
   assert_contains "$SK/$s/SKILL.md" "name: $s" "$s has name frontmatter"
   assert_contains "$SK/$s/SKILL.md" "description:" "$s has description frontmatter"
@@ -27,14 +27,20 @@ assert_contains "$SK/clarify/SKILL.md" "Scan prior art" "clarify scans prior art
 assert_contains "$SK/clarify/SKILL.md" "input to a question, never an answer" "clarify forbids prior art as the answer"
 assert_contains "$SK/clarify/SKILL.md" "Reserve a creative branch" "clarify reserves a non-conventional branch"
 
+# Product layer: product-writer authors the once-per-project brief; the PRD references it
+# instead of re-deriving product context (user/problem/north-star). Keeps features coherent.
+assert_contains "$SK/product-writer/SKILL.md" "product.md" "product-writer writes the product brief"
+assert_contains "$SK/product-writer/SKILL.md" "once per project" "product-writer is once-per-project"
+assert_contains "$SK/prd-writer/SKILL.md" "product.md" "prd-writer references the product brief"
+
 # Feature seams: the PRD states dependencies + what the feature consumes/exposes, so
 # coupling surfaces at product time instead of being discovered during planning.
-assert_contains "$SK/prd-writer/SKILL.md" "Dependências e Interfaces" "prd-writer fills the seams section"
-assert_contains "$SK/prd-writer/SKILL.md" "Consome" "prd-writer names the feature's inputs"
-assert_contains "$SK/prd-writer/SKILL.md" "Expõe" "prd-writer names what the feature exposes"
+assert_contains "$SK/prd-writer/SKILL.md" "Dependencies & Interfaces" "prd-writer fills the seams section"
+assert_contains "$SK/prd-writer/SKILL.md" "Consumes" "prd-writer names the feature's inputs"
+assert_contains "$SK/prd-writer/SKILL.md" "Exposes" "prd-writer names what the feature exposes"
 
 # Data-layer contract: plan-writer fills the conditional section when DB is touched.
-assert_contains "$SK/plan-writer/SKILL.md" "Contrato da Camada de Dados" "plan-writer fills data-layer contract"
+assert_contains "$SK/plan-writer/SKILL.md" "Data Layer Contract" "plan-writer fills data-layer contract"
 
 # Slice-vs-layer decomposition axis: plan-writer chooses it, tasks-writer honors it,
 # implement-and-evaluate makes the partition/mode decision visible. This is what unlocks

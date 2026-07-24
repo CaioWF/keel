@@ -1,6 +1,6 @@
 ---
 status: draft
-feature: NNN-nome
+feature: NNN-name
 date: YYYY-MM-DD
 ---
 
@@ -8,24 +8,24 @@ date: YYYY-MM-DD
 
 ## User Stories
 
-- [Como usuário, quero... para que...]
-- [Critério de aceitação para cada story]
+- [As a user, I want... so that...]
+- [Acceptance criteria for each story]
 
-## Requisitos Funcionais
+## Functional Requirements
 
-- [RF1: Descrição do requisito]
-- [RF2: Descrição do requisito]
+- [FR1: Requirement description]
+- [FR2: Requirement description]
 
-## Critérios de Aceitação
+## Acceptance Criteria
 
-> Numere cada critério com um identificador `AC-N`. O gate `eval-spec-fidelity` exige que
-> todo `AC-N` seja referenciado por uma task em `tasks.md` (rastreabilidade) e, depois, no
-> código/teste que o implementa.
+> Number each criterion with an `AC-N` identifier. The `eval-spec-fidelity` gate requires that
+> every `AC-N` be referenced by a task in `tasks.md` (traceability) and, later, by the
+> code/test that implements it.
 
-- AC-1: [Dado... quando... então...]
-- AC-2: [Dado... quando... então...]
+- AC-1: [Given... when... then...]
+- AC-2: [Given... when... then...]
 
-## Fora de Escopo
+## Out of Scope
 
-- [O que não será implementado nesta fase]
-- [Dependências ou melhorias futuras]
+- [What will not be implemented in this phase]
+- [Dependencies or future improvements]

@@ -35,7 +35,7 @@ Steps:
    this way" as the resolution; never let the scan narrow the option set before the user has seen
    it. Proportional — skip the scan when the feature has no external analog (internal plumbing,
    a refactor, a repo-specific rule) and say you skipped it.
-5. For each section (`User Stories`, `Requisitos Funcionais`, `Critérios de Aceitação`, `Fora de Escopo`), list concrete ambiguities, missing edge cases, or contradictions as numbered questions.
+5. For each section (`User Stories`, `Functional Requirements`, `Acceptance Criteria`, `Out of Scope`), list concrete ambiguities, missing edge cases, or contradictions as numbered questions.
 6. **Order by dependency, not by section.** One answer often dissolves or reshapes three later
    questions — ask that one first. Walk the decision tree branch by branch instead of dumping a
    flat list that mixes a load-bearing choice with cosmetic detail.
@@ -44,10 +44,10 @@ Steps:
    theirs — never proceed on an unanswered recommendation.
 8. Ask **load-bearing questions one at a time** — an answer that reshapes the rest earns its own
    round-trip. Batch the independent ones; do not drip-feed trivia.
-9. Once answered, edit `spec.md` directly to resolve each ambiguity — tighten requirements, add missing acceptance criteria, or move newly-excluded items into "Fora de Escopo".
+9. Once answered, edit `spec.md` directly to resolve each ambiguity — tighten requirements, add missing acceptance criteria, or move newly-excluded items into "Out of Scope".
 10. **Do not hand off with a branch left open.** If an ambiguity survives — unanswered, or
    answered "decide later" — write it into the spec explicitly (an open decision, or moved to
-   `Fora de Escopo`). `plan-writer` must never inherit an ambiguity silently.
+   `Out of Scope`). `plan-writer` must never inherit an ambiguity silently.
 11. Leave the frontmatter `status` untouched (still `draft`) unless the human explicitly approves it elsewhere.
 
 Interview discipline in steps 3 and 6–8 adapted from [`mattpocock/skills`](https://github.com/mattpocock/skills) `grilling` (MIT).

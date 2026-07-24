@@ -16,7 +16,7 @@ Template: none — this skill orchestrates `implement-and-evaluate`, it does not
 template-based artifact.
 
 Output: the same as `implement-and-evaluate` (a gate-green feature, every `tasks.md`
-checkbox ticked, every `Critérios de Aceitação` scenario PASS) — OR, on budget/stall
+checkbox ticked, every `Acceptance Criteria` scenario PASS) — OR, on budget/stall
 exhaustion, a stop with `.git/sdd/<feature>/loop-report.md` written and the blocker
 surfaced to the human. Never a silent runaway.
 
@@ -30,7 +30,7 @@ Done is machine-checkable, every line an exit code — the loop cannot know when
 otherwise:
 
 - every top-level checkbox in `specs/<active-feature>/tasks.md` is ticked, AND
-- every `Critérios de Aceitação` scenario in `spec.md` reports PASS from `evaluator`, AND
+- every `Acceptance Criteria` scenario in `spec.md` reports PASS from `evaluator`, AND
 - `.specify/gates/run-gates.sh` exits 0.
 
 When all three hold, the loop stops with success. Nothing else counts as done — do not

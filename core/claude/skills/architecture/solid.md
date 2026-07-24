@@ -1,40 +1,41 @@
-# SOLID (agnóstico de linguagem)
+# SOLID (language-agnostic)
 
-Cinco heurísticas para módulos que mudam sem quebrar. Use como checklist de desenho, não como
-dogma — cada uma resolve uma dor específica de acoplamento/coesão.
+Five heuristics for modules that change without breaking. Use as a design checklist, not
+dogma — each one addresses a specific coupling/cohesion pain point.
 
 ## S — Single Responsibility
 
-Uma unidade tem **uma razão para mudar** (um ator/stakeholder). Se duas mudanças não
-relacionadas tocam o mesmo módulo, separe.
-- Red flag: classe/função que faz parsing + regra de negócio + persistência.
+A unit has **one reason to change** (one actor/stakeholder). If two unrelated changes
+touch the same module, split it.
+- Red flag: a class/function that does parsing + business rule + persistence.
 
 ## O — Open/Closed
 
-Aberto para extensão, fechado para modificação. Adicione comportamento por **nova implementação
-de uma abstração**, não editando o código existente que já funciona.
-- Red flag: um `switch`/`if` por tipo que cresce a cada feature nova. Considere polimorfismo/estratégia.
+Open for extension, closed for modification. Add behavior via a **new implementation
+of an abstraction**, not by editing existing code that already works.
+- Red flag: a `switch`/`if` per type that grows with every new feature. Consider polymorphism/strategy.
 
 ## L — Liskov Substitution
 
-Um subtipo deve ser usável onde o supertipo é esperado, **sem surpresa**. Não fortaleça
-pré-condições nem enfraqueça pós-condições.
-- Red flag: subclasse que lança em método herdado, ou checagem `instanceof` para tratar um subtipo diferente.
+A subtype must be usable wherever the supertype is expected, **without surprise**. Don't
+strengthen preconditions or weaken postconditions.
+- Red flag: a subclass that throws in an inherited method, or an `instanceof` check to handle a different subtype.
 
 ## I — Interface Segregation
 
-Clientes não devem depender de métodos que não usam. Prefira **portas pequenas e focadas** a uma
-interface gorda.
-- Red flag: implementar uma interface com metade dos métodos jogando `notImplemented`.
+Clients shouldn't depend on methods they don't use. Prefer **small, focused ports** over a
+fat interface.
+- Red flag: implementing an interface where half the methods throw `notImplemented`.
 
 ## D — Dependency Inversion
 
-Dependa de **abstrações**, não de concretos. Módulos de alto nível (use cases) definem a porta;
-os de baixo nível (infra) a implementam. É o motor da dependency rule da Clean Architecture.
-- Red flag: use case dando `new` num cliente HTTP/SQL concreto em vez de receber a porta.
+Depend on **abstractions**, not on concretes. High-level modules (use cases) define the port;
+low-level ones (infra) implement it. This is the engine behind Clean Architecture's dependency rule.
+- Red flag: a use case doing `new` on a concrete HTTP/SQL client instead of receiving the port.
 
-## Como aplicar
+## How to apply
 
-No desenho da feature (plan-writer), passe o módulo por essas cinco perguntas. SOLID **suporta** a
-dependency rule (especialmente D e I): são a forma tática de manter as fronteiras da Clean
-Architecture limpas. Enforcement é por lint de linguagem (depois), não no core agnóstico.
+When designing the feature (plan-writer), run the module through these five questions. SOLID
+**supports** the dependency rule (especially D and I): they're the tactical way to keep Clean
+Architecture's boundaries clean. Enforcement is via language-specific lint (later), not in the
+language-agnostic core.

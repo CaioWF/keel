@@ -1,59 +1,63 @@
-# Minimalismo — a laziness ladder (agnóstico de linguagem)
+# Minimalism — the laziness ladder (language-agnostic)
 
-Heurística geradora: pensar como dev experiente que **resiste a complexidade desnecessária**.
-Agente de IA tende a over-engineer — instala dep, cria abstração, gera código verboso quando
-algo mais simples resolve. Esta é a disciplina **antes de escrever**: suba a escada e pare no
-primeiro degrau que resolve.
+Generative heuristic: think like an experienced dev who **resists unnecessary complexity**.
+AI agents tend to over-engineer — installing a dep, creating an abstraction, generating verbose
+code when something simpler would do. This is the discipline **before writing**: climb the ladder
+and stop at the first rung that solves it.
 
-## A escada (suba antes de adicionar código)
+## The ladder (climb before adding code)
 
-Para qualquer pedaço de funcionalidade, na ordem:
+For any piece of functionality, in order:
 
-1. **Precisa existir?** O requisito é real ou é feature inventada/antecipada (YAGNI)? Se não
-   precisa, o melhor código é nenhum código.
-2. **Já está no codebase?** Existe função/módulo/util que já faz isso? Reuse em vez de recriar.
-3. **Está na stdlib?** A linguagem já oferece? Prefira o padrão da linguagem a escrever do zero.
-4. **É feature nativa da plataforma?** Runtime/framework/SO já dá de graça? Use o nativo.
-5. **Dep já instalada?** Alguma dependência do projeto já cobre? Use o que já está lá antes de
-   adicionar pacote novo.
-6. **Dá em one-liner?** Se sim, escreva o one-liner — não uma abstração ao redor dele.
-7. **Senão: código mínimo viável.** Só agora escreva, e só o mínimo que satisfaz o requisito.
+1. **Does it need to exist?** Is the requirement real, or is it an invented/anticipated
+   feature (YAGNI)? If it doesn't need to exist, the best code is no code.
+2. **Is it already in the codebase?** Does a function/module/util already do this? Reuse instead
+   of recreating.
+3. **Is it in the stdlib?** Does the language already offer it? Prefer the language's standard over
+   writing from scratch.
+4. **Is it a native platform feature?** Does the runtime/framework/OS already give it for free? Use
+   the native one.
+5. **Already-installed dep?** Does some existing project dependency already cover it? Use what's
+   already there before adding a new package.
+6. **Does it fit a one-liner?** If so, write the one-liner — not an abstraction around it.
+7. **Otherwise: minimum viable code.** Only now write it, and only the minimum that satisfies
+   the requirement.
 
-## O carve-out (não-negociável)
+## The carve-out (non-negotiable)
 
-A escada otimiza **volume de código**, nunca **corretude de borda**. Jamais corte:
+The ladder optimizes for **code volume**, never **edge-case correctness**. Never cut:
 
-- **Validação de trust-boundary** — input externo é validado, sempre.
-- **Tratamento de perda de dados** — falha não pode corromper/perder estado silenciosamente.
-- **Segurança** — authz (allow-list), secrets, injection, SSRF, crypto.
-- **Acessibilidade** — quando há superfície de usuário.
+- **Trust-boundary validation** — external input is always validated.
+- **Data-loss handling** — failure must not silently corrupt/lose state.
+- **Security** — authz (allow-list), secrets, injection, SSRF, crypto.
+- **Accessibility** — whenever there's a user-facing surface.
 
-"Mínimo" significa sem gordura, não sem cinto de segurança. Esses quatro nunca são o degrau que
-se pula.
+"Minimal" means without fat, not without a seatbelt. These four are never the rung you skip.
 
-## Minimalismo (pré) vs `simplify` (pós) — não confundir
+## Minimalism (pre) vs `simplify` (post) — don't confuse them
 
-Puxam direções opostas de propósito:
+They pull in opposite directions on purpose:
 
-- **Esta skill decide o que NASCE.** Pré-escrita, geradora: não adicione dep/abstração/feature
-  sem subir a escada.
-- **`simplify` limpa o que NASCEU.** Pós-escrita, behavior-preserving: melhora leitura do diff —
-  e explicitamente **não estripa** abstração que paga aluguel.
+- **This skill decides what gets BORN.** Pre-write, generative: don't add a dep/abstraction/feature
+  without climbing the ladder.
+- **`simplify` cleans up what was BORN.** Post-write, behavior-preserving: improves diff
+  readability — and explicitly **doesn't strip** an abstraction that's earning its keep.
 
-Não há contradição: minimalismo evita criar o supérfluo; `simplify` não remove o necessário.
-Em dúvida sobre remover algo já escrito, é território de `simplify`, não desta skill.
+No contradiction: minimalism avoids creating the superfluous; `simplify` doesn't remove the
+necessary. When in doubt about removing something already written, that's `simplify`'s
+territory, not this skill's.
 
-## Sinais de violação (red flags)
+## Violation signals (red flags)
 
-- Dep nova para algo que stdlib/dep-existente já faz.
-- Camada de abstração com uma única implementação e nenhum segundo caso à vista.
-- Wrapper/helper que só repassa argumentos.
-- Config/flag para um caso que ninguém pediu.
-- Generalização "pro futuro" sem requisito presente.
+- New dep for something stdlib/an existing dep already does.
+- Abstraction layer with a single implementation and no second use case in sight.
+- Wrapper/helper that just passes arguments through.
+- Config/flag for a case nobody asked for.
+- "For the future" generalization with no present requirement.
 
 ## Enforcement
 
-Advisory por natureza — é decisão de desenho, não regra mecânica. O reforço vem do wire-in nas
-fases: `analyze` checa o degrau 1 (precisa existir?) contra a spec; `implement-feature` e o
-implementer subagent sobem a escada antes de adicionar dep/abstração. A constituição carrega a
-regra dura (`## Princípios de arquitetura`). O racional fica aqui.
+Advisory by nature — it's a design decision, not a mechanical rule. Reinforcement comes from
+wiring into the phases: `analyze` checks rung 1 (does it need to exist?) against the spec;
+`implement-feature` and the implementer subagent climb the ladder before adding a dep/abstraction.
+The constitution carries the hard rule (`## Architecture Principles`). The rationale lives here.

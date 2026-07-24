@@ -1,32 +1,32 @@
-# Estratégia de testes (agnóstico de linguagem)
+# Testing strategy (language-agnostic)
 
-Onde investir esforço de teste e por quê. O **como** (ciclo red-green-refactor, comportamento >
-implementação) está na skill `test-driven-development` — esta nota não reescreve, só posiciona.
+Where to invest testing effort and why. The **how** (the red-green-refactor cycle, behavior over
+implementation) lives in the `test-driven-development` skill — this note doesn't rewrite it, just positions it.
 
-## A pirâmide
+## The pyramid
 
-- **Unidade (base, maioria):** domínio e use cases testados em isolamento, sem framework/rede/banco.
-  Rápidos, determinísticos. A Clean Architecture torna isso barato — o domínio é puro.
-- **Integração (meio):** adapters reais contra suas dependências (banco em container, HTTP fake).
-  Verifica que as portas casam com as implementações.
-- **End-to-end (topo, poucos):** fluxo do usuário pela aplicação montada. Caros e mais frágeis —
-  cubra os caminhos críticos, não tudo.
+- **Unit (base, majority):** domain and use cases tested in isolation, without framework/network/database.
+  Fast, deterministic. Clean Architecture makes this cheap — the domain is pure.
+- **Integration (middle):** real adapters against their dependencies (containerized database, fake HTTP).
+  Verifies that ports match their implementations.
+- **End-to-end (top, few):** user flow through the assembled application. Expensive and more
+  fragile — cover critical paths, not everything.
 
-Anti-pirâmide (muito E2E, pouca unidade) = suíte lenta e instável. Se testar o domínio exige
-subir o mundo, a fronteira está errada (volte à dependency rule).
+Anti-pyramid (lots of E2E, little unit) = a slow, flaky suite. If testing the domain requires
+spinning up the world, the boundary is wrong (go back to the dependency rule).
 
-## Princípios (reforçam `test-driven-development`)
+## Principles (reinforce `test-driven-development`)
 
-- **Teste comportamento, não implementação:** asserte entradas/saídas/efeitos observáveis. Um
-  teste que quebra num refactor que preserva comportamento está testando implementação — reescreva.
-- **Não asserte sobre mocks:** mock é para isolar uma dependência de borda, não para ser o objeto
-  do teste. Prefira fakes a mocks que verificam chamadas internas.
-- **Nomeie pelo comportamento:** o nome do teste descreve a regra de negócio, não o método.
-- **Domínio puro = teste sem mock:** se o domínio segue a dependency rule, a maioria dos testes de
-  unidade não precisa de mock nenhum.
+- **Test behavior, not implementation:** assert on inputs/outputs/observable effects. A
+  test that breaks on a behavior-preserving refactor is testing implementation — rewrite it.
+- **Don't assert on mocks:** a mock is for isolating an edge dependency, not for being the
+  object under test. Prefer fakes over mocks that verify internal calls.
+- **Name by behavior:** the test name describes the business rule, not the method.
+- **Pure domain = mock-free test:** if the domain follows the dependency rule, most unit
+  tests need no mocks at all.
 
-## Como aplicar
+## How to apply
 
-No plan-writer, decida o nível de teste por componente (domínio → unidade; adapter → integração;
-fluxo → 1-2 E2E). O gate de teste (`run-gates.sh`) roda a suíte; esta estratégia decide o que
-escrever. O enforcement do ciclo TDD é disciplina da skill `test-driven-development` (REQUIRED).
+In plan-writer, decide the test level per component (domain → unit; adapter → integration;
+flow → 1-2 E2E). The test gate (`run-gates.sh`) runs the suite; this strategy decides what to
+write. Enforcement of the TDD cycle is the discipline of the `test-driven-development` skill (REQUIRED).

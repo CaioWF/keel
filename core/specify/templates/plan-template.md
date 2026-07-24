@@ -2,44 +2,44 @@
 status: draft
 ---
 
-# [Feature] — Plano
+# [Feature] — Plan
 
-## Arquitetura
+## Architecture
 
-- [Componentes principais]
-- [Fluxo de dados]
-- [Integração com sistemas existentes]
+- [Main components]
+- [Data flow]
+- [Integration with existing systems]
 
-## Estrutura de Arquivos
+## File Structure
 
 - [src/components/...]
 - [src/services/...]
 - [tests/...]
 
-## Decisões Técnicas
+## Technical Decisions
 
-- [Tech decision 1 e justificativa]
-- [Tech decision 2 e justificativa]
+- [Tech decision 1 and rationale]
+- [Tech decision 2 and rationale]
 
-## Contrato da Camada de Dados
+## Data Layer Contract
 
-> Preencher SÓ quando o plano adiciona/altera tabela, coluna, índice ou migração.
-> Caso contrário, escrever `N/A — não toca a camada de dados` e seguir.
+> Fill in ONLY when the plan adds/changes a table, column, index, or migration.
+> Otherwise, write `N/A — does not touch the data layer` and move on.
 
-- **Mapeamento código↔schema**: [campo `camelCase` (código) ↔ coluna `snake_case` (DB), e onde o mapeamento vive — ex. Prisma `@map`/`@@map`, ou a camada de query. Um site, não espalhado.]
-- **Tabelas/colunas**: [PK explícita; FKs com `on delete`; tipos (`timestamptz`/`numeric`/…); constraints `not null`/`unique`/`check`.]
-- **Índices**: [FK e colunas de filtro/sort em hot path; ordem de índice composto; `unique` para invariantes reais.]
-- **RLS**: [tabelas tenant/user-scoped → RLS habilitado + policy allow-list na coluna de escopo. Ou `N/A` com motivo.]
-- **Migração**: [aditiva e reversível; coluna nova non-null via default ou backfill+`set not null`.]
+- **Code↔schema mapping**: [`camelCase` field (code) ↔ `snake_case` column (DB), and where the mapping lives — e.g. Prisma `@map`/`@@map`, or the query layer. One place, not scattered.]
+- **Tables/columns**: [explicit PK; FKs with `on delete`; types (`timestamptz`/`numeric`/…); `not null`/`unique`/`check` constraints.]
+- **Indexes**: [FK and filter/sort columns on hot path; composite index order; `unique` for real invariants.]
+- **RLS**: [tenant/user-scoped tables → RLS enabled + allow-list policy on the scope column. Or `N/A` with reason.]
+- **Migration**: [additive and reversible; new non-null column via default or backfill+`set not null`.]
 
-## Ordem de Implementação
+## Implementation Order
 
-1. [Tarefa 1: Descrição]
-2. [Tarefa 2: Descrição]
-3. [Tarefa 3: Descrição]
+1. [Task 1: Description]
+2. [Task 2: Description]
+3. [Task 3: Description]
 
-## Como Validar
+## How to Validate
 
-- [Testes unitários]
-- [Testes de integração]
-- [Checklist de qualidade]
+- [Unit tests]
+- [Integration tests]
+- [Quality checklist]

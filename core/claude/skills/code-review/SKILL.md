@@ -7,7 +7,7 @@ description: Use after implement-and-evaluate confirms acceptance criteria and g
 
 This is one lens orchestrated by `review-and-simplify` (dispatched in parallel alongside `security-review` as part of the mandatory pre-commit step) — it is also usable standalone for an ad-hoc review.
 
-When: implement-and-evaluate has finished — all `tasks.md` boxes checked, all `Critérios de Aceitação` passing, gates green — and the feature is otherwise ready to propose for commit.
+When: implement-and-evaluate has finished — all `tasks.md` boxes checked, all `Acceptance Criteria` passing, gates green — and the feature is otherwise ready to propose for commit.
 
 Template: `.specify/templates/checklist-template.md`.
 
@@ -22,7 +22,7 @@ This is what keeps review anchored to the project's agreed rules instead of the 
 Steps:
 1. Resolve the active feature from `.specify/state` (fallback: newest dir under `specs/`).
 2. Read `.specify/memory/constitution.md` (principles, code patterns, SDD process) and hold the diff against it — flag any violation of a stated principle or code pattern. **Cite the rule that was broken**: quote the constitution text (or the spec's `AC-N`) verbatim, with its section heading, next to the finding.
-3. Read `.specify/templates/checklist-template.md` and walk every item (`Testes`, `Quality Gates`, `Documentação`, `Code Review`, `Deploy`) against the actual state of the repo — do not assume an item is satisfied just because gates passed; verify (e.g. check for stray `console.log`/debug statements, confirm spec.md reflects the final implementation).
+3. Read `.specify/templates/checklist-template.md` and walk every item (`Tests`, `Quality Gates`, `Documentation`, `Code Review`, `Deploy`) against the actual state of the repo — do not assume an item is satisfied just because gates passed; verify (e.g. check for stray `console.log`/debug statements, confirm spec.md reflects the final implementation).
 4. Report each checklist item as done/not-done with evidence, plus any constitution violations found. Split findings in two: **blocking** — each carrying its citation from step 2 — and **suggestions** — everything else you believe but cannot cite.
 5. Make no code edits — this skill reviews, it does not fix. If a finding is blocking, hand it back to implement-and-evaluate (or fix-runner directly for a small gate-level fix) rather than patching it here.
 6. Only once the checklist is clean and no constitution violations remain should you propose the commit message(s) to the user and wait for approval — per the project's commit-at-milestone convention, do not commit yourself.

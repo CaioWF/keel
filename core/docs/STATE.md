@@ -4,36 +4,36 @@ title: Project state
 description: Between-session work-state tracking the current active feature, recent decisions, blockers, and deferred ideas.
 ---
 
-# STATE — Memória viva do projeto
+# STATE — Living project memory
 
-> Memória de trabalho **entre sessões** (humanos e agentes). É **volátil**: atualizada o tempo
-> todo. Diferente do **ADR** (decisão durável e imutável — ver `docs/architecture/adr/`).
-> Decisão estrutural → ADR; estado do trabalho → aqui. Atualize ao **pausar/encerrar**; leia ao
-> **retomar**. Use a skill `handoff`. Injetado no contexto no início de cada sessão.
+> Working memory **between sessions** (humans and agents). It's **volatile**: updated all
+> the time. Different from an **ADR** (a durable, immutable decision — see `docs/architecture/adr/`).
+> Structural decision → ADR; work state → here. Update when **pausing/ending**; read when
+> **resuming**. Use the `handoff` skill. Injected into context at the start of each session.
 
-**Última atualização:** YYYY-MM-DD por <nome>
+**Last updated:** YYYY-MM-DD by <name>
 
-## Em andamento / próximo passo
+## In progress / next step
 
-> O que está aberto agora e a **próxima ação concreta** (não "continuar a feature" — diga o passo).
+> What's open right now and the **next concrete action** (not "continue the feature" — state the step).
 
-- Feature ativa: `specs/NNNN-<nome>/` — <fase atual: spec | plan | tasks | implement>
-- Próximo passo: <ação específica, ex.: "implementar AC-3 no adapter X">
+- Active feature: `specs/NNNN-<name>/` — <current phase: spec | plan | tasks | implement>
+- Next step: <specific action, e.g. "implement AC-3 in adapter X">
 
-## Decisões recentes
+## Recent decisions
 
-> Resumo cronológico. Se for difícil de reverter, vire um ADR e linke aqui.
+> Chronological summary. If it's hard to reverse, turn it into an ADR and link it here.
 
-- YYYY-MM-DD: <decisão> — <ADR-NNNN se aplicável>
+- YYYY-MM-DD: <decision> — <ADR-NNNN if applicable>
 
-## Bloqueios
+## Blockers
 
-- [ ] <o que trava · quem/como destrava · desde quando>
+- [ ] <what's blocking · who/how unblocks it · since when>
 
-## Ideias adiadas / backlog técnico
+## Deferred ideas / technical backlog
 
-- <ideia → qual gatilho para reconsiderar>
+- <idea → what trigger to reconsider>
 
-## Todos soltos
+## Loose todos
 
-- [ ] <tarefa que ainda não cabe numa spec>
+- [ ] <task that doesn't fit a spec yet>

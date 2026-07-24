@@ -10,7 +10,7 @@ assert_contains "$R" "simplify"        "review-and-simplify runs simplify"
 assert_contains "$R" "parallel"        "review-and-simplify fans out in parallel"
 assert_contains "$SK/simplify/SKILL.md" "preserve" "simplify preserves behavior"
 assert_contains "$SK/security-review/SKILL.md" "allow-list" "security-review checks whitelist rule"
-assert_contains "$HERE/../core/specify/templates/checklist-template.md" "Segurança" "checklist has security section"
+assert_contains "$HERE/../core/specify/templates/checklist-template.md" "Security" "checklist has security section"
 assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "review-and-simplify" "CLAUDE.md wires review-and-simplify"
 
 # Lens registry: core seeds the agnostic lenses; orchestrator reads the file.

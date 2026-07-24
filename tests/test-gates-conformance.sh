@@ -36,7 +36,7 @@ printf '# spec\nAC-1: a\n' > "$E5/specs/001-x/spec.md"
 printf '# tasks\n- [ ] T1 (AC-1)\n' > "$E5/specs/001-x/tasks.md"
 printf '// SPEC_DEVIATION: skipped AC-9 for now\nconst x=1; // AC-1\n' > "$E5/src/a.mjs"
 out="$(node "$EV" "$E5" 2>&1)"
-echo "$out" | grep -qF "SPEC_DEVIATION abertos no código: 1" && pass "eval: counts SPEC_DEVIATION" || fail "eval should count SPEC_DEVIATION (got: $out)"
+echo "$out" | grep -qF "SPEC_DEVIATION open in code: 1" && pass "eval: counts SPEC_DEVIATION" || fail "eval should count SPEC_DEVIATION (got: $out)"
 rm -rf "$E5"
 
 # ---- audit-structure.mjs ----

@@ -16,9 +16,9 @@ Steps:
 2. Copy `.specify/templates/spec-template.md` to `specs/<active-feature>/spec.md`.
 3. Fill the frontmatter (`status`, `feature`, `date`) and each section that exists in the template:
    - `User Stories` — story + acceptance criterion per story.
-   - `Requisitos Funcionais` — numbered functional requirements (RF1, RF2, ...).
-   - `Critérios de Aceitação` — Given/When/Then scenarios.
-   - `Fora de Escopo` — what this spec explicitly excludes, plus known dependencies.
+   - `Functional Requirements` — numbered functional requirements (RF1, RF2, ...).
+   - `Acceptance Criteria` — Given/When/Then scenarios.
+   - `Out of Scope` — what this spec explicitly excludes, plus known dependencies.
 4. Keep `status: draft` in the frontmatter — do not set it to `approved` yourself.
 
 Approval: the spec is "approved" only when a human flips the frontmatter to `status: approved`. The phase-gate hook (`core/claude/hooks/phase-gate.mjs`) enforces this — it blocks code edits until both `spec.md` and `plan.md` carry `status: approved`.

@@ -1,44 +1,44 @@
 ---
 status: draft
-feature: NNN-nome
+feature: NNN-name
 date: YYYY-MM-DD
 ---
 
 # [Feature] — Brainstorm
 
-> O design aprovado + a trilha de raciocínio que o produziu. Upstream de `spec.md`/`plan.md`:
-> aqui mora o **por quê essa forma** (exploração, trade-offs, o que ficou em aberto); o *o quê*
-> e o *como* ficam nos templates de spec e plan. Sem código — contratos e intenção, não corpo de
-> função. Escale cada seção à complexidade; seções curtas para features simples.
+> The approved design + the reasoning trail that produced it. Upstream of `spec.md`/`plan.md`:
+> this is where the **why this shape** lives (exploration, trade-offs, what was left open); the
+> *what* and the *how* live in the spec and plan templates. No code — contracts and intent, not
+> function bodies. Scale each section to the complexity; keep sections short for simple features.
 
-## Entendimento
+## Understanding
 
-- [Request reformulado em 1-2 frases.]
-- [Premissas assumidas onde havia ambiguidade.]
+- [Request restated in 1-2 sentences.]
+- [Assumptions made where there was ambiguity.]
 
-## Investigação
+## Investigation
 
-- [Arquivos/docs lidos e o que foi extraído: padrões, convenções, pontos de integração.]
-- [Constraints do codebase existente (reusa `docs/codebase-map.md` quando houver).]
-- [Se nada foi lido, justifique.]
+- [Files/docs read and what was extracted: patterns, conventions, integration points.]
+- [Constraints from the existing codebase (reuse `docs/codebase-map.md` when available).]
+- [If nothing was read, justify why.]
 
-## Abordagens consideradas
+## Approaches considered
 
-- [Abordagem A — resumo + trade-off.]
-- [Abordagem B — resumo + trade-off.]
-- [**Escolhida: X** — porquê venceu.]
+- [Approach A — summary + trade-off.]
+- [Approach B — summary + trade-off.]
+- [**Chosen: X** — why it won.]
 
-> Modo `deep`: esta seção recebe as 2-3 abordagens destiladas pelo pass critic da divergência
-> framed (score novelty/viability/fit, traps podados), não opções anchored inline.
+> `deep` mode: this section receives the 2-3 approaches distilled by the critic pass of framed
+> divergence (novelty/viability/fit score, pruned traps), not inline anchored options.
 
-## Decisões em aberto
+## Open Decisions
 
-> Pontos que precisam de resolução, com handoff explícito pro `clarify`. Distinga do que já está
-> **fechado** (isso vai pro Esboço com o porquê). Se não há nenhum, escreva "Nenhuma".
+> Points that need resolution, with an explicit handoff to `clarify`. Distinguish from what is
+> already **closed** (that goes into the Outline with the why). If there are none, write "None".
 
-- [Ponto 1: A vs B — recomendo A porque X. Confirmar?]
+- [Point 1: A vs B — I recommend A because X. Confirm?]
 
-## Esboço da solução
+## Outline of the solution
 
-- [O design aprovado: arquitetura, componentes, fluxo de dados, error handling, testes —
-  escalado à complexidade. Sem código.]
+- [The approved design: architecture, components, data flow, error handling, tests — scaled to
+  the complexity. No code.]

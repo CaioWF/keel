@@ -1,19 +1,19 @@
 #!/usr/bin/env node
-// Auditoria estrutural da documentação SDD (zero-dep, só builtins node:).
-// Regras determinísticas (serve de gate; exit 1 em qualquer violação):
-//   • toda skill (.claude/skills/ * /SKILL.md) tem frontmatter com `name` e `description`
-//   • toda pasta specs/NNNN-* tem spec.md
-//   • links relativos em .md não apontam para arquivo inexistente
-// NÃO exige frontmatter em todo .md (CLAUDE.md, README, ADRs não têm) — só nas skills.
-// Uso: node audit-structure.mjs [dir]   (default: ".")
+// Structural audit of SDD documentation (zero-dep, node: builtins only).
+// Deterministic rules (serves as a gate; exit 1 on any violation):
+//   • every skill (.claude/skills/ * /SKILL.md) has frontmatter with `name` and `description`
+//   • every specs/NNNN-* folder has spec.md
+//   • relative links in .md don't point to a nonexistent file
+// Does NOT require frontmatter on every .md (CLAUDE.md, README, ADRs don't have it) — only on skills.
+// Usage: node audit-structure.mjs [dir]   (default: ".")
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname, relative, resolve, extname, basename } from "node:path";
 
 const ROOT = resolve(process.argv[2] || ".");
-// Dirs de views geradas (clientes não-Claude) são artefatos derivados da fonte canônica
-// (.claude/ + CLAUDE.md) — auditar a fonte basta e evita falso-positivo.
+// Generated view dirs (non-Claude clients) are artifacts derived from the canonical source
+// (.claude/ + CLAUDE.md) — auditing the source is enough and avoids false positives.
 const IGNORE = new Set(["node_modules", ".git", ".specify", ".agents", ".cursor", ".gemini", ".windsurf"]);
-// Arquivos de instruções gerados (fora de um dir próprio) que também são views derivadas.
+// Generated instruction files (outside their own dir) that are also derived views.
 const isGenerated = (f) => {
   const r = relative(ROOT, f).replace(/\\/g, "/");
   return r === "AGENTS.md" || r === "GEMINI.md" ||
@@ -47,30 +47,30 @@ function parseFrontmatter(text) {
   return keys;
 }
 
-// Só o SKILL.md de cada skill exige frontmatter; arquivos companheiros (prompts,
-// anti-patterns, refs) ficam ao lado e não são skills.
+// Only each skill's SKILL.md requires frontmatter; companion files (prompts,
+// anti-patterns, refs) sit alongside it and are not skills.
 const isSkill = (f) => f.replace(/\\/g, "/").includes("/.claude/skills/") && basename(f) === "SKILL.md";
 const files = walk(ROOT).filter((f) => !isGenerated(f));
 
-// 1) skills precisam de frontmatter name + description
+// 1) skills need frontmatter name + description
 for (const f of files) {
   if (!isSkill(f)) continue;
   const fm = parseFrontmatter(readFileSync(f, "utf8"));
-  if (!fm) { err(f, "skill sem frontmatter"); continue; }
-  if (!fm.name) err(f, "skill sem `name`");
-  if (!fm.description) err(f, "skill sem `description`");
+  if (!fm) { err(f, "skill missing frontmatter"); continue; }
+  if (!fm.name) err(f, "skill missing `name`");
+  if (!fm.description) err(f, "skill missing `description`");
 }
 
-// 2) toda specs/NNNN-* precisa de spec.md
+// 2) every specs/NNNN-* needs spec.md
 const specsDir = join(ROOT, "specs");
 if (existsSync(specsDir)) {
   for (const n of readdirSync(specsDir)) {
     if (/^\d+-/.test(n) && !existsSync(join(specsDir, n, "spec.md")))
-      err(join(specsDir, n), "feature sem `spec.md`");
+      err(join(specsDir, n), "feature missing `spec.md`");
   }
 }
 
-// 3) links relativos quebrados
+// 3) broken relative links
 const linkRe = /\]\(([^)]+)\)/g;
 for (const f of files) {
   const text = readFileSync(f, "utf8");
@@ -78,17 +78,17 @@ for (const f of files) {
   while ((m = linkRe.exec(text))) {
     let target = m[1].trim();
     if (/^(https?:|mailto:|#)/.test(target)) continue;
-    if (/[<>]|XXXX|NNNN|NNN|\s/.test(target)) continue; // placeholders dos templates
+    if (/[<>]|XXXX|NNNN|NNN|\s/.test(target)) continue; // template placeholders
     target = target.split("#")[0];
     if (!target) continue;
-    if (!existsSync(resolve(dirname(f), target))) err(f, `link quebrado → ${target}`);
+    if (!existsSync(resolve(dirname(f), target))) err(f, `broken link → ${target}`);
   }
 }
 
 if (errors.length) {
-  console.error(`\n✗ Auditoria estrutural: ${errors.length} problema(s)\n`);
+  console.error(`\n✗ Structural audit: ${errors.length} problem(s)\n`);
   for (const e of errors) console.error(`  • ${e}`);
   console.error("");
   process.exit(1);
 }
-console.log(`✓ Auditoria estrutural: ${files.length} docs OK (skills, specs, links).`);
+console.log(`✓ Structural audit: ${files.length} docs OK (skills, specs, links).`);

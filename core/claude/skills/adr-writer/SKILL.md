@@ -26,12 +26,12 @@ Skip it for reversible or local choices (a variable name, a helper's location, a
 
 1. Determine the number: `NNNN` = highest existing ADR in `docs/architecture/adr/` + 1, zero-padded to 4 digits, sequential and never reused. `_template.md` and `index.md` are not ADRs.
 2. Copy `_template.md` and fill every section against what was actually decided:
-   - **Contexto** — the problem, the forces, the constraints, why this must be decided now.
-   - **Decisão** — present tense ("Vamos usar X porque…"). One decision per ADR.
-   - **Alternativas consideradas** — real options that were weighed, each with why it lost. An ADR with no alternatives is a note, not a decision.
-   - **Consequências** — positive, negative/trade-offs, and neutral. Naming the negative consequence is the point; an ADR with only upsides is not honest.
-   - **Status** — `proposto` while the user has not agreed; `aceito` once they have.
-   - **Decisores** and **Data** (today's date, `YYYY-MM-DD`).
+   - **Context** — the problem, the forces, the constraints, why this must be decided now.
+   - **Decision** — present tense ("We will use X because…"). One decision per ADR.
+   - **Alternatives Considered** — real options that were weighed, each with why it lost. An ADR with no alternatives is a note, not a decision.
+   - **Consequences** — positive, negative/trade-offs, and neutral. Naming the negative consequence is the point; an ADR with only upsides is not honest.
+   - **Status** — `proposed` while the user has not agreed; `accepted` once they have.
+   - **Decision makers** and **Date** (today's date, `YYYY-MM-DD`).
 3. Ground it in evidence: cite the spec/plan, the constitution rule, or the code that forced the decision. Do not invent a rationale after the fact — if the real reason was a constraint or a deadline, write that.
 4. Register it as an OKF concept: the frontmatter carries `type: adr`, `title`, and a one-sentence `description`, so the SessionStart `okf-index` hook surfaces it. Cross-link related concepts with **relative markdown links** (`[Title](../../design-notes/XXXX.md)`), and link back from the spec/plan that motivated it.
 5. Refresh the knowledge index — `node .specify/gates/okf-build-index.mjs build docs` — otherwise the freshness gate blocks the commit.
@@ -43,11 +43,11 @@ ADRs are **append-only**. An accepted ADR is a historical record of what was dec
 
 To change a decision:
 
-1. Write a NEW ADR with the next number. Its `Contexto` states what changed since the old one (new constraint, new evidence, the trade-off went bad).
-2. Edit the OLD ADR's `Status` line only: `substituído por ADR-XXXX`. Touch nothing else in it.
+1. Write a NEW ADR with the next number. Its `Context` states what changed since the old one (new constraint, new evidence, the trade-off went bad).
+2. Edit the OLD ADR's `Status` line only: `superseded by ADR-XXXX`. Touch nothing else in it.
 3. Link the two in both directions.
 
-The single exception: an ADR still in `proposto` status has not been agreed to yet, so it may be edited freely until it becomes `aceito`.
+The single exception: an ADR still in `proposed` status has not been agreed to yet, so it may be edited freely until it becomes `accepted`.
 
 Fixing a typo or a broken link is not "changing a decision" — that is fine.
 

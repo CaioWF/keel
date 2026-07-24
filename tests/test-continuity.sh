@@ -10,13 +10,13 @@ assert_contains "$SK/handoff/SKILL.md" "RESUME" "handoff covers resume mode"
 
 # STATE template
 assert_file "$DOCS/STATE.md" "STATE.md template exists"
-assert_contains "$DOCS/STATE.md" "Em andamento / próximo passo" "STATE has next-step section"
-assert_contains "$DOCS/STATE.md" "volátil" "STATE marked volatile"
+assert_contains "$DOCS/STATE.md" "In progress / next step" "STATE has next-step section"
+assert_contains "$DOCS/STATE.md" "volatile" "STATE marked volatile"
 
 # ADR scaffold
 assert_file "$DOCS/architecture/adr/_template.md" "ADR template exists"
 assert_file "$DOCS/architecture/adr/0001-record-architecture-decisions.md" "ADR-0001 seed exists"
-assert_contains "$DOCS/architecture/adr/_template.md" "Consequências" "ADR template has consequences"
+assert_contains "$DOCS/architecture/adr/_template.md" "Consequences" "ADR template has consequences"
 
 # CLAUDE.md wires continuity + SPEC_DEVIATION + doc gates
 C="$HERE/../core/claude/CLAUDE.md.tmpl"

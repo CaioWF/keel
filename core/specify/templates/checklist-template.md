@@ -1,45 +1,45 @@
-# Checklist Pré-Merge
+# Pre-Merge Checklist
 
-## Testes
+## Tests
 
-- [ ] Testes unitários implementados
-- [ ] Testes de integração implementados
-- [ ] Cobertura de testes > 80%
-- [ ] Todos os testes passam localmente
+- [ ] Unit tests implemented
+- [ ] Integration tests implemented
+- [ ] Test coverage > 80%
+- [ ] All tests pass locally
 
 ## Quality Gates
 
-- [ ] Linter sem erros
-- [ ] Tipos TypeScript corretos
-- [ ] Sem console.log ou debug statements
-- [ ] Performance dentro dos limites
+- [ ] Linter has no errors
+- [ ] TypeScript types correct
+- [ ] No console.log or debug statements
+- [ ] Performance within limits
 
-## Documentação
+## Documentation
 
-- [ ] Spec atualizada com implementação final
-- [ ] Código comentado onde necessário
-- [ ] README/docs atualizados
-- [ ] Exemplos de uso se aplicável
+- [ ] Spec updated with final implementation
+- [ ] Code commented where necessary
+- [ ] README/docs updated
+- [ ] Usage examples if applicable
 
 ## Code Review
 
-- [ ] PR revisada por pelo menos 1 reviewer
-- [ ] Feedback incorporado ou respondido
-- [ ] Commits com histórico claro
+- [ ] PR reviewed by at least 1 reviewer
+- [ ] Feedback incorporated or addressed
+- [ ] Commits with clear history
 
 ## Deploy
 
-- [ ] Migrations testadas (se aplicável)
-- [ ] Variáveis de ambiente documentadas
-- [ ] Rollback plan documentado
-- [ ] Monitoramento e alertas configurados
+- [ ] Migrations tested (if applicable)
+- [ ] Environment variables documented
+- [ ] Rollback plan documented
+- [ ] Monitoring and alerts configured
 
-## Segurança
+## Security
 
-- [ ] Sem secrets/credenciais hardcoded
-- [ ] Checks de autorização em allow-list (não deny-list)
-- [ ] Input validado / sem injeção (SQL/comando/path)
-- [ ] Sem SSRF em requests externos
-- [ ] Crypto forte / IDs imprevisíveis
-- [ ] Nenhuma dependência de terceiro nova sem revisão (supply-chain)
-- [ ] Secrets fora dos logs
+- [ ] No hardcoded secrets/credentials
+- [ ] Authorization checks use allow-list (not deny-list)
+- [ ] Input validated / no injection (SQL/command/path)
+- [ ] No SSRF in external requests
+- [ ] Strong crypto / unpredictable IDs
+- [ ] No new third-party dependency without review (supply-chain)
+- [ ] Secrets kept out of logs

@@ -1,30 +1,30 @@
 ---
 type: adr
-title: <título da decisão>
-description: <uma frase resumindo a decisão>
+title: <decision title>
+description: <one sentence summarizing the decision>
 ---
 
-# ADR-NNNN: <título da decisão>
+# ADR-NNNN: <decision title>
 
-- **Status:** proposto | aceito | substituído por ADR-XXXX | descontinuado
-- **Data:** YYYY-MM-DD
-- **Decisores:** <quem decidiu>
+- **Status:** proposed | accepted | superseded by ADR-XXXX | deprecated
+- **Date:** YYYY-MM-DD
+- **Decision makers:** <who decided>
 
-## Contexto
+## Context
 
-<O problema, as forças em jogo, as restrições. Por que precisamos decidir agora.>
+<The problem, the forces at play, the constraints. Why we need to decide now.>
 
-## Decisão
+## Decision
 
-<O que foi decidido, no presente: "Vamos usar X porque...">
+<What was decided, in the present tense: "We will use X because...">
 
-## Alternativas consideradas
+## Alternatives considered
 
-- <Alternativa A> — por que não.
-- <Alternativa B> — por que não.
+- <Alternative A> — why not.
+- <Alternative B> — why not.
 
-## Consequências
+## Consequences
 
-- **Positivas:** <o que melhora>
-- **Negativas / trade-offs:** <o que piora ou fica em dívida>
-- **Neutras:** <o que muda sem ser bom nem ruim>
+- **Positive:** <what improves>
+- **Negative / trade-offs:** <what gets worse or goes into debt>
+- **Neutral:** <what changes without being good or bad>
