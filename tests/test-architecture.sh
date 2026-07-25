@@ -42,6 +42,7 @@ assert_file "$HERE/../docs/design-notes/prose-slop-guard.md" "prose-slop-guard d
 # The em-dash omission is deliberate and counter-intuitive; if the note stops saying so,
 # someone "fixes" it later and the guard drowns in false positives.
 assert_contains "$HERE/../docs/design-notes/prose-slop-guard.md" "em-dash" "slop-guard note records why em-dash is not a rule"
+assert_file "$HERE/../docs/design-notes/context-engineering-audit.md" "context-engineering-audit design note exists"
 
 # CLAUDE.md cites the architecture skill
 assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "architecture" "CLAUDE.md cites architecture skill"

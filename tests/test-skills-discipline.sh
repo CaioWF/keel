@@ -61,3 +61,7 @@ done
 # the moved sections must NOT remain duplicated in the body
 grep -qF "## Constructing Reviewer Prompts" "$SDD/SKILL.md" && fail "SDD body still holds moved Constructing Reviewer Prompts" || pass "SDD body defers reviewer-prompt detail to reference"
 grep -qF "## Example Workflow" "$SDD/SKILL.md" && fail "SDD body still holds moved Example Workflow" || pass "SDD body defers example workflow to reference"
+# Context handoffs (docs/design-notes/context-engineering-audit.md): a dispatched implementer
+# carries no session history, so whatever the brief fails to name does not exist for it.
+assert_contains "$SDD/implementer-prompt.md" "contract.md" "implementer brief names the verification contract"
+assert_contains "$B" "SessionStart" "brainstorming starts from the already-injected context"

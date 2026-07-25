@@ -19,6 +19,21 @@ Subagent (general-purpose):
 
     [Scene-setting: where this fits, dependencies, architectural context]
 
+    Read these before you start — you carry no session history, so nothing
+    outside this prompt and these files exists for you:
+    - `specs/[FEATURE]/spec.md` — the `AC-N` acceptance criteria your task
+      delivers (the brief names which ones)
+    - `specs/[FEATURE]/contract.md` — per `AC-N`, the `proof` (test path), the
+      `command` that runs it, and the `observable` that means it passed. Put
+      the test at that path and make that command pass; it is the bar your
+      work will be judged against
+    - `specs/[FEATURE]/plan.md` — `File Structure` and `Technical Decisions`
+      for the files you may touch, plus `Data Layer Contract` if your task
+      goes near the schema
+    - `.specify/impl-conventions.txt` — when it lists convention lenses, apply
+      the relevant ones (naming, indexing/RLS, boundary types). Absent or
+      empty: nothing to do
+
     ## No-Commit Rule
 
     Do NOT run `git commit` or any other git mutating command. This project

@@ -15,6 +15,8 @@ assert_contains "$EVAL" "UNVERIFIED" "evaluator never records an unrun criterion
 assert_contains "$EVAL" "stale" "evaluator reports a contract section for a dropped AC"
 assert_contains "$EVAL" "contract drift" "evaluator refuses to re-stamp a criterion that changed"
 assert_contains "$SK/implement-and-evaluate/SKILL.md" "contract.md" "final pass checks the contract is fully PASS"
+# The implementer has to see the bar before it builds, not after the evaluator applies it.
+assert_contains "$SK/implement-feature/SKILL.md" "contract.md" "implement-feature reads the contract it will be judged by"
 
 C="$HERE/../core/claude/CLAUDE.md.tmpl"
 assert_contains "$C" "SDD Workflow"  "CLAUDE.md has SDD Workflow section"

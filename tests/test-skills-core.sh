@@ -58,3 +58,9 @@ assert_contains "$SK/tasks-writer/SKILL.md" "contract-template.md" "tasks-writer
 assert_contains "$SK/tasks-writer/SKILL.md" "contract.md" "tasks-writer outputs contract.md"
 assert_contains "$SK/tasks-writer/SKILL.md" "PENDING" "tasks-writer leaves status to the evaluator"
 assert_contains "$SK/analyze/SKILL.md" "contract.md" "analyze cross-checks the contract"
+
+# Context handoffs (see docs/design-notes/context-engineering-audit.md). Each of these is a link
+# the chain used to get from the session transcript — which a fresh-context dispatch does not have.
+assert_contains "$SK/spec-writer/SKILL.md" "prd.md" "spec-writer reads the PRD it makes precise"
+assert_contains "$SK/plan-writer/SKILL.md" "Dependencies & Interfaces" "plan-writer consumes the PRD's seams"
+grep -qF "RF1" "$SK/spec-writer/SKILL.md" && fail "spec-writer must use the template's FR identifier, not RF" || pass "spec-writer numbers requirements FR1 like the template"

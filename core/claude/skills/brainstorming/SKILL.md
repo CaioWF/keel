@@ -22,7 +22,7 @@ Every project goes through this process. A todo list, a single-function utility,
 You MUST create a task for each of these items and complete them in order:
 
 1. **Set the depth dial** — `default` (conversational, the default) or `deep` (opt-in framed divergence). See `## Depth dial`.
-2. **Explore project context** — check files, docs, recent commits
+2. **Explore project context** — start from what SessionStart already injected: the product brief, the constitution, `docs/STATE.md`, and the OKF concept map (name, type, path, description of every documented concept). Those cost zero tool calls and already sit in your window; rediscovering them by reading files is waste. Then read only what is missing for THIS idea — the concepts the map points at, the code the feature touches, recent commits in that area.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Explore approaches** — `default`: propose 2-3 inline with trade-offs and your recommendation. `deep`: dispatch framed divergence, then converge into 2-3 (see `## Depth dial`).
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
