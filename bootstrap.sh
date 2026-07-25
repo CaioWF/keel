@@ -85,6 +85,15 @@ mkdir -p "$TARGET/.claude/skills" "$TARGET/.claude/hooks"
 chmod +x "$TARGET/.claude/hooks/"*.mjs 2>/dev/null || true
 copy_file "$SELF/core/claude/CLAUDE.md.tmpl" "$TARGET/CLAUDE.md"
 
+# The trivial-change marker is a LOCAL, short-lived door through the phase gate.
+# A committed one would reopen it in every clone forever: checkout resets mtime,
+# so the freshness window can never expire it. Ignore it rather than trusting that
+# nobody runs `git add -A` while it exists.
+if ! grep -qxF ".specify/trivial" "$TARGET/.gitignore" 2>/dev/null; then
+  printf '\n# keel: local trivial-change marker (never commit — see .claude/hooks/phase-gate.mjs)\n.specify/trivial\n' >> "$TARGET/.gitignore"
+  echo "[keel] +$TARGET/.gitignore (.specify/trivial)"
+fi
+
 # AGENTS.md -> CLAUDE.md (relative symlink), created only if absent or --force
 if [ ! -e "$TARGET/AGENTS.md" ] || [ "$FORCE" -eq 1 ]; then
   ln -sf "CLAUDE.md" "$TARGET/AGENTS.md"; echo "[keel] +$TARGET/AGENTS.md"

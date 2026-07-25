@@ -20,4 +20,35 @@ printf '{"cwd":"%s","tool_input":{"file_path":"%s/src/app.py"}}' "$S" "$S" | nod
 printf -- '---\nstatus: draft\n---\n' > "$S/specs/001-foo/plan.md"
 printf '{"cwd":"%s","tool_input":{"file_path":"%s/src/app.py"}}' "$S" "$S" | node "$H" 2>/dev/null; assert_eq "2" "$?" "blocked when plan not approved"
 
+# --- trivial-change path: proportionality without a bypass -------------------
+# A typo fix must not cost six artifacts and two approvals; a refactor must not
+# ride the same door. See docs/design-notes/over-constraint-audit.md.
+pg() { printf '{"cwd":"%s","tool_name":"Edit","tool_input":{"file_path":"%s/src/app.py","new_string":%s}}' "$S" "$S" "$(node -e 'process.stdout.write(JSON.stringify(process.argv[1]))' "$1")"; }
+
+# the block message must advertise the door, or nobody finds it
+out="$(pg 'x = 1' | node "$H" 2>&1 >/dev/null)"
+echo "$out" | grep -qF ".specify/trivial" && pass "block message points at the trivial path" || fail "block should advertise the trivial path (got: $out)"
+
+# declared reason + small edit -> allowed, and says so
+printf 'fix typo in greet()\n' > "$S/.specify/trivial"
+assert_eq "0" "$(pg 'x = 1' | node "$H" >/dev/null 2>&1; echo $?)" "small edit allowed with a declared reason"
+out="$(pg 'x = 1' | node "$H" 2>&1 >/dev/null)"
+echo "$out" | grep -qF "fix typo in greet()" && pass "allowed edit echoes the declared reason" || fail "should echo the reason (got: $out)"
+echo "$out" | grep -qi "announce" && pass "trivial path demands the skip be announced" || fail "should demand announcing the skip (got: $out)"
+pg 'x = 1' | node "$H" 2>/dev/null | grep -qF '"permissionDecision":"allow"' && pass "emits an explicit allow decision" || fail "should emit permissionDecision allow"
+
+# an edit that is not actually small must NOT ride the trivial door
+big="$(printf 'l%.0s\n' $(seq 1 25))"
+assert_eq "2" "$(pg "$big" | node "$H" >/dev/null 2>&1; echo $?)" "25-line edit refused by the trivial path"
+out="$(pg "$big" | node "$H" 2>&1 >/dev/null)"
+echo "$out" | grep -qF "trivial limit" && pass "refusal explains the size limit" || fail "refusal should cite the limit (got: $out)"
+
+# the door expires: a stale marker stops working
+touch -d '2 hours ago' "$S/.specify/trivial" 2>/dev/null || touch -t 200001010000 "$S/.specify/trivial"
+assert_eq "2" "$(pg 'x = 1' | node "$H" >/dev/null 2>&1; echo $?)" "stale trivial marker no longer opens the door"
+
+# an empty marker is not a reason
+: > "$S/.specify/trivial"
+assert_eq "2" "$(pg 'x = 1' | node "$H" >/dev/null 2>&1; echo $?)" "empty marker does not open the door"
+
 rm -rf "$S"

@@ -25,6 +25,12 @@ done
 assert_contains "$S/.claude/settings.json" "phase-gate.mjs" "e2e: hook registered"
 assert_contains "$S/.claude/settings.json" "PostToolUse" "e2e: PostToolUse event merged into settings"
 assert_contains "$S/.claude/settings.json" "slop-guard.mjs" "e2e: slop-guard registered"
+# A committed trivial marker would hold the phase gate open in every clone (checkout
+# resets mtime, so it can never go stale), hence the ignore rule — and it must not
+# accumulate across re-runs.
+assert_contains "$S/.gitignore" ".specify/trivial" "e2e: trivial marker is gitignored"
+bash "$HERE/../bootstrap.sh" --dir "$S" >/dev/null
+assert_eq "1" "$(grep -cxF '.specify/trivial' "$S/.gitignore")" "e2e: gitignore entry is idempotent across re-runs"
 # the freshly-installed project passes its own doc-layer gates
 ( cd "$S" && bash .specify/gates/run-gates.sh >/dev/null 2>&1 ); assert_eq "0" "$?" "e2e: scaffold passes its own gates"
 # TS detection line

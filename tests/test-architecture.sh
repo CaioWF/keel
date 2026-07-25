@@ -43,6 +43,11 @@ assert_file "$HERE/../docs/design-notes/prose-slop-guard.md" "prose-slop-guard d
 # someone "fixes" it later and the guard drowns in false positives.
 assert_contains "$HERE/../docs/design-notes/prose-slop-guard.md" "em-dash" "slop-guard note records why em-dash is not a rule"
 assert_file "$HERE/../docs/design-notes/context-engineering-audit.md" "context-engineering-audit design note exists"
+assert_file "$HERE/../docs/design-notes/over-constraint-audit.md" "over-constraint-audit design note exists"
+# The trivial path is a door in a default-deny gate: if the note stops explaining why it is
+# bounded, announced, and expiring, the next edit widens it into a plain bypass.
+assert_contains "$HERE/../docs/design-notes/over-constraint-audit.md" "declared door, not a bypass" "over-constraint note frames the trivial path as designed, not an exception"
+assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" ".specify/trivial" "CLAUDE.md documents the trivial-change path"
 
 # CLAUDE.md cites the architecture skill
 assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "architecture" "CLAUDE.md cites architecture skill"

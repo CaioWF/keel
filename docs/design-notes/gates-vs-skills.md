@@ -28,6 +28,7 @@ Skills are for what cannot be mechanized.
 | Tests | pass? coverage %? test file exists? | test BEHAVIOR not mocks/implementation? edge cases? → `test-driven-development` + `code-review` |
 | Traceability | each `AC-N` covered by a task? `SPEC_DEVIATION` count → `eval-spec-fidelity` gate | is the AC the *right* one? does the impl truly satisfy it? → `code-review` |
 | Verification | each `AC-N` has a `## AC-N` section in `contract.md`, none left over from a dropped AC (warn-only) → `eval-spec-fidelity` gate | does the declared proof actually prove the criterion? did it pass? → `evaluator` (see [verification contract](verification-contract.md)) |
+| Proportionality | is this edit actually small, is a reason declared, has the marker expired? → `phase-gate` trivial path | is this change genuinely free of judgment calls? → the author, who must announce the skip (see [over-constraint audit](over-constraint-audit.md)) |
 | Doc structure | skills have frontmatter, every `specs/NNNN-*` has `spec.md`, no broken links, mermaid parses → `audit-structure` + `validate-mermaid` gates | is the doc *clear/correct*? → review |
 | Formatting | prettier / lint → pure gate | — (never a skill) |
 | Prose | AI-writing tells (`not just X, but Y`, throat-clearing, borrowed vocabulary) → `slop-guard` hook, advisory (see [prose slop-guard](prose-slop-guard.md)) | is the doc actually clear and true? → `code-review` / `simplify` |

@@ -10,12 +10,22 @@ Help turn ideas into fully formed designs and specs through natural collaborativ
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
 <HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This holds for every feature, refactor, and bug fix, however simple it looks — with one carve-out, below, that is about size rather than about how simple something feels.
 </HARD-GATE>
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
-Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+A todo list, a single-function utility, a settings screen: all of them go through this process. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short — a few sentences for a genuinely small feature — but you MUST present it and get approval.
+
+The failure this guards against is rationalizing: deciding mid-task that the thing you already understand does not need a design. If you are arguing for the exception, you are the case it was written for.
+
+## The one carve-out: mechanically trivial changes
+
+A change is trivial when its shape is decided before you start and nothing about it is a judgment call: a typo, a mechanical rename, a formatting fix, a one-line config value, a broken link. No design exists to present — there is no alternative approach, no trade-off, nothing a user could approve differently.
+
+For those, skip this skill and the chain: write the reason into `.specify/trivial` (one line) and make the edit. The phase-gate allows up to 10 lines while that marker is fresh and echoes the reason back. **Say in your response that you took the trivial path and why.**
+
+The moment the change acquires a decision — an interface, a name others depend on, behavior, more than a handful of lines — it stopped being trivial and the gate above applies again. `doubt-driven-development` draws the same line for the same reason.
 
 ## Checklist
 

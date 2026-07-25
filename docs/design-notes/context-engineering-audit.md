@@ -88,10 +88,11 @@ quoted from the source:
 7. **One model-routing rule, four sources.** `subagent-driven-development/SKILL.md:170-201`
    (`## Model Selection`), `implement-feature/SKILL.md:24`, `fix-runner/SKILL.md:22`, and the global
    `routing-minimum-capable-model` skill all state it (rule 4).
-8. **`CLAUDE.md.tmpl` is drifting into a policy manual.** Thirteen sections, including `slop-guard`
-   env knobs, `contract.md` mechanics, OKF tooling, and multi-client views. Two of those sections
-   were added during this same session, which is the point: every feature wants a paragraph there,
-   and nothing ever removes one (rule 5).
+8. **`CLAUDE.md.tmpl` is drifting into a policy manual.** Eleven sections and 101 lines, carrying
+   `slop-guard` env knobs, `contract.md` mechanics, and the OKF tooling map. Two sections were added
+   during this same session, which is the point: every feature wants a paragraph there, and nothing
+   ever removes one (rule 5). *Addressed in the [over-constraint audit](over-constraint-audit.md):
+   88 lines, detail moved to the hooks and notes that own it.*
 9. **`subagent-driven-development` carries two `dot` graphs (~60 of its 290 lines)** that redraw
    flows the surrounding prose already states. It defers three documents to `references/` correctly;
    the graphs and `## Model Selection` are the remaining bulk (rules 3, 4).
@@ -143,10 +144,10 @@ left open (audit vs. a context contract per skill vs. a gate):
 Fixed in the same pass as this note: the four missing links (findings 1-5), plus `spec-writer`
 telling the model to number requirements `RF1` while the template says `FR1`.
 
-Left as proposals, because each changes behavior and deserves an explicit decision: slimming the
-implementer brief to project-specific context only (findings 6, 11, 12), moving `CLAUDE.md` detail
-behind progressive disclosure (8), and collapsing model routing to a single source (7). Those belong
-with the over-constraint audit and the skill-anatomy work, not to a quick edit.
+Findings 6, 7, 8, and 11 were left as proposals here, since each changes behavior; all four were
+decided and applied in the [over-constraint audit](over-constraint-audit.md) — the implementer brief
+lost what `CLAUDE.md` already mandates, `CLAUDE.md` lost its operational detail, model routing
+collapsed to one source, and "ask questions" became `NEEDS_CONTEXT`.
 
 Rule 8 is the one this repo should sit with longest. keel is built out of "never" clauses, and the
 article's position is that a current model applies judgment without them — every rule kept is a
