@@ -27,6 +27,7 @@ Skills are for what cannot be mechanized.
 | Naming | camelCase/snake, no leading `_`, length → a lint rule | is the name descriptive? avoids `data`/`handler`/`Manager` for *this* thing? → `code-review` / `simplify` |
 | Tests | pass? coverage %? test file exists? | test BEHAVIOR not mocks/implementation? edge cases? → `test-driven-development` + `code-review` |
 | Traceability | each `AC-N` covered by a task? `SPEC_DEVIATION` count → `eval-spec-fidelity` gate | is the AC the *right* one? does the impl truly satisfy it? → `code-review` |
+| Verification | each `AC-N` has a `## AC-N` section in `contract.md`, none left over from a dropped AC (warn-only) → `eval-spec-fidelity` gate | does the declared proof actually prove the criterion? did it pass? → `evaluator` (see [verification contract](verification-contract.md)) |
 | Doc structure | skills have frontmatter, every `specs/NNNN-*` has `spec.md`, no broken links, mermaid parses → `audit-structure` + `validate-mermaid` gates | is the doc *clear/correct*? → review |
 | Formatting | prettier / lint → pure gate | — (never a skill) |
 | Types | `tsc` → gate | — |

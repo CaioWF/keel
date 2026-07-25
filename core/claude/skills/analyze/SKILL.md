@@ -9,14 +9,14 @@ When: spec, plan, and tasks all exist for the active feature, right before handi
 
 Template: none — this skill is purely analytical, it does not fill or produce a template-based artifact.
 
-Output: findings reported inline to the user (and/or appended as notes under `tasks.md`'s `Notas` section if persistence is wanted) — no new file is mandated.
+Output: findings reported inline to the user (and/or appended as notes under `tasks.md`'s `Notes` section if persistence is wanted) — no new file is mandated.
 
 Steps:
 1. Resolve the active feature from `.specify/state` (fallback: newest dir under `specs/`).
-2. Read `specs/<active-feature>/spec.md`, `plan.md`, and `tasks.md` in full.
+2. Read `specs/<active-feature>/spec.md`, `plan.md`, `tasks.md`, and `contract.md` in full.
 3. Cross-check:
    - Every functional requirement (`Functional Requirements`) in the spec is covered by at least one task.
-   - Every acceptance criterion has a corresponding validation step in the plan's `How to Validate` or a task's subtask.
+   - Every acceptance criterion has a section in `contract.md` declaring how it is proven (`proof` + `command` + `observable`), and that proof is consistent with the tasks and the plan's `How to Validate` strategy. A criterion with no declared proof, or a `command`/path the project cannot actually run, is a finding — implementation would start with no way to verify it.
    - The plan's `Implementation Order` and `tasks.md`'s checklist agree on sequence and scope.
    - No task references something out of scope per `Out of Scope` in either spec or PRD.
    - No requirement or task introduces a dependency, abstraction, or feature the spec doesn't actually require — laziness ladder rung 1, "does it need to exist?" (see `architecture` skill's `minimalism.md`). Flag suspected over-engineering for the human; don't fix it here.

@@ -23,4 +23,4 @@ Steps:
 4. Keep it lean: a map, not a tour. No line-by-line file summaries; link paths, don't quote code. If a section would be guesswork, mark it `TODO/uncertain` rather than inventing.
 5. Write/refresh `docs/codebase-map.md`. Record the commit/date it reflects at the top so drift is detectable later.
 
-Next: `plan-writer` reads `docs/codebase-map.md` to ground `Arquitetura` / `Estrutura de Arquivos` in the real structure; `analyze` and `implement-feature` reuse it. Regenerate when the structure drifts, not per feature.
+Next: `plan-writer` reads `docs/codebase-map.md` to ground `Architecture` / `File Structure` in the real structure; `analyze` and `implement-feature` reuse it. Regenerate when the structure drifts, not per feature.

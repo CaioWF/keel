@@ -40,6 +40,10 @@ status: draft
 
 ## How to Validate
 
+> Strategy only — which kinds of test cover what, and why that is enough. The per-`AC-N` proof map
+> (exact command, expected observable, environment setup) belongs in `contract.md`, written by
+> `tasks-writer`. Do not duplicate it here.
+
 - [Unit tests]
 - [Integration tests]
 - [Quality checklist]

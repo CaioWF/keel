@@ -10,6 +10,21 @@ assert_contains "$T/plan-template.md" "Data Layer Contract" "plan template has d
 assert_contains "$T/prd-template.md" "Dependencies & Interfaces" "prd template has dependencies/interfaces section"
 assert_contains "$T/prd-template.md" "Consumes (inputs)" "prd template asks what the feature consumes"
 assert_contains "$T/prd-template.md" "Exposes (outputs)"     "prd template asks what the feature exposes"
+# Verification contract (per-feature): the self-contained "how do I verify this" artifact.
+# Field names are load-bearing — evaluator fills `status:`, the gate counts `## AC-N` headings.
+CT="$T/contract-template.md"
+assert_file "$CT" "contract template exists"
+assert_contains "$CT" "## Environment"   "contract template has environment section"
+assert_contains "$CT" "## AC-1"          "contract template has a per-AC section"
+assert_contains "$CT" "**proof**"        "contract template declares the proof field"
+assert_contains "$CT" "**command**"      "contract template declares the command field"
+assert_contains "$CT" "**observable**"   "contract template declares the observable field"
+assert_contains "$CT" "PENDING"          "contract template seeds status as PENDING"
+assert_contains "$CT" "Full-Suite Check" "contract template has a full-suite check"
+assert_contains "$CT" "UNVERIFIED" "contract template has an UNVERIFIED status (never a fake PASS)"
+assert_contains "$CT" "Dependencies & Interfaces" "contract template disambiguates from interface contracts"
+assert_contains "$T/plan-template.md" "contract.md" "plan template points per-AC proofs at the contract"
+
 assert_file "$HERE/../core/specify/memory/constitution.md.tmpl" "constitution template exists"
 assert_file "$HERE/../core/specify/memory/product.md.tmpl" "product brief template exists"
 assert_contains "$HERE/../core/specify/memory/product.md.tmpl" "North-star Metric" "product template has north-star section"

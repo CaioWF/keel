@@ -39,6 +39,48 @@ out="$(node "$EV" "$E5" 2>&1)"
 echo "$out" | grep -qF "SPEC_DEVIATION open in code: 1" && pass "eval: counts SPEC_DEVIATION" || fail "eval should count SPEC_DEVIATION (got: $out)"
 rm -rf "$E5"
 
+# contract.md coverage is WARN-ONLY: it reports, it never blocks. A hard fail here would
+# reject every feature authored before contracts existed.
+E6="$(new_sandbox)"; mkdir -p "$E6/specs/001-x"
+printf '# spec\nAC-1: a\n' > "$E6/specs/001-x/spec.md"
+printf '# tasks\n- [ ] T1 (AC-1)\n' > "$E6/specs/001-x/tasks.md"
+out="$(node "$EV" "$E6" 2>&1)"; rc=$?
+assert_eq "0" "$rc" "eval: missing contract.md does not block"
+echo "$out" | grep -qF "no contract.md" && pass "eval: warns when contract.md is absent" || fail "eval should warn on absent contract.md (got: $out)"
+rm -rf "$E6"
+
+# contract present: declared AC counted, undeclared AC warned, PASS verdicts tallied
+E7="$(new_sandbox)"; mkdir -p "$E7/specs/001-x"
+printf '# spec\nAC-1: a\nAC-2: b\n' > "$E7/specs/001-x/spec.md"
+printf '# tasks\n- [ ] T1 (AC-1)\n- [ ] T2 (AC-2)\n' > "$E7/specs/001-x/tasks.md"
+printf '# contract\n\n## AC-1 - login\n- **proof**: tests/a.spec.ts:9\n- **status**: PASS (evaluator, 2026-07-25)\n' > "$E7/specs/001-x/contract.md"
+out="$(node "$EV" "$E7" 2>&1)"; rc=$?
+assert_eq "0" "$rc" "eval: undeclared AC in contract does not block"
+echo "$out" | grep -qF "1/2 AC declared" && pass "eval: counts AC declared in contract" || fail "eval should count declared AC (got: $out)"
+echo "$out" | grep -qF "no section in contract.md: AC-2" && pass "eval: names the AC missing a contract section" || fail "eval should name undeclared AC (got: $out)"
+echo "$out" | grep -qF "1 marked PASS" && pass "eval: tallies PASS verdicts from the contract" || fail "eval should tally PASS verdicts (got: $out)"
+rm -rf "$E7"
+
+# reverse direction: a section for an AC the spec dropped/renumbered is a stale contract.
+# This is how traceability docs rot, so the gate names it — still without blocking.
+E7b="$(new_sandbox)"; mkdir -p "$E7b/specs/001-x"
+printf '# spec\nAC-1: a\n' > "$E7b/specs/001-x/spec.md"
+printf '# tasks\n- [ ] T1 (AC-1)\n' > "$E7b/specs/001-x/tasks.md"
+printf '# contract\n\n## AC-1 - login\n- **status**: PENDING\n\n## AC-7 - removed\n- **status**: PASS (evaluator, 2026-07-25)\n' > "$E7b/specs/001-x/contract.md"
+out="$(node "$EV" "$E7b" 2>&1)"; rc=$?
+assert_eq "0" "$rc" "eval: stale contract section does not block"
+echo "$out" | grep -qF "spec no longer has (stale): AC-7" && pass "eval: warns on contract section for a dropped AC" || fail "eval should warn on stale contract section (got: $out)"
+rm -rf "$E7b"
+
+# a bare AC-N mention is NOT a declared proof — only a "## AC-N" section counts
+E8="$(new_sandbox)"; mkdir -p "$E8/specs/001-x"
+printf '# spec\nAC-1: a\n' > "$E8/specs/001-x/spec.md"
+printf '# tasks\n- [ ] T1 (AC-1)\n' > "$E8/specs/001-x/tasks.md"
+printf '# contract\n\nsomeday we will verify AC-1 properly\n' > "$E8/specs/001-x/contract.md"
+out="$(node "$EV" "$E8" 2>&1)"
+echo "$out" | grep -qF "no section in contract.md: AC-1" && pass "eval: bare AC-N mention is not a declared proof" || fail "eval should require a ## AC-N section (got: $out)"
+rm -rf "$E8"
+
 # ---- audit-structure.mjs ----
 AU="$GATES/audit-structure.mjs"
 assert_file "$AU" "audit-structure.mjs exists"

@@ -37,6 +37,7 @@ assert_contains "$TPL/architecture-template.md" "realizes it in its own idiom" "
 
 # design note recipe
 assert_file "$HERE/../docs/design-notes/concepts-layer.md" "concepts-layer design note exists"
+assert_file "$HERE/../docs/design-notes/verification-contract.md" "verification-contract design note exists"
 
 # CLAUDE.md cites the architecture skill
 assert_contains "$HERE/../core/claude/CLAUDE.md.tmpl" "architecture" "CLAUDE.md cites architecture skill"

@@ -58,6 +58,11 @@ brainstorming → prd-writer → spec-writer → clarify → plan-writer → tas
   → finishing-a-development-branch
 ```
 
+`tasks-writer` also writes `specs/<feature>/contract.md` — the feature's **verification
+contract**: environment setup plus, per `AC-N`, the proof, the command that runs it, the
+expected observable, and a status. `evaluator` follows it instead of re-deriving verification
+each loop, and records each verdict back in it.
+
 Code edits are blocked by the **phase gate** until the active feature's `spec.md` and
 `plan.md` both carry `status: approved`. Implementation follows TDD (test behavior, not
 implementation). `review-and-simplify` runs `code-review` + `security-review` in parallel
@@ -69,7 +74,7 @@ then a behavior-preserving `simplify` pass before any commit is proposed.
 zero-dep doc gates:
 
 - **audit-structure** — skill frontmatter, every `specs/NNN-*/` has a `spec.md`, no broken links
-- **eval-spec-fidelity** — every `AC-N` in the spec is covered by a task (traceability), counts `SPEC_DEVIATION` markers
+- **eval-spec-fidelity** — every `AC-N` in the spec is covered by a task (traceability), warns on AC with no proof declared in `contract.md`, counts `SPEC_DEVIATION` markers
 - **validate-mermaid** — mermaid blocks parse
 
 plus the project's own `lint` / `test` / `build` when present (npm or make, auto-detected).

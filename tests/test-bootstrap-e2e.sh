@@ -3,6 +3,7 @@ S="$(new_sandbox)"
 bash "$HERE/../bootstrap.sh" --dir "$S" >/dev/null
 for f in .specify/templates/spec-template.md \
          .specify/templates/brainstorm-template.md \
+         .specify/templates/contract-template.md \
          .specify/gates/run-gates.sh \
          .specify/gates/has-npm-script.mjs \
          .claude/hooks/phase-gate.mjs .claude/hooks/precommit-gate.mjs \

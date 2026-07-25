@@ -51,3 +51,10 @@ assert_contains "$SK/tasks-writer/SKILL.md" "decomposition axis" "tasks-writer h
 assert_file "$SK/implement-and-evaluate/SKILL.md" "implement-and-evaluate skill exists"
 assert_contains "$SK/implement-and-evaluate/SKILL.md" "validate-parallel-scope.mjs partition" "implement-and-evaluate runs the partition"
 assert_contains "$SK/implement-and-evaluate/SKILL.md" "announce" "implement-and-evaluate announces mode + batch plan"
+
+# Verification contract: tasks-writer authors it, analyze cross-checks it. Without the
+# author-time step nothing ever writes contract.md and the evaluator falls back forever.
+assert_contains "$SK/tasks-writer/SKILL.md" "contract-template.md" "tasks-writer consumes the contract template"
+assert_contains "$SK/tasks-writer/SKILL.md" "contract.md" "tasks-writer outputs contract.md"
+assert_contains "$SK/tasks-writer/SKILL.md" "PENDING" "tasks-writer leaves status to the evaluator"
+assert_contains "$SK/analyze/SKILL.md" "contract.md" "analyze cross-checks the contract"

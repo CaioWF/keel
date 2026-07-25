@@ -47,7 +47,7 @@ Steps:
    c. If evaluator reports any FAIL, invoke fix-runner, then re-invoke evaluator to confirm.
    d. Repeat b-c until evaluator reports all relevant scenarios PASS and gates are green, then proceed to the next task.
 3. Stop the loop early and report the blocker if: the phase-gate blocks an edit (spec/plan not approved), a fix-runner attempt requires scope beyond the current task, or the same scenario fails three iterations in a row without progress.
-4. Once all tasks are checked and a final fix-runner pass confirms `.specify/gates/run-gates.sh` is green, run evaluator once more over the full `Acceptance Criteria` list as a final confirmation before handing off.
+4. Once all tasks are checked and a final fix-runner pass confirms `.specify/gates/run-gates.sh` is green, run evaluator once more over the full `Acceptance Criteria` list as a final confirmation before handing off. After that pass, `specs/<active-feature>/contract.md` should carry a PASS `status:` for every `AC-N` and for its `Full-Suite Check` — a criterion still `PENDING` there was never actually verified, whatever the checkboxes say.
 5. Do not commit. Accumulate changes; commit happens later, once code-review and the human both sign off.
 
 Next: review-and-simplify.

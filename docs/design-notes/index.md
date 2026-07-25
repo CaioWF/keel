@@ -6,3 +6,4 @@
 * [Knowledge-packs roadmap](knowledge-packs-roadmap.md) - Roadmap for adding knowledge packs that inject stack/domain expertise during plan and implement phases, including stack-conventions, codebase-map, saas-security, pattern replication, and data-layer contracts
 * [OKF adoption](okf-adoption.md) - How keel adopts the Open Knowledge Format — the tooling map and why cross-links are relative markdown, not wiki-links or absolute
 * [Ship-pack scoping](ship-pack-scoping.md) - Scope analysis for a ship pack covering post-integration lifecycle, including observability-and-instrumentation (included) and contract-deprecation (deferred)
+* [Verification contract](verification-contract.md) - Why each feature carries a contract.md mapping AC to proof/command/observable, who writes vs stamps it, and why the gate only warns

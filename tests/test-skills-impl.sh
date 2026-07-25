@@ -3,6 +3,19 @@ for s in implement-feature evaluator fix-runner implement-and-evaluate code-revi
   assert_file "$SK/$s/SKILL.md" "$s skill exists"
   assert_contains "$SK/$s/SKILL.md" "name: $s" "$s has name frontmatter"
 done
+# evaluator follows the verification contract instead of re-deriving it each loop, and its
+# verdict is durable — it writes status back. Both halves matter: reading it closes the
+# rework hole, writing it closes the "verification vanished with the session" hole.
+EVAL="$SK/evaluator/SKILL.md"
+assert_contains "$EVAL" "contract.md" "evaluator reads the verification contract"
+assert_contains "$EVAL" "status:" "evaluator writes the status back"
+assert_contains "$EVAL" "PASS (evaluator" "evaluator stamps the verdict with its source"
+assert_contains "$EVAL" "Fall back" "evaluator degrades to spec.md when no contract exists"
+assert_contains "$EVAL" "UNVERIFIED" "evaluator never records an unrun criterion as passing"
+assert_contains "$EVAL" "stale" "evaluator reports a contract section for a dropped AC"
+assert_contains "$EVAL" "contract drift" "evaluator refuses to re-stamp a criterion that changed"
+assert_contains "$SK/implement-and-evaluate/SKILL.md" "contract.md" "final pass checks the contract is fully PASS"
+
 C="$HERE/../core/claude/CLAUDE.md.tmpl"
 assert_contains "$C" "SDD Workflow"  "CLAUDE.md has SDD Workflow section"
 assert_contains "$C" "Quality Gates" "CLAUDE.md has Quality Gates section"
