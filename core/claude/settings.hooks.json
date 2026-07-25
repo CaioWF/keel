@@ -12,6 +12,9 @@
       { "matcher": "Bash", "hooks": [ { "type": "command", "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/precommit-gate.mjs" } ] },
       { "matcher": "Bash", "hooks": [ { "type": "command", "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/destructive-guard.mjs" } ] },
       { "matcher": "Read|Grep|Bash", "hooks": [ { "type": "command", "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/secrets-guard.mjs" } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Write|Edit", "hooks": [ { "type": "command", "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/slop-guard.mjs" } ] }
     ]
   },
   "permissions": {

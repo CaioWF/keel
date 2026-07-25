@@ -62,6 +62,12 @@ if (entity.sourceApp !== 'expected-source') throw new ForbiddenException();
 
 Comment WHY, not WHAT — the code already says what it does. Docstrings should state intent plus a short example. Reference the relevant issue or commit SHA when a comment explains a workaround or a non-obvious historical decision.
 
+## Prose
+
+Docs, specs, and comments are written plainly. No throat-clearing openers, no claiming significance the work has not earned (`stands as a testament`, `underscores the importance`), no `not just X, but Y`, no borrowed vocabulary (`delve`, `intricate`, `myriad`, `showcase`), no `-ing` filler clauses, no decorative emoji in headings, no Title-Case section headings. Say the thing and stop.
+
+The `slop-guard` hook (`.claude/hooks/slop-guard.mjs`, PostToolUse on Write/Edit) scans markdown prose and code comments for these tells and reports them back with file, line, and rule name once one write carries 3 or more. It is **advisory**: a PostToolUse hook runs after the write, so nothing is blocked and nobody is asked for approval — treat the report as a prompt to rewrite. Em-dash is deliberately not a rule (current models suppress them, so it signals nothing and only produces false positives). Tune with `KEEL_SLOP_THRESHOLD`, silence with `KEEL_SLOP_OFF=1`, and keep a flagged phrase when it is genuinely the right words.
+
 ## Structure
 
 Keep modules small and focused on one concern. Use predictable, conventional paths so files can be found without searching.

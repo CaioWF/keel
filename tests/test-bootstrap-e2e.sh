@@ -9,6 +9,7 @@ for f in .specify/templates/spec-template.md \
          .claude/hooks/phase-gate.mjs .claude/hooks/precommit-gate.mjs \
          .claude/hooks/phase-sensor.mjs .claude/hooks/load-constitution.mjs \
          .claude/hooks/_lib.mjs \
+         .claude/hooks/slop-guard.mjs \
          .claude/skills/spec-writer/SKILL.md \
          .claude/skills/implement-and-evaluate/SKILL.md \
          .claude/skills/handoff/SKILL.md \
@@ -22,6 +23,8 @@ for f in .specify/templates/spec-template.md \
   assert_file "$S/$f" "e2e: $f installed"
 done
 assert_contains "$S/.claude/settings.json" "phase-gate.mjs" "e2e: hook registered"
+assert_contains "$S/.claude/settings.json" "PostToolUse" "e2e: PostToolUse event merged into settings"
+assert_contains "$S/.claude/settings.json" "slop-guard.mjs" "e2e: slop-guard registered"
 # the freshly-installed project passes its own doc-layer gates
 ( cd "$S" && bash .specify/gates/run-gates.sh >/dev/null 2>&1 ); assert_eq "0" "$?" "e2e: scaffold passes its own gates"
 # TS detection line

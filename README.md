@@ -28,7 +28,7 @@ bash /path/to/keel/bootstrap.sh
 This lands (idempotently — existing files are kept unless `--force`):
 
 - `.specify/` — templates (spec, plan, tasks, constitution, architecture), quality gates
-- `.claude/hooks/` — SessionStart context loader, phase sensor, phase gate, pre-commit gate
+- `.claude/hooks/` — SessionStart context loader, phase sensor, phase gate, pre-commit gate, secrets + destructive-command guards, prose slop-guard
 - `.claude/skills/` — the SDD chain + discipline skills
 - `.specify/memory/` — `product.md` (product brief: user, problem, north-star) + `constitution.md` (engineering principles, code standards, SDD process) — the two once-per-project layers, injected at SessionStart
 - `docs/` — `STATE.md` (working memory) + `architecture/adr/` (decision records)

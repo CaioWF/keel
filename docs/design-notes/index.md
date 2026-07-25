@@ -5,5 +5,6 @@
 * [Gate vs skill](gates-vs-skills.md) - Decision rule for splitting review concerns: mechanical/deterministic rules belong in gates, judgment-based concerns in skills
 * [Knowledge-packs roadmap](knowledge-packs-roadmap.md) - Roadmap for adding knowledge packs that inject stack/domain expertise during plan and implement phases, including stack-conventions, codebase-map, saas-security, pattern replication, and data-layer contracts
 * [OKF adoption](okf-adoption.md) - How keel adopts the Open Knowledge Format — the tooling map and why cross-links are relative markdown, not wiki-links or absolute
+* [Prose slop-guard](prose-slop-guard.md) - Why keel scans written prose for AI-writing tells with an advisory PostToolUse hook, why em-dash is not a rule, and why it warns instead of blocking
 * [Ship-pack scoping](ship-pack-scoping.md) - Scope analysis for a ship pack covering post-integration lifecycle, including observability-and-instrumentation (included) and contract-deprecation (deferred)
 * [Verification contract](verification-contract.md) - Why each feature carries a contract.md mapping AC to proof/command/observable, who writes vs stamps it, and why the gate only warns

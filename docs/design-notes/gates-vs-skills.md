@@ -30,6 +30,7 @@ Skills are for what cannot be mechanized.
 | Verification | each `AC-N` has a `## AC-N` section in `contract.md`, none left over from a dropped AC (warn-only) → `eval-spec-fidelity` gate | does the declared proof actually prove the criterion? did it pass? → `evaluator` (see [verification contract](verification-contract.md)) |
 | Doc structure | skills have frontmatter, every `specs/NNNN-*` has `spec.md`, no broken links, mermaid parses → `audit-structure` + `validate-mermaid` gates | is the doc *clear/correct*? → review |
 | Formatting | prettier / lint → pure gate | — (never a skill) |
+| Prose | AI-writing tells (`not just X, but Y`, throat-clearing, borrowed vocabulary) → `slop-guard` hook, advisory (see [prose slop-guard](prose-slop-guard.md)) | is the doc actually clear and true? → `code-review` / `simplify` |
 | Types | `tsc` → gate | — |
 | Security | secret-scan regex, `npm audit` → can become a gate | allow-list authz, injection, SSRF → `security-review` |
 
