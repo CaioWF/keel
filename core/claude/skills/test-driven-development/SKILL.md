@@ -67,7 +67,7 @@ Tests the mock, not the behavior
 - Refactoring
 - Behavior changes
 
-**Exceptions (ask your human partner):**
+**Exceptions (ask the human):**
 - Throwaway prototypes
 - Generated code
 - Configuration files
@@ -216,4 +216,4 @@ Production code → test exists and failed first
 Otherwise → not TDD
 ```
 
-No exceptions without your human partner's permission.
+No exceptions without the human's permission.

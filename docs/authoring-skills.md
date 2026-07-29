@@ -54,9 +54,44 @@ rationalizations that break it). Imperative voice, concrete examples.
 
 ## Companion files
 
-Heavy reference (100+ lines), reusable prompts, or templates go in sibling files next to
-`SKILL.md` (e.g. `subagent-driven-development/implementer-prompt.md`). Only `SKILL.md` needs
-frontmatter — `audit-structure` skips companions. Keep principles and short patterns inline.
+Heavy reference, reusable prompts, or templates go in companion files beside `SKILL.md`. Only
+`SKILL.md` needs frontmatter — `audit-structure` skips companions. Keep principles and short
+patterns inline.
+
+**Flat sibling or `references/` subdir — decide by domain fan-out, not by size:**
+
+> Two or more companions covering independent topics go in `references/`. A single companion
+> stays a flat sibling.
+
+The test is whether the reader picks one of N per task (`architecture/references/solid.md` vs
+`ddd-tactical.md` — you read the one that applies) or reads the only companion there is
+(`test-driven-development/testing-anti-patterns.md`). Both shapes are conformant; the subdir
+exists to keep the other domains out of context, so it earns nothing when there is no other
+domain. Reasoning in [skill anatomy audit](design-notes/skill-anatomy-audit.md).
+
+**Limits `audit-structure` checks** (from the [Agent Skills authoring
+guide](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)):
+
+| Rule | Level | Why |
+|---|---|---|
+| `name` max 64 chars, `[a-z0-9-]` only | error | platform validation — the skill will not load |
+| `description` max 1024 chars | error | same |
+| `SKILL.md` body under 500 lines | warning | authoring guidance, not a hard limit |
+| companion over 100 lines has a `## Contents` list | warning | a partial read still shows the full scope |
+
+`*-prompt.md` is exempt from the ToC rule: those files are copied verbatim into a dispatched
+brief, so a table of contents would leak into the prompt.
+
+**Keep companion links one level deep from `SKILL.md`.** A companion that points at another
+companion invites partial reads of both — link every file from the body instead.
+
+## What keel does not adopt from the canonical anatomy
+
+The reference anatomy is `SKILL.md` + `references/` + `scripts/` + `eval/`. keel takes the first
+two and keeps the other two central: deterministic logic belongs in `core/gates/*.mjs` (see
+[gate vs skill](design-notes/gates-vs-skills.md)) and skill tests in `tests/test-skills-*.sh`.
+Do not add per-skill `scripts/` or `eval/` directories without a reason that survives the
+gate-vs-skill question.
 
 ## Pressure-test before shipping
 

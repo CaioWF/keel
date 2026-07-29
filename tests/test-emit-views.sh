@@ -7,6 +7,9 @@ printf '# PROJECT\nsee .claude/skills/foo\n' > "$S/CLAUDE.md"
 mkdir -p "$S/.claude/skills/foo"
 printf -- '---\nname: foo\ndescription: does foo\n---\nbody\n' > "$S/.claude/skills/foo/SKILL.md"
 printf '# companion\nx\n' > "$S/.claude/skills/foo/impl-prompt.md"
+# a skill whose companions live in references/ (progressive disclosure) — the views must carry them
+mkdir -p "$S/.claude/skills/foo/references"
+printf '# deep companion\ny\n' > "$S/.claude/skills/foo/references/mechanics.md"
 
 node "$EV" --dir "$S" --agents codex,cursor,copilot,gemini,windsurf --version test >/dev/null 2>&1
 # instruction files for all 5
@@ -18,6 +21,7 @@ assert_file "$S/.windsurf/rules/sdd.md" "emit: windsurf rules"
 # skills as commands
 assert_file "$S/.agents/skills/foo/SKILL.md" "emit: codex skill-dir SKILL.md"
 assert_file "$S/.agents/skills/foo/impl-prompt.md" "emit: codex copies companion"
+assert_file "$S/.agents/skills/foo/references/mechanics.md" "emit: codex copies references/ companion (progressive disclosure survives the view)"
 assert_file "$S/.cursor/commands/foo.md" "emit: cursor command"
 assert_file "$S/.gemini/commands/foo.toml" "emit: gemini toml command"
 assert_file "$S/.github/prompts/foo.prompt.md" "emit: copilot prompt"

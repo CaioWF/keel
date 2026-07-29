@@ -48,17 +48,62 @@ function parseFrontmatter(text) {
 }
 
 // Only each skill's SKILL.md requires frontmatter; companion files (prompts,
-// anti-patterns, refs) sit alongside it and are not skills.
-const isSkill = (f) => f.replace(/\\/g, "/").includes("/.claude/skills/") && basename(f) === "SKILL.md";
+// anti-patterns, refs) sit alongside it and are not skills. Matches both the installed
+// layout (.claude/skills/) and keel's own source layout (core/claude/skills/, packs/*/skills/),
+// so the gate audits the corpus it ships as well as the one it installs.
+const slash = (f) => f.replace(/\\/g, "/");
+const isSkill = (f) => slash(f).includes("/skills/") && basename(f) === "SKILL.md";
+// A companion is any other .md living under a skill directory (same dir as SKILL.md, or a
+// sub-dir of it such as references/).
+const companionOf = (f) => {
+  if (basename(f) === "SKILL.md" || !slash(f).includes("/skills/")) return null;
+  for (let d = dirname(f), i = 0; i < 3; d = dirname(d), i++) {
+    if (existsSync(join(d, "SKILL.md"))) return d;
+  }
+  return null;
+};
 const files = walk(ROOT).filter((f) => !isGenerated(f));
 
-// 1) skills need frontmatter name + description
+// Warnings are authoring guidance from the Agent Skills docs ("under 500 lines", "table of
+// contents for reference files longer than 100 lines"). They are reported but never fail the
+// gate — only the platform's own validation limits are hard errors, because a skill that
+// breaks those will not load at all.
+const warnings = [];
+const warn = (f, m) => warnings.push(`${relative(ROOT, f) || f}: ${m}`);
+
+// 1) skills need frontmatter name + description, within the platform's validation limits
 for (const f of files) {
   if (!isSkill(f)) continue;
-  const fm = parseFrontmatter(readFileSync(f, "utf8"));
+  const text = readFileSync(f, "utf8");
+  const fm = parseFrontmatter(text);
   if (!fm) { err(f, "skill missing frontmatter"); continue; }
   if (!fm.name) err(f, "skill missing `name`");
   if (!fm.description) err(f, "skill missing `description`");
+  if (fm.name && fm.name.length > 64) err(f, `skill \`name\` is ${fm.name.length} chars (max 64)`);
+  if (fm.name && !/^[a-z0-9-]+$/.test(fm.name))
+    err(f, `skill \`name\` must be lowercase letters, numbers and hyphens only (got \`${fm.name}\`)`);
+  if (fm.description && fm.description.length > 1024)
+    err(f, `skill \`description\` is ${fm.description.length} chars (max 1024)`);
+  // Body = everything after the frontmatter block.
+  const end = text.indexOf("\n---", 3);
+  const body = end === -1 ? text : text.slice(end + 4);
+  const lines = body.split("\n").length;
+  if (lines > 500)
+    warn(f, `SKILL.md body is ${lines} lines — guidance is to stay under 500 lines; split detail into references/`);
+}
+
+// 1b) long companions need a table of contents, so a partial read still shows the full scope.
+// `*-prompt.md` files are copied verbatim into a dispatched brief, where a ToC would leak
+// into the prompt itself — they are reference-shaped only by accident, so they are exempt.
+for (const f of files) {
+  if (!companionOf(f)) continue;
+  if (/-prompt\.md$/.test(basename(f))) continue;
+  const text = readFileSync(f, "utf8");
+  const lines = text.split("\n");
+  if (lines.length <= 100) continue;
+  const hasToc = lines.slice(0, 40).some((l) => /^#{1,3}\s+(contents|table of contents)\s*$/i.test(l.trim()));
+  if (!hasToc)
+    warn(f, `companion is ${lines.length} lines with no table of contents — add a "## Contents" list at the top`);
 }
 
 // 2) every specs/NNNN-* needs spec.md
@@ -83,6 +128,12 @@ for (const f of files) {
     if (!target) continue;
     if (!existsSync(resolve(dirname(f), target))) err(f, `broken link → ${target}`);
   }
+}
+
+if (warnings.length) {
+  console.log(`\n! Structural audit: ${warnings.length} authoring warning(s)\n`);
+  for (const w of warnings) console.log(`  • ${w}`);
+  console.log("");
 }
 
 if (errors.length) {

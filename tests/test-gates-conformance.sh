@@ -111,6 +111,66 @@ A3="$(new_sandbox)"; mkdir -p "$A3/specs/001-x"
 [ "$rc" -ne 0 ] && pass "audit: spec dir without spec.md fails" || fail "audit should fail on missing spec.md"
 rm -rf "$A3"
 
+# --- Agent Skills conformance (platform limits are errors, doc guidance is warnings) ---
+# Source: platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+
+# name outside the allowed charset -> exit 1 (the platform would reject the skill)
+A4="$(new_sandbox)"; mkdir -p "$A4/.claude/skills/foo"
+printf -- '---\nname: Foo_Bar\ndescription: does foo\n---\n# foo\n' > "$A4/.claude/skills/foo/SKILL.md"
+( node "$AU" "$A4" >/dev/null 2>&1 ); rc=$?
+[ "$rc" -ne 0 ] && pass "audit: skill name outside [a-z0-9-] fails" || fail "audit should fail on bad name charset"
+rm -rf "$A4"
+
+# name over 64 chars -> exit 1
+A5="$(new_sandbox)"; LONG="$(printf 'a%.0s' $(seq 1 65))"; mkdir -p "$A5/.claude/skills/foo"
+printf -- '---\nname: %s\ndescription: does foo\n---\n# foo\n' "$LONG" > "$A5/.claude/skills/foo/SKILL.md"
+( node "$AU" "$A5" >/dev/null 2>&1 ); rc=$?
+[ "$rc" -ne 0 ] && pass "audit: skill name over 64 chars fails" || fail "audit should fail on name length"
+rm -rf "$A5"
+
+# description over 1024 chars -> exit 1
+A6="$(new_sandbox)"; BIG="$(printf 'x%.0s' $(seq 1 1025))"; mkdir -p "$A6/.claude/skills/foo"
+printf -- '---\nname: foo\ndescription: %s\n---\n# foo\n' "$BIG" > "$A6/.claude/skills/foo/SKILL.md"
+( node "$AU" "$A6" >/dev/null 2>&1 ); rc=$?
+[ "$rc" -ne 0 ] && pass "audit: skill description over 1024 chars fails" || fail "audit should fail on description length"
+rm -rf "$A6"
+
+# SKILL.md body over 500 lines -> warns on stdout but still exits 0 (doc guidance, not a limit)
+A7="$(new_sandbox)"; mkdir -p "$A7/.claude/skills/foo"
+{ printf -- '---\nname: foo\ndescription: does foo\n---\n'; for i in $(seq 1 520); do echo "line $i"; done; } > "$A7/.claude/skills/foo/SKILL.md"
+out="$(node "$AU" "$A7" 2>&1)"; rc=$?
+assert_eq "0" "$rc" "audit: oversized SKILL.md body still exits 0 (warning, not error)"
+case "$out" in *"500 lines"*) pass "audit: warns on SKILL.md body over 500 lines";; *) fail "audit should warn on body over 500 lines (got: $out)";; esac
+rm -rf "$A7"
+
+# companion over 100 lines without a table of contents -> warns, exits 0
+A8="$(new_sandbox)"; mkdir -p "$A8/.claude/skills/foo"
+printf -- '---\nname: foo\ndescription: does foo\n---\n# foo\n' > "$A8/.claude/skills/foo/SKILL.md"
+{ echo "# big companion"; for i in $(seq 1 120); do echo "line $i"; done; } > "$A8/.claude/skills/foo/big.md"
+out="$(node "$AU" "$A8" 2>&1)"; rc=$?
+assert_eq "0" "$rc" "audit: companion without ToC still exits 0"
+case "$out" in *"table of contents"*) pass "audit: warns on 100+ line companion with no ToC";; *) fail "audit should warn on companion missing ToC (got: $out)";; esac
+rm -rf "$A8"
+
+# same companion WITH a ToC -> no warning
+A9="$(new_sandbox)"; mkdir -p "$A9/.claude/skills/foo"
+printf -- '---\nname: foo\ndescription: does foo\n---\n# foo\n' > "$A9/.claude/skills/foo/SKILL.md"
+{ echo "# big companion"; echo; echo "## Contents"; echo "- a"; for i in $(seq 1 120); do echo "line $i"; done; } > "$A9/.claude/skills/foo/big.md"
+out="$(node "$AU" "$A9" 2>&1)"
+case "$out" in *"table of contents"*) fail "audit should not warn when companion has a ToC";; *) pass "audit: companion with ToC is clean";; esac
+rm -rf "$A9"
+
+# prompt templates are copied verbatim into a dispatch, so a ToC would leak into the prompt -> exempt
+A10="$(new_sandbox)"; mkdir -p "$A10/.claude/skills/foo"
+printf -- '---\nname: foo\ndescription: does foo\n---\n# foo\n' > "$A10/.claude/skills/foo/SKILL.md"
+{ echo "# reviewer brief"; for i in $(seq 1 120); do echo "line $i"; done; } > "$A10/.claude/skills/foo/task-reviewer-prompt.md"
+out="$(node "$AU" "$A10" 2>&1)"
+case "$out" in *"table of contents"*) fail "audit should exempt *-prompt.md from the ToC rule";; *) pass "audit: *-prompt.md exempt from ToC rule";; esac
+rm -rf "$A10"
+
+# keel's own corpus is clean under the new rules
+( node "$AU" "$HERE/.." >/dev/null 2>&1 ); assert_eq "0" "$?" "audit: keel's own tree passes the conformance rules"
+
 # broken relative link -> exit 1
 A4="$(new_sandbox)"
 printf '# doc\nsee [other](./nope.md)\n' > "$A4/README.md"

@@ -65,7 +65,7 @@ rule set instead.
   zero-dep, so the detector is a table of regexes inside the hook rather than a dependency.
 - **`iCodeCraft/anti-slop`**, the reference in the original TODO, turned out to be about *code* slop,
   not prose: minimal diffs, no unrequested dependencies, no invented layer directories, no obvious
-  comments. keel covers that ground already with `simplify`, `architecture/minimalism.md` (the
+  comments. keel covers that ground already with `simplify`, `architecture/references/minimalism.md` (the
   laziness ladder), and `analyze`'s over-engineering check. It informed nothing here.
 
 ## Deliberately not done

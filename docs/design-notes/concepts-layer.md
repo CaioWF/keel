@@ -4,51 +4,55 @@ title: Concept layer
 description: How the concept layer standardizes engineering principles (Clean Architecture, SOLID, etc.) agnostically across languages using skills, constitution rules, and structure templates
 ---
 
-# Design note: a camada de conceito agnóstica (o container)
+# Design note: the language-agnostic concept layer (the container)
 
-A camada de conceito é o lado **skill/agnóstico** da `gates-vs-skills.md` aplicado a
-princípios de engenharia (Clean Architecture, SOLID, ...). Ela padroniza **o quê** construir
-e o **formato**; o **enforcement** mecânico fica no pack por linguagem (o lado gate).
+The concept layer is the **skill/agnostic** half of `gates-vs-skills.md` applied to engineering
+principles (Clean Architecture, SOLID, and so on). It standardizes **what** to build and the
+**format**; mechanical **enforcement** lives in the per-language pack (the gate half).
 
-## A receita: um "conceito" é um triple uniforme
+## The recipe: a "concept" is a uniform triple
 
-Para adicionar um conceito ao keel, preencha até quatro slots — só o primeiro é obrigatório:
+To add a concept to keel, fill up to four slots — only the first is required:
 
-1. **Guia (obrigatório)** — um companheiro da skill `architecture`:
-   `core/claude/skills/architecture/<conceito>.md`. Agnóstico de linguagem: o princípio, quando
-   aplicar, exemplos neutros, como mapeia para a estrutura. É o "como pensar".
-2. **Regra de constituição (opcional)** — se o conceito tem um **não-negociável** verificável
-   pelo agente, adicione uma linha imperativa em `## Princípios de arquitetura` da
-   `constitution.md.tmpl`. Curto. A profundidade fica no guia, não aqui.
-3. **Nota de estrutura (opcional)** — se o conceito molda o layout de pastas/módulos, descreva o
-   formato em `architecture-template.md` (agnóstico; cada linguagem realiza com seu idioma).
-4. **Pack de enforcement (opcional, por linguagem)** — se a regra dá para impor mecanicamente,
-   o config vai num pack `packs/<lang>-<conceito>/` (ex.: `ts-clean-arch` com dependency-cruiser),
-   plugado no `run-gates.sh`. NUNCA no core agnóstico.
+1. **Guide (required)** — a companion of the `architecture` skill:
+   `core/claude/skills/architecture/references/<concept>.md`. Language-agnostic: the principle,
+   when to apply it, neutral examples, how it maps to structure. This is the "how to think".
+   The companions live in `references/` because five independent concepts are a domain fan-out —
+   you read the one that applies (see [skill anatomy audit](skill-anatomy-audit.md)).
+2. **Constitution rule (optional)** — if the concept has a **non-negotiable** the agent can
+   verify, add one imperative line under `## Architecture Principles` in `constitution.md.tmpl`.
+   Keep it short. The depth belongs in the guide, not here.
+3. **Structure note (optional)** — if the concept shapes folder/module layout, describe the
+   format in `architecture-template.md` (agnostic; each language realizes it in its own idiom).
+4. **Enforcement pack (optional, per language)** — if the rule can be imposed mechanically, the
+   config goes in a `packs/<lang>-<concept>/` pack (for example `ts-clean-arch` with
+   dependency-cruiser), wired into `run-gates.sh`. NEVER in the agnostic core.
 
-## Por que esse formato
+## Why this shape
 
-- **Skill umbrella + companheiros** (não N skills soltas): uma entrada na cadeia SDD, conceitos
-  plugam como companheiros, audita limpo (só `SKILL.md` exige frontmatter).
-- **Constituição só com o duro**: ela é injetada no SessionStart — manter enxuto. O guia carrega
-  o resto.
-- **Estrutura = formato, não código**: código de camada é específico de linguagem (= pack).
-- **Guia ↔ pack**: o guia é a fonte; o pack é o guia expresso no linter de uma linguagem. Guia
-  sem pack = advisory (aceitável); pack sem guia = regra sem racional (evitar).
+- **Umbrella skill + companions** (not N loose skills): one entry point in the SDD chain,
+  concepts plug in as companions, and it audits cleanly (only `SKILL.md` needs frontmatter).
+- **Constitution carries only the hard parts**: it is injected at SessionStart — keep it lean.
+  The guide carries the rest.
+- **Structure = format, not code**: layer code is language-specific (= pack).
+- **Guide ↔ pack**: the guide is the source; the pack is the guide expressed in one language's
+  linter. Guide without pack = advisory (acceptable); pack without guide = a rule with no
+  rationale (avoid).
 
-## Conjunto curado atual
+## Current curated set
 
-| Conceito | Guia | Regra constituição | Nota estrutura | Pack |
+| Concept | Guide | Constitution rule | Structure note | Pack |
 |---|---|---|---|---|
-| Clean Architecture | `clean-architecture.md` | dependency rule | camadas | `ts-clean-arch` (deferido) |
-| SOLID | `solid.md` | — | — | (lint por linguagem, depois) |
-| Estratégia de testes | `testing-strategy.md` (aponta p/ `test-driven-development`) | testar comportamento | — | gate de teste já existe |
-| DDD tático | `ddd-tactical.md` | fronteira de agregado | — | — |
-| Minimalismo | `minimalism.md` | mínimo viável + carve-out | — | (advisory; sem pack) |
+| Clean Architecture | `references/clean-architecture.md` | dependency rule | layers | `ts-clean-arch` (deferred) |
+| SOLID | `references/solid.md` | — | — | (per-language lint, later) |
+| Testing strategy | `references/testing-strategy.md` (points to `test-driven-development`) | test behavior | — | test gate already exists |
+| Tactical DDD | `references/ddd-tactical.md` | aggregate boundary | — | — |
+| Minimalism | `references/minimalism.md` | minimum viable + carve-out | — | (advisory; no pack) |
 
-Crescer = mais uma linha na tabela + os slots da receita. Sem tocar em código.
+Growing = one more row in the table plus the recipe's slots. No code changes.
 
-## Relacionado
+## Related
 
-- [Gate vs skill](gates-vs-skills.md) — a regra gate-vs-skill que esta camada aplica no lado skill
-- [Agnostic concept layer](../plans/2026-06-22-agnostic-concept-layer.md) — o plano que implementa esta nota de design
+- [Gate vs skill](gates-vs-skills.md) — the gate-vs-skill rule this layer applies on the skill side
+- [Skill anatomy audit](skill-anatomy-audit.md) — why the guides live in `references/`
+- [Agnostic concept layer](../plans/2026-06-22-agnostic-concept-layer.md) — the plan that implements this design note

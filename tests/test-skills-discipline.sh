@@ -65,3 +65,23 @@ grep -qF "## Example Workflow" "$SDD/SKILL.md" && fail "SDD body still holds mov
 # carries no session history, so whatever the brief fails to name does not exist for it.
 assert_contains "$SDD/implementer-prompt.md" "contract.md" "implementer brief names the verification contract"
 assert_contains "$B" "SessionStart" "brainstorming starts from the already-injected context"
+
+# --- skill anatomy (docs/design-notes/skill-anatomy-audit.md) ---
+# Vendored session anecdotes and self-reported metrics were demoted out of the always-loaded
+# body into a companion. They explain why a technique exists; they do not tell the agent what
+# to do, so they must not creep back into SKILL.md.
+for s in systematic-debugging dispatching-parallel-agents; do
+  assert_file "$SK/$s/field-notes.md" "$s ships a field-notes companion"
+  assert_contains "$SK/$s/SKILL.md" "field-notes.md" "$s body links its field notes"
+  grep -qF "## Real-World Impact" "$SK/$s/SKILL.md" && fail "$s body still holds Real-World Impact" || pass "$s body defers reported outcomes to field notes"
+done
+grep -qF "Real Example from Session" "$SK/dispatching-parallel-agents/SKILL.md" && fail "dispatching body still holds the session anecdote" || pass "dispatching body defers the worked example to field notes"
+
+# Borrowed upstream voice ("your human partner") was normalized to keel's own, including a
+# heading that a find-replace had mangled into a possessive.
+grep -rqF "your human partner" "$SK" && fail "vendored second-person possessive is back in the skills" || pass "skill corpus speaks in keel's own voice"
+
+# Companions over 100 lines carry a table of contents so a partial read still shows the scope.
+# *-prompt.md is exempt: it is copied verbatim into a dispatch, where a ToC would leak.
+assert_contains "$SK/test-driven-development/testing-anti-patterns.md" "## Contents" "long TDD companion has a table of contents"
+assert_contains "$SDD/references/dispatch-mechanics.md" "## Contents" "long dispatch-mechanics reference has a table of contents"

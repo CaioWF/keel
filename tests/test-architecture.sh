@@ -6,24 +6,27 @@ CONST="$HERE/../core/specify/memory/constitution.md.tmpl"
 assert_file "$SK/SKILL.md" "architecture skill exists"
 assert_contains "$SK/SKILL.md" "name: architecture" "architecture has name frontmatter"
 
-# 4 curated companions
+# 4 curated companions. Five independent concepts = domain fan-out, so they live in
+# references/ and load on demand (docs/design-notes/skill-anatomy-audit.md).
+REF="$SK/references"
+assert_nofile "$SK/clean-architecture.md" "architecture companions are not flat siblings"
 for c in clean-architecture solid testing-strategy ddd-tactical; do
-  assert_file "$SK/$c.md" "architecture companion $c exists"
+  assert_file "$REF/$c.md" "architecture companion $c exists under references/"
 done
-# companions referenced by the umbrella skill
+# companions referenced by the umbrella skill, as one-level-deep links
 for c in clean-architecture solid testing-strategy ddd-tactical; do
-  assert_contains "$SK/SKILL.md" "$c.md" "architecture skill indexes $c"
+  assert_contains "$SK/SKILL.md" "references/$c.md" "architecture skill links $c"
 done
 # minimalism companion (laziness ladder) exists, indexed, and stays distinct from simplify
-assert_file "$SK/minimalism.md" "architecture companion minimalism exists"
-assert_contains "$SK/SKILL.md" "minimalism.md" "architecture skill indexes minimalism"
-assert_contains "$SK/minimalism.md" "laziness ladder" "minimalism states the laziness ladder"
-assert_contains "$SK/minimalism.md" "simplify" "minimalism demarcates against simplify (pre vs post-write)"
+assert_file "$REF/minimalism.md" "architecture companion minimalism exists"
+assert_contains "$SK/SKILL.md" "references/minimalism.md" "architecture skill links minimalism"
+assert_contains "$REF/minimalism.md" "laziness ladder" "minimalism states the laziness ladder"
+assert_contains "$REF/minimalism.md" "simplify" "minimalism demarcates against simplify (pre vs post-write)"
 
 # testing-strategy references TDD (does not duplicate)
-assert_contains "$SK/testing-strategy.md" "test-driven-development" "testing-strategy points to TDD skill"
+assert_contains "$REF/testing-strategy.md" "test-driven-development" "testing-strategy points to TDD skill"
 # clean-architecture states the dependency rule
-assert_contains "$SK/clean-architecture.md" "dependency rule" "clean-architecture states dependency rule"
+assert_contains "$REF/clean-architecture.md" "dependency rule" "clean-architecture states dependency rule"
 
 # constitution carries the hard rules
 assert_contains "$CONST" "Architecture Principles" "constitution has architecture principles section"

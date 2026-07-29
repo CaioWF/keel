@@ -9,4 +9,5 @@
 * [Over-constraint audit](over-constraint-audit.md) - Where keel's own scaffolding capped the ceiling instead of raising the floor — the measured trivial-change contradiction, the declared path that fixes it, and the de-duplication that followed
 * [Prose slop-guard](prose-slop-guard.md) - Why keel scans written prose for AI-writing tells with an advisory PostToolUse hook, why em-dash is not a rule, and why it warns instead of blocking
 * [Ship-pack scoping](ship-pack-scoping.md) - Scope analysis for a ship pack covering post-integration lifecycle, including observability-and-instrumentation (included) and contract-deprecation (deferred)
+* [Skill anatomy audit](skill-anatomy-audit.md) - Audit of every keel skill against the official Agent Skills anatomy, the measured thresholds that decided the references/ convention, and the domain fan-out rule that replaced a made-up line count
 * [Verification contract](verification-contract.md) - Why each feature carries a contract.md mapping AC to proof/command/observable, who writes vs stamps it, and why the gate only warns

@@ -30,6 +30,7 @@ Skills are for what cannot be mechanized.
 | Verification | each `AC-N` has a `## AC-N` section in `contract.md`, none left over from a dropped AC (warn-only) → `eval-spec-fidelity` gate | does the declared proof actually prove the criterion? did it pass? → `evaluator` (see [verification contract](verification-contract.md)) |
 | Proportionality | is this edit actually small, is a reason declared, has the marker expired? → `phase-gate` trivial path | is this change genuinely free of judgment calls? → the author, who must announce the skip (see [over-constraint audit](over-constraint-audit.md)) |
 | Doc structure | skills have frontmatter, every `specs/NNNN-*` has `spec.md`, no broken links, mermaid parses → `audit-structure` + `validate-mermaid` gates | is the doc *clear/correct*? → review |
+| Skill anatomy | `name` charset/length, `description` length (errors); body over 500 lines, long companion with no ToC (warnings) → `audit-structure` | does this companion earn its own file, and does the split follow domain fan-out? → the author (see [skill anatomy audit](skill-anatomy-audit.md)) |
 | Formatting | prettier / lint → pure gate | — (never a skill) |
 | Prose | AI-writing tells (`not just X, but Y`, throat-clearing, borrowed vocabulary) → `slop-guard` hook, advisory (see [prose slop-guard](prose-slop-guard.md)) | is the doc actually clear and true? → `code-review` / `simplify` |
 | Types | `tsc` → gate | — |

@@ -4,6 +4,12 @@ Full detail for constructing reviewer prompts, handing artifacts as files, and
 keeping durable progress. The `SKILL.md` body carries the non-negotiables; read
 this before your first dispatch for the complete rules and rationale.
 
+## Contents
+
+- Constructing Reviewer Prompts — what a task-scoped review gate must carry
+- File Handoffs — brief/report by path, and the size gate for inlining
+- Durable Progress — the `progress.md` ledger
+
 ## Constructing Reviewer Prompts
 
 Per-task reviews are task-scoped gates. The broad review happens once, at the
