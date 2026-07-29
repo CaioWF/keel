@@ -20,5 +20,5 @@ Scope: schema and migration the change introduces. Advisory knowledge, makes no 
 
 ## Applying
 
-- In `plan-writer`: record indexes, constraints, RLS policies, and the code↔`snake_case` mapping (see `naming-conventions`) in `Decisões Técnicas`, not left to implement-time guesswork.
+- In `plan-writer`: record indexes, constraints, RLS policies, and the code↔`snake_case` mapping (see `naming-conventions`) in `Technical Decisions`, not left to implement-time guesswork.
 - In `implement-feature`: match the existing migration tool and file convention already in the repo before writing a new migration.

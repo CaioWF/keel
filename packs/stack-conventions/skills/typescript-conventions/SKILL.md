@@ -21,5 +21,5 @@ Scope: TS the change introduces. Advisory knowledge, makes no edits.
 
 ## Applying
 
-- In `plan-writer`: when the plan introduces a domain state machine or an external boundary, record the union/parse-at-edge decision in `Decisões Técnicas`.
+- In `plan-writer`: when the plan introduces a domain state machine or an external boundary, record the union/parse-at-edge decision in `Technical Decisions`.
 - In `implement-feature`: match the repo's existing validation lib and type-organization convention before introducing a new one — climb the laziness ladder (reuse existing).

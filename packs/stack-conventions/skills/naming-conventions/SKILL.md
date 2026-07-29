@@ -5,7 +5,7 @@ description: Naming-convention lens consulted BEFORE writing code — camelCase 
 
 # naming-conventions
 
-When: consulted by `plan-writer` (to record naming decisions in `Decisões Técnicas`) and by `implement-feature` (to apply them while coding), in projects where the `stack-conventions` pack is installed. Not a review lens — this shapes code as it is written, not after.
+When: consulted by `plan-writer` (to record naming decisions in `Technical Decisions`) and by `implement-feature` (to apply them while coding), in projects where the `stack-conventions` pack is installed. Not a review lens — this shapes code as it is written, not after.
 
 Scope: names the code introduces — identifiers, DB columns/tables, API fields, files. Advisory knowledge, makes no edits.
 
@@ -19,7 +19,7 @@ Scope: names the code introduces — identifiers, DB columns/tables, API fields,
 
 ## Applying
 
-- In `plan-writer`: when the plan adds a table, column, or API field, record the code↔DB↔wire names and the mapping site in `Decisões Técnicas`. Ambiguity here becomes a `clarify` question, not a coin-flip at implement time.
+- In `plan-writer`: when the plan adds a table, column, or API field, record the code↔DB↔wire names and the mapping site in `Technical Decisions`. Ambiguity here becomes a `clarify` question, not a coin-flip at implement time.
 - In `implement-feature`: before naming a new identifier, match how the surrounding code already names the same concept. New name only when no sibling exists.
 
 Whitelist over blacklist for any allowed-value naming (source/role/type checks): name the allowed set, not the banned one — see the constitution's authorization rule.

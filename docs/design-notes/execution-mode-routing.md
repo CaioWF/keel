@@ -52,7 +52,7 @@ compartilhado, não o paralelismo em si.
 `dispatch-parallel` remove o bloqueio combinando duas coisas — nenhuma sozinha basta:
 
 1. **Partição por file-scope.** Cada task declara `[scope: glob]` no `tasks.md` (o `tasks-writer`
-   deriva do `Estrutura de Arquivos` do plan). `validate-parallel-scope.mjs partition` agrupa em
+   deriva do `File Structure` do plan). `validate-parallel-scope.mjs partition` agrupa em
    batches onde os scopes são **disjuntos par-a-par** — nenhum par de tasks no mesmo batch pode
    tocar o mesmo arquivo. Scope ausente ou amplo (`**`) cai em batch de um → roda sozinho. É
    whitelist, não blacklist: só paraleliza o que é **provadamente** disjunto; a dúvida serializa.

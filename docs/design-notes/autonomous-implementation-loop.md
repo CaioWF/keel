@@ -22,7 +22,7 @@ O achado desta nota: keel **já tem o goal loop**. `implement-and-evaluate` é o
 
 | Componente loop-engineering | Peça keel existente |
 |---|---|
-| **Loop contract** (done checável por exit code) | checkboxes de `tasks.md` + `Critérios de Aceitação` do `spec.md` + `run-gates.sh` (exit 0) |
+| **Loop contract** (done checável por exit code) | checkboxes de `tasks.md` + `Acceptance Criteria` do `spec.md` + `run-gates.sh` (exit 0) |
 | **Checker** (contexto fresco, sem checker-theater) | `evaluator` + `task-reviewer` = **subagents frescos** — o agente não revisa a si mesmo por construção |
 | **State layer** (sobrevive compaction) | ledger `.git/sdd/<feature>/progress.md` — nunca re-faz task marcada done |
 | **Bounded retry + escalação** | `implement-and-evaluate` step 3: mesma cena falha 3× sem progresso → para e reporta blocker |
