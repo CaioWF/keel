@@ -3,7 +3,7 @@
 # (naming-conventions, postgres-conventions, typescript-conventions) to a keel
 # install. Unlike the review packs, these are consulted BEFORE code is written:
 # they copy into .claude/skills and register in .specify/impl-conventions.txt, which
-# plan-writer reads to ground Decisões Técnicas and implement-feature applies while
+# plan-writer reads to ground Technical Decisions and implement-feature applies while
 # coding. Idempotent: safe to re-run.
 #
 # Usage: bash packs/stack-conventions/install.sh --dir <target> [--force]
@@ -42,5 +42,12 @@ for lens in naming-conventions postgres-conventions typescript-conventions; do
     printf '%s\n' "$lens" >> "$REG"; echo "[keel:stack-conventions] +lens $lens"
   fi
 done
+
+# Contribute this pack's section to the project's CLAUDE.md. Which sections a project
+# carries follows from its detected stack, so each pack renders its own marker block
+# instead of core shipping one monolithic template. Re-running re-renders in place.
+if [ -f "$TARGET/CLAUDE.md" ]; then
+  node "$SELF/../../lib/inject-section.mjs" set "$TARGET/CLAUDE.md" stack-conventions "$SELF/claude-section.md"
+fi
 
 echo "[keel:stack-conventions] pack installed at $TARGET"

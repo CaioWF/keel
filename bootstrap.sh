@@ -83,7 +83,20 @@ copy_tree "$SELF/core/claude/skills" "$TARGET/.claude/skills"
 copy_tree "$SELF/core/claude/hooks"  "$TARGET/.claude/hooks"
 mkdir -p "$TARGET/.claude/skills" "$TARGET/.claude/hooks"
 chmod +x "$TARGET/.claude/hooks/"*.mjs 2>/dev/null || true
+# CLAUDE.md is a LIVING doc: keel owns the body, but the `<!-- BEGIN:keel:<id> -->`
+# blocks hold project-learned facts (environment, tests, conventions — written by the
+# learn-session skill) and pack-contributed sections. A --force refresh rewrites the
+# file from the template, so snapshot the blocks first and carry them back after.
+# Packs run later and re-render their own, so a pack update still wins.
+CLAUDE_PREV=""
+if [ -f "$TARGET/CLAUDE.md" ] && [ "$FORCE" -eq 1 ]; then
+  CLAUDE_PREV="$(mktemp)"; cp "$TARGET/CLAUDE.md" "$CLAUDE_PREV"
+fi
 copy_file "$SELF/core/claude/CLAUDE.md.tmpl" "$TARGET/CLAUDE.md"
+if [ -n "$CLAUDE_PREV" ]; then
+  node "$SELF/lib/inject-section.mjs" carry-over "$CLAUDE_PREV" "$TARGET/CLAUDE.md"
+  rm -f "$CLAUDE_PREV"
+fi
 
 # The trivial-change marker is a LOCAL, short-lived door through the phase gate.
 # A committed one would reopen it in every clone forever: checkout resets mtime,

@@ -21,6 +21,7 @@ Update `docs/STATE.md` with this session's real state:
 4. **Deferred ideas / todos** — what was intentionally left out, with the trigger to reconsider it.
 5. Note the date and the author. If there is an open `SPEC_DEVIATION` in the code, record it as a blocker.
 6. Be concise and actionable — STATE exists so someone (or an agent) can resume **cold** tomorrow.
+7. Sort out what is **not** volatile. A start command, a test invocation, a repo convention, a trap that cost an hour: those outlive this session and do not belong in STATE. Run `learn-session` to route them into `CLAUDE.md` and `docs/gotchas.md`. STATE keeps only what stops being true once the work resumes.
 
 Do not commit on your own; propose the commit (`docs: handoff — update STATE`) and wait for
 approval, per the project's commit rule.

@@ -95,6 +95,10 @@ Nothing there is tracked, so this frees scratch space without touching the
 commit. dispatch-parallel's per-implementer worktrees are harness-managed
 (`isolation: "worktree"`) and auto-cleaned — do not `git worktree remove` them.
 
+## Step 7 — Capture what the feature taught (Options 1, 2 & 3)
+
+A finished feature is where the project's operating knowledge is freshest: the command that brings the stack up, the suite that had to be seeded first, the trap that cost an hour. Run `learn-session` — it proposes the lines for `CLAUDE.md`'s marker blocks and `docs/gotchas.md` and waits for approval. Skip it for Option 4: discarded work taught the repo nothing durable.
+
 ## Quick reference
 
 | Option | Merge | Push | Keep worktree | Delete branch |

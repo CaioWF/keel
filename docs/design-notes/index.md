@@ -5,6 +5,7 @@
 * [Execution mode routing](execution-mode-routing.md) - Why implement-and-evaluate picks inline vs dispatch vs dispatch-parallel execution modes based on task count and coupling, with parallelization via scope declaration and worktree isolation
 * [Gate vs skill](gates-vs-skills.md) - Decision rule for splitting review concerns: mechanical/deterministic rules belong in gates, judgment-based concerns in skills
 * [Knowledge-packs roadmap](knowledge-packs-roadmap.md) - Roadmap for adding knowledge packs that inject stack/domain expertise during plan and implement phases, including stack-conventions, codebase-map, saas-security, pattern replication, and data-layer contracts
+* [Living project docs](living-project-docs.md) - Why CLAUDE.md is assembled from marker blocks rather than shipped as one static template, and why the loop that keeps it true is a skill instead of a hook
 * [OKF adoption](okf-adoption.md) - How keel adopts the Open Knowledge Format — the tooling map and why cross-links are relative markdown, not wiki-links or absolute
 * [Over-constraint audit](over-constraint-audit.md) - Where keel's own scaffolding capped the ceiling instead of raising the floor — the measured trivial-change contradiction, the declared path that fixes it, and the de-duplication that followed
 * [Prose slop-guard](prose-slop-guard.md) - Why keel scans written prose for AI-writing tells with an advisory PostToolUse hook, why em-dash is not a rule, and why it warns instead of blocking

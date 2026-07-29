@@ -1,5 +1,17 @@
 # PROJECT
 
+## Environment
+
+<!-- BEGIN:keel:environment -->
+How this project is brought up and taken down. Fill each line the first time you learn it; `learn-session` keeps it current. Record the exact command, not a description of it, and state the prohibition whenever a wrong path exists ("do not start the dev server directly — use the script above").
+
+- start: [command]
+- stop: [command]
+- required env vars: [names, and where they are set]
+- local URL / health check: [address]
+- test data / credentials: [seeded login, fixtures]
+<!-- END:keel:environment -->
+
 ## SDD Workflow
 
 This project follows spec-driven development. The skill chain, in order, is:
@@ -74,6 +86,8 @@ Ground the plan in the real tree first with the `codebase-map` skill — it maps
 ## Continuity & decisions
 
 `docs/STATE.md` is the **volatile** work memory — where we stopped, the next concrete step, blockers. It is injected at SessionStart. Use the `handoff` skill to write it when pausing and to recompose context when resuming.
+
+Parts of this file are **living**. The spans between `<!-- BEGIN:keel:<id> -->` and `<!-- END:keel:<id> -->` hold what the project learned about itself (environment, test commands, conventions) plus the sections an installed pack contributes. `learn-session` writes them at the end of a session or feature; traps and doc pointers go to `docs/gotchas.md` instead, so the always-loaded file stays short. `bootstrap.sh --force` refreshes the body around the blocks and carries them across, and each pack re-renders its own block — never hand-edit a pack's.
 
 Durable architecture decisions go in `docs/architecture/adr/NNNN-*.md` via the `adr-writer` skill, which owns numbering, template, and the supersede protocol. ADRs are append-only. Rule of thumb: hard-to-reverse decision → ADR; current work state → STATE.
 
