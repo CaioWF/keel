@@ -8,6 +8,7 @@
 * [Living project docs](living-project-docs.md) - Why CLAUDE.md is assembled from marker blocks rather than shipped as one static template, and why the loop that keeps it true is a skill instead of a hook
 * [OKF adoption](okf-adoption.md) - How keel adopts the Open Knowledge Format — the tooling map and why cross-links are relative markdown, not wiki-links or absolute
 * [Over-constraint audit](over-constraint-audit.md) - Where keel's own scaffolding capped the ceiling instead of raising the floor — the measured trivial-change contradiction, the declared path that fixes it, and the de-duplication that followed
+* [Parallel work visibility](parallel-work-visibility.md) - Why keel-watch renders repo state instead of tailing agent logs, and why the tmux layout is a thin wrapper over a renderer that works without it
 * [Prose slop-guard](prose-slop-guard.md) - Why keel scans written prose for AI-writing tells with an advisory PostToolUse hook, why em-dash is not a rule, and why it warns instead of blocking
 * [Ship-pack scoping](ship-pack-scoping.md) - Scope analysis for a ship pack covering post-integration lifecycle, including observability-and-instrumentation (included) and contract-deprecation (deferred)
 * [Skill anatomy audit](skill-anatomy-audit.md) - Audit of every keel skill against the official Agent Skills anatomy, the measured thresholds that decided the references/ convention, and the domain fan-out rule that replaced a made-up line count

@@ -79,10 +79,16 @@ copy_file_once "$SELF/core/specify/review-lenses.txt" "$TARGET/.specify/review-l
 copy_file_once "$SELF/core/specify/impl-conventions.txt" "$TARGET/.specify/impl-conventions.txt"
 copy_tree "$SELF/core/gates"         "$TARGET/.specify/gates"
 copy_tree_once "$SELF/core/docs"     "$TARGET/docs"  # living artifacts — seed once, never force
+copy_tree "$SELF/core/scripts"       "$TARGET/scripts"   # human-side tooling (keel-watch)
 copy_tree "$SELF/core/claude/skills" "$TARGET/.claude/skills"
 copy_tree "$SELF/core/claude/hooks"  "$TARGET/.claude/hooks"
 mkdir -p "$TARGET/.claude/skills" "$TARGET/.claude/hooks"
 chmod +x "$TARGET/.claude/hooks/"*.mjs 2>/dev/null || true
+# Only the scripts keel ships — `scripts/` is the project's dir too, and marking a
+# file executable is not ours to decide for anything we did not put there.
+for f in "$SELF/core/scripts/"*; do
+  [ -e "$f" ] && chmod +x "$TARGET/scripts/$(basename "$f")" 2>/dev/null || true
+done
 # CLAUDE.md is a LIVING doc: keel owns the body, but the `<!-- BEGIN:keel:<id> -->`
 # blocks hold project-learned facts (environment, tests, conventions — written by the
 # learn-session skill) and pack-contributed sections. A --force refresh rewrites the

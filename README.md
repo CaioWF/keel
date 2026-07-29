@@ -32,6 +32,9 @@ This lands (idempotently — existing files are kept unless `--force`):
 - `.claude/skills/` — the SDD chain + discipline skills
 - `.specify/memory/` — `product.md` (product brief: user, problem, north-star) + `constitution.md` (engineering principles, code standards, SDD process) — the two once-per-project layers, injected at SessionStart
 - `docs/` — `STATE.md` (working memory) + `architecture/adr/` (decision records)
+- `scripts/keel-watch.sh` — read-only view of work in flight (features, tasks dispatched, ledger,
+  worktrees) as a tmux layout, or one terminal with `--no-tmux`
+  ([parallel work visibility](docs/design-notes/parallel-work-visibility.md))
 - `CLAUDE.md` (+ `AGENTS.md`) — keel's body plus `<!-- BEGIN:keel:… -->` blocks that hold what the
   project learns about itself (environment, tests, conventions) and the sections its packs
   contribute. `learn-session` fills them; `--force` refreshes the body and carries the blocks
