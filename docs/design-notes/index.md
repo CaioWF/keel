@@ -1,5 +1,6 @@
 # design-note
 * [Autonomous implementation loop](autonomous-implementation-loop.md) - Why keel's autonomous implementation mode is a thin opt-in envelope over implement-and-evaluate, not a new loop — the loop-engineering 2026 framing, the three gaps it closes, and why the driver is in-session
+* [CI and server-side gates](ci-server-side-gates.md) - Why keel's own CI runs only the doc-layer gates plus a rationale check, why the phase gate could not be ported literally, and why the API-key review tier was deferred
 * [Concept layer](concepts-layer.md) - How the concept layer standardizes engineering principles (Clean Architecture, SOLID, etc.) agnostically across languages using skills, constitution rules, and structure templates
 * [Context engineering audit](context-engineering-audit.md) - Per-handoff audit of what each chain skill reads, what it is missing, and where keel repeats itself — plus the conclusion that the fix is mostly deletion
 * [Execution mode routing](execution-mode-routing.md) - Why implement-and-evaluate picks inline vs dispatch vs dispatch-parallel execution modes based on task count and coupling, with parallelization via scope declaration and worktree isolation

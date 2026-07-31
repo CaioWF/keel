@@ -1,0 +1,66 @@
+# keel CI — the server-side half of the discipline keel ships.
+#
+# Every gate keel installs is client-side: hooks live in .claude/ on one machine
+# and only fire inside Claude Code. This workflow is what nobody can skip.
+#
+# Scope is deliberate. keel has no package.json and no Makefile, so run-gates.sh
+# resolves to the doc-layer checks only — that is the keel-specific value, and it
+# needs no services and no secrets. Nothing here reads a secret; a review job
+# using an API key is a separate decision, not a line added to this file.
+name: ci
+
+on:
+  # A pull request is rare in this repo (one so far); work lands directly on main.
+  # Both triggers are listed so neither flow escapes the check, scoped so a PR
+  # branch does not run the whole suite twice.
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # Zero-dep bash + node. The suite sets its own git identity where it needs one.
+      - run: bash tests/run.sh
+
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # keel running its own gates against itself: structural audit, mermaid,
+      # spec fidelity, and OKF index freshness.
+      - run: bash core/gates/run-gates.sh .
+
+  rationale:
+    runs-on: ubuntu-latest
+    steps:
+      # Full history: the check diffs a commit range, which a shallow clone cannot resolve.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Payload changes carry recorded reasoning
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Labels exist only on a pull request; on a push the escape hatch is a
+          # [trivial] commit trailer, which the check reads from the range itself.
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: node ci/rationale-check.mjs --base "$BASE" --head "$HEAD" --labels "$LABELS"

@@ -1,5 +1,7 @@
 # Keel
 
+[![ci](https://github.com/CaioWF/keel/actions/workflows/ci.yml/badge.svg)](https://github.com/CaioWF/keel/actions/workflows/ci.yml)
+
 A zero-dependency **spec-driven development (SDD)** scaffolder. Run one script in any
 project and it installs the full SDD flow — document templates, discipline skills, active
 hooks, and quality gates — so an AI coding agent (Claude Code first; Codex, Cursor, Copilot,
@@ -16,6 +18,11 @@ review. Keel makes the discipline **mechanical**: a phase gate refuses to edit c
 spec and plan are both approved, a pre-commit gate runs the quality checks before every
 commit, and a doc gate enforces that every acceptance criterion is traced to a task. The
 agent works around the gates by getting approval — never by disabling them.
+
+Those gates are client-side, so keel runs the server-side half on itself: CI executes the
+full test suite, keel's own doc gates, and a check that any change to what keel ships
+arrives with the reasoning that justifies it
+([CI and server-side gates](docs/design-notes/ci-server-side-gates.md)).
 
 ## Install
 
