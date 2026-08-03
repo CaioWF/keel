@@ -53,6 +53,19 @@ Generate views for other agents too:
 bash bootstrap.sh --agent=codex,cursor   # or --all
 ```
 
+Optional packs are never auto-installed from a stack signal alone, so install ends by naming
+the ones it skipped. To pick them (and agent views) from a menu instead of remembering flags:
+
+```bash
+bash /path/to/keel/bootstrap.sh --configure
+```
+
+`--configure` is a separate command on purpose: install stays non-interactive so CI, the test
+suite and the agent can run it with stdin captured. Architecture style (Clean, Hexagonal, …)
+is deliberately *not* asked here — it belongs to the constitution plus an ADR, decided
+in-session where the repo can be read
+([install configuration](docs/design-notes/install-configuration.md)).
+
 Requires Node (for the hooks/gates). No other dependency.
 
 Every install stamps `.specify/keel.json` (keel version, source commit, agents, packs,
