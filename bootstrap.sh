@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SELF="$(cd "$(dirname "$0")" && pwd)"
-TARGET="$PWD"; FORCE=0; AGENTS=""; PACKS=""; STATUS=0
+TARGET="$PWD"; FORCE=0; AGENTS=""; PACKS=""; STATUS=0; CONFIGURE=0
 ALL_EXTRA="codex,cursor,copilot,gemini,windsurf"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -11,9 +11,13 @@ while [ $# -gt 0 ]; do
     --agent=*) AGENTS="${1#--agent=}"; shift ;;
     --pack=*) PACKS="${1#--pack=}"; shift ;;
     --status) STATUS=1; shift ;;
+    --configure) CONFIGURE=1; shift ;;
     *) echo "[keel] unknown arg: $1" >&2; exit 2 ;;
   esac
 done
+
+# shellcheck source=lib/ui.sh
+. "$SELF/lib/ui.sh"
 
 # keel source version (semver from VERSION file) + exact commit of this clone.
 # VERSION is the in-repo source of truth; the sha pins what was actually installed.
@@ -21,9 +25,23 @@ done
 KEEL_VERSION="$( [ -f "$SELF/VERSION" ] && head -n1 "$SELF/VERSION" | tr -d '[:space:]' || echo "unknown" )"
 KEEL_COMMIT="$(git -C "$SELF" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
 
+# Wordmark. No-op unless stdout is a TTY, so captured/CI/agent runs are byte-identical.
+# Skipped under --configure, which redraws its own banner on every menu repaint.
+[ "$CONFIGURE" -eq 1 ] || keel_banner "$KEEL_VERSION" "$KEEL_COMMIT"
+
 # --status: read the target's manifest and report; do not install.
 if [ "$STATUS" -eq 1 ]; then
   node "$SELF/lib/keel-status.mjs" --dir "$TARGET" --source-version "$KEEL_VERSION" --source-commit "$KEEL_COMMIT"
+  exit $?
+fi
+
+# --configure: interactive pack/agent selection. Its own command on purpose — the
+# install path must stay non-interactive for the test suite, CI and the agent, all of
+# which run bootstrap with stdin/stdout captured.
+if [ "$CONFIGURE" -eq 1 ]; then
+  CFG_ARGS=(--dir "$TARGET" --self "$SELF" --agents-available "$ALL_EXTRA")
+  [ "$FORCE" -eq 1 ] && CFG_ARGS+=(--force)
+  bash "$SELF/lib/configure.sh" "${CFG_ARGS[@]}"
   exit $?
 fi
 
@@ -185,3 +203,18 @@ node "$SELF/lib/write-manifest.mjs" --dir "$TARGET" \
   --agents "${AGENTS:-}" --packs "${INSTALLED_PACKS:-}"
 
 echo "[keel] core installed at $TARGET"
+
+# Discovery: opt-in packs are invisible by design (`ship` is "opt-in ONLY, never
+# auto-detected"), and nobody reads --help. Naming what exists but is not installed is
+# the cheapest fix that does not put a prompt in the install path.
+AVAILABLE_PACKS=""
+for d in "$SELF"/packs/*/; do
+  [ -f "${d}install.sh" ] || continue
+  p="$(basename "$d")"
+  case ",$INSTALLED_PACKS," in *",$p,"*) continue ;; esac
+  AVAILABLE_PACKS="${AVAILABLE_PACKS:+$AVAILABLE_PACKS, }$p"
+done
+if [ -n "$AVAILABLE_PACKS" ]; then
+  keel_dim "[keel] optional packs not installed: $AVAILABLE_PACKS"
+  keel_dim "[keel]   pick interactively: bootstrap.sh --dir $TARGET --configure"
+fi
