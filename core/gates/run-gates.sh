@@ -42,6 +42,17 @@ for g in audit-structure eval-spec-fidelity validate-mermaid; do
 done
 [ -f "$GATES_DIR/okf-build-index.mjs" ] && run_check "doc:okf-index" node "$GATES_DIR/okf-build-index.mjs" check "$DIR/docs"
 
+# Pack-contributed gates. A pack drops a .mjs here instead of editing this file, which
+# bootstrap rewrites on every --force — the same reason review-lenses.txt and
+# impl-conventions.txt are living registries rather than edits to core files. copy_tree
+# never deletes, so whatever a pack leaves in pack.d/ survives an update.
+if [ -d "$GATES_DIR/pack.d" ]; then
+  for g in "$GATES_DIR"/pack.d/*.mjs; do
+    [ -e "$g" ] || continue
+    run_check "pack:$(basename "$g" .mjs)" node "$g" "$DIR"
+  done
+fi
+
 if [ -f package.json ]; then
   for s in lint test; do has_npm_script "$s" && run_check "npm:$s" npm run "$s"; done
 elif [ -f Makefile ]; then

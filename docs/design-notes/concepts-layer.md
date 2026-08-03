@@ -24,9 +24,14 @@ To add a concept to keel, fill up to four slots — only the first is required:
    Keep it short. The depth belongs in the guide, not here.
 3. **Structure note (optional)** — if the concept shapes folder/module layout, describe the
    format in `architecture-template.md` (agnostic; each language realizes it in its own idiom).
-4. **Enforcement pack (optional, per language)** — if the rule can be imposed mechanically, the
-   config goes in a `packs/<lang>-<concept>/` pack (for example `ts-clean-arch` with
-   dependency-cruiser), wired into `run-gates.sh`. NEVER in the agnostic core.
+4. **Enforcement pack (optional)** — if the rule can be imposed mechanically, the check goes in
+   an opt-in pack that drops a gate into `.specify/gates/pack.d/`, which `run-gates.sh` sweeps.
+   NEVER in the agnostic core. The first is `architecture-gates`, enforcing the dependency
+   rule. Earlier drafts of this recipe assumed `packs/<lang>-<concept>/`; that proved wrong
+   twice over — no other pack carries a language prefix, and the invariant being checked
+   (imports point inward) is shared by Clean, Hexagonal and Onion alike, so naming a pack after
+   one style would overclaim. Name the pack after the rule; keep language-specific detail
+   inside it.
 
 ## Why this shape
 
@@ -43,11 +48,21 @@ To add a concept to keel, fill up to four slots — only the first is required:
 
 | Concept | Guide | Constitution rule | Structure note | Pack |
 |---|---|---|---|---|
-| Clean Architecture | `references/clean-architecture.md` | dependency rule | layers | `ts-clean-arch` (deferred) |
+| Clean Architecture | `references/clean-architecture.md` (also carries the hexagonal/onion vocabulary and driving-vs-driven ports) | dependency rule | layers | `architecture-gates` |
+| Vertical slice | `references/vertical-slice.md` | — | — | (advisory; `validate-parallel-scope` is the adjacent check) |
 | SOLID | `references/solid.md` | — | — | (per-language lint, later) |
+| Error handling | `references/error-handling.md` | — | — | (per-language lint, later) |
 | Testing strategy | `references/testing-strategy.md` (points to `test-driven-development`) | test behavior | — | test gate already exists |
 | Tactical DDD | `references/ddd-tactical.md` | aggregate boundary | — | — |
+| Strategic DDD | `references/ddd-strategic.md` | — | — | — |
 | Minimalism | `references/minimalism.md` | minimum viable + carve-out | — | (advisory; no pack) |
+
+Hexagonal, Onion and Layered are deliberately **not** rows. The first two are the same
+dependency rule in different vocabulary, so they live as a section inside
+`clean-architecture.md` rather than as guides that would repeat their neighbour — the
+redundancy failure the [context engineering audit](context-engineering-audit.md) diagnosed.
+Layered is absent because classic layered points its dependency at the database, which the
+constitution forbids; a guide would have to argue against the rule the same file states.
 
 Growing = one more row in the table plus the recipe's slots. No code changes.
 

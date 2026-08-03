@@ -6,17 +6,43 @@ CONST="$HERE/../core/specify/memory/constitution.md.tmpl"
 assert_file "$SK/SKILL.md" "architecture skill exists"
 assert_contains "$SK/SKILL.md" "name: architecture" "architecture has name frontmatter"
 
-# 4 curated companions. Five independent concepts = domain fan-out, so they live in
-# references/ and load on demand (docs/design-notes/skill-anatomy-audit.md).
+# Curated companions. Independent concepts = domain fan-out, so they live in references/ and
+# load on demand (docs/design-notes/skill-anatomy-audit.md).
 REF="$SK/references"
 assert_nofile "$SK/clean-architecture.md" "architecture companions are not flat siblings"
-for c in clean-architecture solid testing-strategy ddd-tactical; do
+for c in clean-architecture solid testing-strategy ddd-tactical vertical-slice error-handling ddd-strategic; do
   assert_file "$REF/$c.md" "architecture companion $c exists under references/"
 done
 # companions referenced by the umbrella skill, as one-level-deep links
-for c in clean-architecture solid testing-strategy ddd-tactical; do
+for c in clean-architecture solid testing-strategy ddd-tactical vertical-slice error-handling ddd-strategic; do
   assert_contains "$SK/SKILL.md" "references/$c.md" "architecture skill links $c"
 done
+
+# Hexagonal and Onion are a SECTION of clean-architecture, not guides of their own: same
+# dependency rule, different vocabulary, and separate files would repeat their neighbour.
+# If someone splits them out later, these asserts are the record of why not to.
+assert_nofile "$REF/hexagonal.md" "hexagonal is a section, not a separate guide"
+assert_nofile "$REF/onion.md" "onion is a section, not a separate guide"
+assert_contains "$REF/clean-architecture.md" "driving" "clean-architecture carries the driving-port half of the hexagonal vocabulary"
+assert_contains "$REF/clean-architecture.md" "driven" "clean-architecture carries the driven-port half"
+# Layered is absent on purpose: classic layered points its dependency at the database, which
+# the constitution forbids, so a guide would argue against the rule the same repo states.
+assert_nofile "$REF/layered.md" "layered has no guide (it contradicts the dependency rule)"
+
+# Clean Code and CUPID were evaluated and deliberately did NOT become guides. CUPID survives
+# as a framing line inside solid.md — properties to move toward, not rules to comply with.
+assert_nofile "$REF/clean-code.md" "Clean Code did not become a guide"
+assert_nofile "$REF/cupid.md" "CUPID did not become a guide"
+assert_contains "$REF/solid.md" "CUPID" "solid.md carries the CUPID properties-not-rules framing"
+
+# Each new guide states the thing it exists for.
+assert_contains "$REF/vertical-slice.md" "disjoint" "vertical-slice ties slicing to disjoint parallel scopes"
+assert_contains "$REF/error-handling.md" "Never swallow" "error-handling states the never-swallow rule"
+assert_contains "$REF/error-handling.md" "offending value" "error-handling requires the offending value in the message"
+assert_contains "$REF/ddd-strategic.md" "bounded context" "ddd-strategic covers bounded contexts"
+assert_contains "$REF/ddd-strategic.md" "Consumes" "ddd-strategic connects context mapping to PRD seams"
+# tactical declared strategic out of scope; strategic must point back, or the split is a gap
+assert_contains "$REF/ddd-strategic.md" "ddd-tactical.md" "ddd-strategic links back to the tactical guide"
 # minimalism companion (laziness ladder) exists, indexed, and stays distinct from simplify
 assert_file "$REF/minimalism.md" "architecture companion minimalism exists"
 assert_contains "$SK/SKILL.md" "references/minimalism.md" "architecture skill links minimalism"

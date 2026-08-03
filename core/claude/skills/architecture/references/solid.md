@@ -3,6 +3,14 @@
 Five heuristics for modules that change without breaking. Use as a design checklist, not
 dogma — each one addresses a specific coupling/cohesion pain point.
 
+**Read these as properties, not as rules.** Dan North's CUPID (composable, Unix philosophy,
+predictable, idiomatic, domain-based) exists as a reaction to SOLID being recited as a rulebook,
+and its useful move is the reframing: a rule is something you either comply with or violate,
+while a property is a direction you can be closer to or further from. Nothing below is a pass or
+a fail. Move toward each one until moving further costs more than it returns — splitting a unit
+that has a single reason to change satisfies S and makes the code worse. Where a principle and
+the reader's comprehension disagree, comprehension wins.
+
 ## S — Single Responsibility
 
 A unit has **one reason to change** (one actor/stakeholder). If two unrelated changes

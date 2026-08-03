@@ -22,7 +22,8 @@ Dependency direction (inward only): `interface → application → domain`;
 - Language: [e.g.: TypeScript]
 - Layer → unit mapping: [e.g.: each layer is a folder; imports crossing the boundary are
   forbidden by the enforcement pack]
-- Enforcement: [e.g.: `ts-clean-arch` via dependency-cruiser; or "advisory" if there is no pack]
+- Enforcement: [e.g.: `architecture-gates` pack, layer map in `.specify/architecture.json`; or
+  "advisory" if the pack is not installed]
 
 ## Components of this feature
 

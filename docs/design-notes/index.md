@@ -1,4 +1,5 @@
 # design-note
+* [Architecture enforcement](architecture-enforcement.md) - Why the dependency rule finally got a mechanical check, why it ships as an opt-in pack with a zero-dep checker, and the pack.d seam that made it possible
 * [Autonomous implementation loop](autonomous-implementation-loop.md) - Why keel's autonomous implementation mode is a thin opt-in envelope over implement-and-evaluate, not a new loop — the loop-engineering 2026 framing, the three gaps it closes, and why the driver is in-session
 * [CI and server-side gates](ci-server-side-gates.md) - Why keel's own CI runs only the doc-layer gates plus a rationale check, why the phase gate could not be ported literally, and why the API-key review tier was deferred
 * [Concept layer](concepts-layer.md) - How the concept layer standardizes engineering principles (Clean Architecture, SOLID, etc.) agnostically across languages using skills, constitution rules, and structure templates

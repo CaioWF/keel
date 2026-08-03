@@ -113,9 +113,14 @@ Two notes capture the architecture:
   mechanical concerns → **gates** (deterministic, hard-blocking, zero tokens); judgment calls →
   **skills** (read-only lenses, discipline).
 - [`docs/design-notes/concepts-layer.md`](docs/design-notes/concepts-layer.md) — the
-  language-agnostic concept layer (Clean Architecture, SOLID, testing strategy, DDD tactical)
-  lives in the `architecture` skill + constitution; per-language *enforcement* lives in optional
+  language-agnostic concept layer (Clean Architecture plus the hexagonal/onion vocabulary,
+  vertical slice, SOLID, error handling, testing strategy, DDD tactical and strategic,
+  minimalism) lives in the `architecture` skill + constitution; *enforcement* lives in optional
   packs.
+- [`docs/design-notes/architecture-enforcement.md`](docs/design-notes/architecture-enforcement.md)
+  — the other half of that split: the opt-in `architecture-gates` pack ships a zero-dep
+  `dependency-rule` check that fails the build when imports point outward, wired through the
+  `.specify/gates/pack.d/` seam any pack can use.
 
 [`docs/authoring-skills.md`](docs/authoring-skills.md) — how to add a skill (skill-as-TDD).
 
