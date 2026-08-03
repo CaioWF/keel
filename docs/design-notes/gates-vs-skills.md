@@ -34,6 +34,7 @@ Skills are for what cannot be mechanized.
 | Project memory | marker blocks upserted and carried across a `--force` refresh, pack sections re-rendered → `lib/inject-section.mjs` at bootstrap/pack time | which learned fact is durable, and does it belong in the always-loaded file or in `docs/`? → `learn-session` (see [living project docs](living-project-docs.md)) |
 | Recorded reasoning | payload path changed with no `docs/{design-notes,plans,specs}` change and no declared trivial door → `ci/rationale-check.mjs`, in CI | is the note the *right* reasoning, and is it true? → the author and review (see [CI and server-side gates](ci-server-side-gates.md)) |
 | Install options | which packs and agent views are recorded, and re-running them idempotently → `--pack=`/`--agent=` and `--configure` (see [install configuration](install-configuration.md)) | which architecture style this project follows, and why → `constitution-writer` plus an ADR, in-session where the repo can be read |
+| Dependency direction | does any file import outward across a declared layer → `dependency-rule` gate in the opt-in `architecture-gates` pack (see [architecture enforcement](architecture-enforcement.md)) | where the boundary should be, whether this deserves a port at all, and which vocabulary the project uses → `architecture` skill + `minimalism.md` |
 | Formatting | prettier / lint → pure gate | — (never a skill) |
 | Prose | AI-writing tells (`not just X, but Y`, throat-clearing, borrowed vocabulary) → `slop-guard` hook, advisory (see [prose slop-guard](prose-slop-guard.md)) | is the doc actually clear and true? → `code-review` / `simplify` |
 | Types | `tsc` → gate | — |
@@ -50,8 +51,8 @@ The stack-agnostic core **cannot ship concrete lint/naming rules** (an
 naming/format/lint config comes from:
 
 - the **target project** (its own `.eslintrc`, etc.), or
-- the **`ts-clean-arch` pack** (Plan 2), which provides the opinionated
-  naming/format/lint config ready to go.
+- an **opt-in pack**, which drops its check into `.specify/gates/pack.d/` for the runner to
+  sweep. `architecture-gates` is the first, enforcing the dependency rule.
 
 So "naming-as-lint" is a **gate** whose content the project/pack fills in;
 "naming-as-meaning" lives in the **skill** layer (`code-review` / `simplify`).

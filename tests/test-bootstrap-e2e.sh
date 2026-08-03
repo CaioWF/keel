@@ -33,14 +33,18 @@ bash "$HERE/../bootstrap.sh" --dir "$S" >/dev/null
 assert_eq "1" "$(grep -cxF '.specify/trivial' "$S/.gitignore")" "e2e: gitignore entry is idempotent across re-runs"
 # the freshly-installed project passes its own doc-layer gates
 ( cd "$S" && bash .specify/gates/run-gates.sh >/dev/null 2>&1 ); assert_eq "0" "$?" "e2e: scaffold passes its own gates"
-# TS detection line
+# A TS signal auto-installs the advisory pack (stack-conventions) and nothing else.
 S2="$(new_sandbox)"; echo '{}' > "$S2/package.json"; echo '{}' > "$S2/tsconfig.json"
 OUT=$(bash "$HERE/../bootstrap.sh" --dir "$S2")
-echo "$OUT" | grep -qF "TS project detected" && pass "e2e: TS detection fires" || fail "e2e: should detect TS"
+echo "$OUT" | grep -qF "stack signal (TS/Postgres) detected" && pass "e2e: TS detection fires" || fail "e2e: should detect TS"
+# architecture-gates writes config into the project and adds a gate that can fail a build, so
+# a stack signal must NOT be enough to install it — that is a delivery choice, like `ship`.
+assert_nofile "$S2/.specify/architecture.json" "e2e: a TS signal does not auto-install architecture-gates"
+assert_nofile "$S2/.specify/gates/pack.d/dependency-rule.mjs" "e2e: no dependency-rule gate without opting in"
 # non-TS: no detection line
 S3="$(new_sandbox)"
 OUT3=$(bash "$HERE/../bootstrap.sh" --dir "$S3")
-echo "$OUT3" | grep -qF "TS project detected" && fail "e2e: should NOT detect TS" || pass "e2e: no false TS detection"
+echo "$OUT3" | grep -qF "stack signal (TS/Postgres) detected" && fail "e2e: should NOT detect TS" || pass "e2e: no false TS detection"
 
 # backward-compat: no --agent => Claude-only, no view dirs, AGENTS.md stays a symlink
 assert_nofile "$S/.cursor" "e2e: no cursor view without --agent"

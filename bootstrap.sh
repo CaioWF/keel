@@ -184,16 +184,13 @@ if [ -f "$TARGET/tsconfig.json" ] || grep -qi 'postgres\|prisma' "$TARGET/packag
   run_detected_pack stack-conventions
 fi
 
-if [ -f "$TARGET/package.json" ] && [ -f "$TARGET/tsconfig.json" ]; then
-  echo "[keel] TS project detected — ts-clean-arch pack"
-  # The TS pack ships in a later plan (Plan 2); absent in core, so this is a
-  # no-op until then. Detection still prints so the seam is observable.
-  PACK="$SELF/packs/ts-clean-arch/install.sh"
-  if [ -f "$PACK" ]; then
-    if [ "$FORCE" -eq 1 ]; then bash "$PACK" --dir "$TARGET" --force; else bash "$PACK" --dir "$TARGET"; fi
-    note_pack "ts-clean-arch"
-  fi
-fi
+# architecture-gates (the dependency-rule check) is deliberately NOT auto-detected. The seam
+# that used to sit here detected TS and pointed at a pack that never shipped, so for its whole
+# life it printed a detection line and did nothing. The pack exists now, and it is opt-in:
+# unlike stack-conventions, which adds advisory skills on the same TS signal, it writes config
+# into the project and adds a gate that can fail a build. That is a delivery choice, not a
+# stack fact — the reasoning that already makes `ship` opt-in. Discovery is covered by the
+# not-installed list printed below, plus --configure.
 
 # Install manifest: always stamp .specify/keel.json (version + commit + agents + packs +
 # install/update timestamps). Unlike clients.json this is unconditional, so any project

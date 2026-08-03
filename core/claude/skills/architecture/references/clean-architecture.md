@@ -32,6 +32,41 @@ implementations) · `interface/` (delivery: HTTP, CLI). Import direction: `inter
 domain`, `infrastructure → application/domain` (implementing ports). See
 `architecture-template.md` for the format; each language realizes it in its own idiom.
 
+## Hexagonal and Onion: the same rule in other words
+
+Ports and Adapters (Cockburn, 2005) and Onion (Palermo, 2008) are not competing rules. All
+three put the business model at the centre and forbid it from depending outward; they differ in
+vocabulary and in how finely they name the rings. Choosing between them is choosing what to
+call things, not what is allowed.
+
+| Clean | Hexagonal | Onion |
+|---|---|---|
+| Entities / domain | inside the hexagon | domain model |
+| Use cases + ports | the ports | domain services + application services |
+| Interface adapters | adapters | infrastructure |
+| Frameworks & drivers | the outside world | infrastructure |
+
+What hexagonal contributes that the rings do not make obvious is the **direction of the port**,
+and it is worth borrowing whichever style a project names itself after:
+
+- **Driving (primary) ports** — the application's own API, called *by* the outside. HTTP
+  handlers, CLI commands, message consumers and test harnesses drive it. The adapter depends on
+  the port; the application does not know who called.
+- **Driven (secondary) ports** — what the application needs *from* the outside, declared by the
+  application and implemented by infra. Repositories, mail senders, clocks, payment gateways.
+
+The asymmetry answers a question that comes up constantly while designing: *who owns this
+interface?* Both kinds are defined by the application, for opposite reasons — a driving port
+exists so callers have something stable to call, a driven port exists so the application never
+names a concrete dependency. An interface defined by infrastructure and imported by a use case
+is neither, and is a dependency-rule violation wearing an interface.
+
+Practical consequence: two adapters implementing the same driven port (a real database one and
+an in-memory fake) is the normal case, and it is what makes the domain testable without the
+world running. If a driven port has exactly one implementation and no plausible second, check
+`minimalism.md` before extracting it — the rule permits the port, it does not require one for
+everything.
+
 ## Violation signals (red flags)
 
 - `import` of framework/database inside `domain/`.
@@ -41,6 +76,9 @@ domain`, `infrastructure → application/domain` (implementing ports). See
 
 ## Enforcement
 
-Language-agnostic here is guidance. Mechanical enforcement (forbidding the import across the
-boundary) is per language: TS `dependency-cruiser`/`eslint-plugin-boundaries`, Python `import-linter`, Go
-arch-tests + `internal/`, Java ArchUnit. It comes from a pack (e.g. `ts-clean-arch`), not from core.
+Language-agnostic here is guidance. The mechanical half — forbidding the import across the
+boundary — is the opt-in `architecture-gates` pack, which declares the layer map in
+`.specify/architecture.json` and fails `run-gates.sh` on a violation. It checks that one
+invariant and no more; for cycles, orphans or a full graph, reach for the real tools:
+`dependency-cruiser`/`eslint-plugin-boundaries` (TS/JS), `import-linter` (Python), arch-tests
+plus `internal/` (Go), ArchUnit (Java). Enforcement never lives in the agnostic core.
